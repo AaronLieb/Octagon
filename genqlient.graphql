@@ -1,0 +1,27 @@
+query getCurrentUser {
+  currentUser {
+    id
+    name
+  }
+}
+
+query getTournament($slug: String) {
+  tournament(slug: $slug) {
+    id
+    name
+  }
+}
+
+query getEvent($slug: String) {
+  event(slug: $slug) {
+    id
+    name
+  }
+}
+
+mutation generateRegistrationToken($eventId: ID!, $userId: ID!) {
+  generateRegistrationToken(registration: {
+      eventIds: [$eventId]
+    }, userId: $userId)
+}
+
