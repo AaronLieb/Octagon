@@ -1,0 +1,106 @@
+query GetCurrentUser {
+  currentUser {
+    id
+      name
+  }
+}
+
+query GetTournament($slug: String) {
+  tournament(slug: $slug) {
+    id
+      name
+      slug
+      shortSlug
+  }
+}
+
+query GetEvent($slug: String) {
+  event(slug: $slug) {
+    id
+      name
+  }
+}
+
+query GetParticipants($slug: String) {
+  tournament(slug: $slug) {
+    id
+    name
+    participants(query: {}) {
+      pageInfo {
+        total
+      }
+      nodes {
+        id
+        gamerTag
+        contactInfo {
+          nameFirst
+          nameLast
+        }
+      }
+    }
+  }
+}
+
+query GetEntrants($slug: String) {
+  event(slug: $slug) {
+    entrants(query: {}) {
+      nodes {
+        name
+      }
+    }
+  }
+}
+
+query GetEntrantByName($slug: String, $name: String) {
+  event(slug: $slug) {
+    entrants(query: {
+      page: 0
+      perPage: 1
+      filter: {
+          name: $name
+      }
+    }) {
+      nodes {
+        id
+        name
+      }
+    }
+  }
+}
+
+query GetSetsForEntrant($slug: String, $entrantId: ID) {
+  event(slug: $slug) {
+    sets(page: 0, perPage: 100, filters: { entrantIds: [$entrantId] }, sortType: CALL_ORDER) {
+      pageInfo {
+        total
+      }
+      nodes {
+        id
+        slots {
+          entrant {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation GenerateRegistrationTokenForEvent($eventId: ID!, $userId: ID!) {
+  generateRegistrationToken(registration: {
+    eventIds: [$eventId]
+  }, userId: $userId)
+}
+
+mutation GenerateRegistrationToken($userId: ID!) {
+  generateRegistrationToken(registration: {
+    eventIds: []
+  }, userId: $userId)
+}
+
+mutation ReportSet($setId: ID!, $winnerId: ID!, $gameData: [BracketSetGameDataInput]) {
+  reportBracketSet(setId: $setId, winnerId: $winnerId, gameData: $gameData) {
+    id
+    state
+  }
+}

@@ -17,6 +17,12 @@ Calls the start.gg GraphQL api
 
 When the start.gg GraphQL schema updates, you need to fetch the updated schema.graphql file and run
 
+```
+go get github.com/Khan/genqlient
+npm install -g graphqurl
+```
+
 ```bash
+gq https://api.start.gg/gql/alpha --introspect > schema.graphql -H 'Authorization: Bearer <API_KEY>'
 go run github.com/Khan/genqlient
 ```
