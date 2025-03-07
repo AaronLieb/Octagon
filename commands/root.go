@@ -4,6 +4,7 @@ import (
 	"github.com/AaronLieb/octagon/commands/attendees"
 	"github.com/AaronLieb/octagon/commands/rating"
 	"github.com/AaronLieb/octagon/commands/report"
+	"github.com/AaronLieb/octagon/commands/seed"
 	"github.com/urfave/cli/v3"
 )
 
@@ -18,6 +19,7 @@ func Command() *cli.Command {
 			attendees.Command(),
 			report.Command(),
 			rating.Command(),
+			seed.Command(),
 		},
 	}
 }
