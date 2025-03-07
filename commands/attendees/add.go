@@ -27,10 +27,6 @@ func AddCommand() *cli.Command {
 }
 
 func addAttendee(ctx context.Context, cmd *cli.Command) error {
-	if cmd.Bool("debug") {
-		log.SetLevel(log.DebugLevel)
-	}
-
 	log.Debug("add attendee")
 
 	currentUserResp, err := startgg.GetCurrentUser(ctx)

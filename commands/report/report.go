@@ -48,10 +48,6 @@ func Command() *cli.Command {
 }
 
 func report(ctx context.Context, cmd *cli.Command) error {
-	if cmd.Bool("debug") {
-		log.SetLevel(log.DebugLevel)
-	}
-
 	log.Debug("report")
 
 	if cmd.Args().Len() < 2 {

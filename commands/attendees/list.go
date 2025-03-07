@@ -27,10 +27,6 @@ func ListCommand() *cli.Command {
 }
 
 func listAttendees(ctx context.Context, cmd *cli.Command) error {
-	if cmd.Bool("debug") {
-		log.SetLevel(log.DebugLevel)
-	}
-
 	log.Debug("list attendees")
 
 	tournamentShortSlug := cmd.String("tournament")
