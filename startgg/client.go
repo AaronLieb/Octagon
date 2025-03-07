@@ -12,6 +12,8 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+var client graphql.Client
+
 const (
 	API_VERSION = "alpha"
 	BASE_URL    = "https://api.start.gg/gql/"
@@ -28,11 +30,14 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return t.wrapped.RoundTrip(req)
 }
 
-// TODO: Ensure client is only generated once
 func GetClient(ctx context.Context) (graphql.Client, error) {
-	key := os.Getenv("API_KEY")
+	if client != nil {
+		return client, nil
+	}
+
+	key := os.Getenv("STARTGG_API_KEY")
 	if key == "" {
-		return nil, fmt.Errorf("must set API_KEY=<startgg token>")
+		return nil, fmt.Errorf("must set STARTGG_API_KEY=<startgg token>")
 	}
 	log.Debug("Found API Key")
 
