@@ -186,6 +186,77 @@ type GetEntrantsEventEntrantsEntrantConnectionNodesEntrant struct {
 // GetName returns GetEntrantsEventEntrantsEntrantConnectionNodesEntrant.Name, and is useful for accessing the field via an interface.
 func (v *GetEntrantsEventEntrantsEntrantConnectionNodesEntrant) GetName() string { return v.Name }
 
+// GetEntrantsOutEvent includes the requested fields of the GraphQL type Event.
+// The GraphQL type's documentation follows.
+//
+// An event in a tournament
+type GetEntrantsOutEvent struct {
+	// The entrants that belong to an event, paginated by filter criteria
+	Entrants GetEntrantsOutEventEntrantsEntrantConnection `json:"entrants"`
+}
+
+// GetEntrants returns GetEntrantsOutEvent.Entrants, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutEvent) GetEntrants() GetEntrantsOutEventEntrantsEntrantConnection {
+	return v.Entrants
+}
+
+// GetEntrantsOutEventEntrantsEntrantConnection includes the requested fields of the GraphQL type EntrantConnection.
+type GetEntrantsOutEventEntrantsEntrantConnection struct {
+	Nodes []GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant `json:"nodes"`
+}
+
+// GetNodes returns GetEntrantsOutEventEntrantsEntrantConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutEventEntrantsEntrantConnection) GetNodes() []GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant {
+	return v.Nodes
+}
+
+// GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant includes the requested fields of the GraphQL type Entrant.
+// The GraphQL type's documentation follows.
+//
+// An entrant in an event
+type GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant struct {
+	// The entrant name as it appears in bracket: gamerTag of the participant or team name
+	Name string `json:"name"`
+	// Standing for this entrant given an event. All entrants queried must be in the same event (for now).
+	Standing GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding `json:"standing"`
+}
+
+// GetName returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant.Name, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant) GetName() string { return v.Name }
+
+// GetStanding returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant.Standing, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant) GetStanding() GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding {
+	return v.Standing
+}
+
+// GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding includes the requested fields of the GraphQL type Standing.
+// The GraphQL type's documentation follows.
+//
+// A standing indicates the placement of something within a container.
+type GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding struct {
+	IsFinal   bool `json:"isFinal"`
+	Placement int  `json:"placement"`
+}
+
+// GetIsFinal returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding.IsFinal, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding) GetIsFinal() bool {
+	return v.IsFinal
+}
+
+// GetPlacement returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding.Placement, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding) GetPlacement() int {
+	return v.Placement
+}
+
+// GetEntrantsOutResponse is returned by GetEntrantsOut on success.
+type GetEntrantsOutResponse struct {
+	// Returns an event given its id or slug
+	Event GetEntrantsOutEvent `json:"event"`
+}
+
+// GetEvent returns GetEntrantsOutResponse.Event, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutResponse) GetEvent() GetEntrantsOutEvent { return v.Event }
+
 // GetEntrantsResponse is returned by GetEntrants on success.
 type GetEntrantsResponse struct {
 	// Returns an event given its id or slug
@@ -522,6 +593,14 @@ type __GetEntrantsInput struct {
 // GetSlug returns __GetEntrantsInput.Slug, and is useful for accessing the field via an interface.
 func (v *__GetEntrantsInput) GetSlug() string { return v.Slug }
 
+// __GetEntrantsOutInput is used internally by genqlient
+type __GetEntrantsOutInput struct {
+	Slug string `json:"slug"`
+}
+
+// GetSlug returns __GetEntrantsOutInput.Slug, and is useful for accessing the field via an interface.
+func (v *__GetEntrantsOutInput) GetSlug() string { return v.Slug }
+
 // __GetEventInput is used internally by genqlient
 type __GetEventInput struct {
 	Slug string `json:"slug"`
@@ -764,6 +843,53 @@ func GetEntrants(
 	}
 
 	data_ = &GetEntrantsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetEntrantsOut.
+const GetEntrantsOut_Operation = `
+query GetEntrantsOut ($slug: String) {
+	event(slug: $slug) {
+		entrants(query: {page:0,perPage:100}) {
+			nodes {
+				name
+				standing {
+					isFinal
+					placement
+				}
+			}
+		}
+	}
+}
+`
+
+func GetEntrantsOut(
+	ctx_ context.Context,
+	slug string,
+) (data_ *GetEntrantsOutResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetEntrantsOut",
+		Query:  GetEntrantsOut_Operation,
+		Variables: &__GetEntrantsOutInput{
+			Slug: slug,
+		},
+	}
+	var client_ graphql.Client
+
+	client_, err_ = GetClient(ctx_)
+	if err_ != nil {
+		return nil, err_
+	}
+
+	data_ = &GetEntrantsOutResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

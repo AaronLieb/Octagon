@@ -51,6 +51,23 @@ query GetEntrants($slug: String) {
   }
 }
 
+query GetEntrantsOut($slug: String) {
+  event(slug: $slug) {
+    entrants(query: {
+        page: 0
+        perPage: 100
+      }) {
+      nodes {
+        name
+        standing {
+          isFinal
+          placement
+        }
+      }
+    }
+  }
+}
+
 query GetEntrantByName($slug: String, $name: String) {
   event(slug: $slug) {
     entrants(query: {

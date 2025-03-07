@@ -12,6 +12,7 @@ func Command() *cli.Command {
 		Commands: []*cli.Command{
 			AddCommand(),
 			ListCommand(),
+			RedemptionInfoCommand(),
 		},
 	}
 }
