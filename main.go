@@ -15,6 +15,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if os.Getenv("DEBUG") == "1" {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	cmd := commands.Command()
 
 	log.Default().SetReportTimestamp(false)
