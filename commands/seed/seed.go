@@ -56,15 +56,31 @@ type set struct {
 	loserSet  *set
 }
 
-var firstSets map[int]*set
-
-func checkConflict(p1 int, p2 int) {
-	// Checks the path of a given two players and returns whether they are seeded to play or not
+type conflict struct {
+	priority int
+	players  []int // ID
 }
+
+// returns true if p1 and p2 are in the conflict
+func (con *conflict) check(p1 int, p2 int) bool {
+	flag := true
+	for _, p := range con.players {
+		if p == p1 || p == p2 {
+			if flag {
+				flag = false
+			} else {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+var firstSets map[int]*set
 
 /*
 * This is a recursive function that generates sets and links them.
-* The concept of a "round" is not your traditional bracket round.
+* The concept of a "" is not your traditional bracket round.
 * When referring to a seed as "high", the seed value is numerically low
 * When referring to a seed that is "low" the seed value is numerically high
  */
@@ -158,4 +174,27 @@ func createBracket(numPlayers int) *set {
 	createSet(numRounds, numPlayers, numRounds-1, true, 2, winnersFinals, losersSemis)
 
 	return winnersFinals
+}
+
+/*
+ * Returns the conflict sum, which matches the following
+ * 3 * p1_conflicts + 2 * p2_conflicts + p3_conflicts
+ */
+func checkConflict(bracket *set, conflicts []conflict, players []int) int {
+	conflictSum := 0
+
+	// BFS
+	q := []*set{bracket}
+	var s *set
+	for len(q) == 0 {
+		s = q[0]
+		q = q[1:]
+		for _, con := range conflicts {
+			if con.check(players[s.player1], players[s.player2]) {
+				conflictSum += (4 - con.priority)
+			}
+		}
+	}
+
+	return conflictSum
 }
