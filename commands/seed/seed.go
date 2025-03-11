@@ -54,7 +54,12 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 
 	tournamentSlug := tournamentResp.Tournament.Slug
 
-	slug := fmt.Sprintf("%s/event/ultimate-singles", tournamentSlug)
+	event := "ultimate-singles"
+	if cmd.Bool("redemption") {
+		event = "redemption-bracket"
+	}
+
+	slug := fmt.Sprintf("%s/event/%s", tournamentSlug, event)
 	log.Debug(slug)
 	entrantsResp, err := startgg.GetUsersForEvent(ctx, slug)
 	if err != nil {
@@ -66,7 +71,6 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	for i, entrant := range entrants {
 		id := entrant.Participants[0].Player.Id
 		name := entrant.Participants[0].GamerTag
-		// id := entrant.Participants[0].User.Id
 		log.Debug("Seed", "name", name, "id", id)
 		rating, err := ratings.Get(ctx, id)
 		if err != nil {
