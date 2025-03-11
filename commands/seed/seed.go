@@ -35,7 +35,8 @@ func Command() *cli.Command {
 	}
 }
 
-// TODO: add seed change to this?
+// TODO: add seed change to this and move printing to seed.go
+// TODO: add aliases/main account
 type player struct {
 	name   string
 	id     int

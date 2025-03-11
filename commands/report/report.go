@@ -92,7 +92,7 @@ func report(ctx context.Context, cmd *cli.Command) error {
 	set := setsResp.Event.Sets.Nodes[0]
 	fmt.Println(set.Id, set.Slots)
 
-	// TOOD: Actually report the set
+	// TODO: Actually report the set
 	// startgg.ReportSet(ctx, set.Id, entrant.Id, {})
 
 	return nil

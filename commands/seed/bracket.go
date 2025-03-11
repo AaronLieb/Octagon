@@ -103,7 +103,7 @@ func createSet(totRounds int, numPlayers int, round int, isWinners bool, highSee
 		loserSet:  loserSet,
 	}
 
-	// TODO fix this shit
+	// TODO: fix this shit
 	x := 0
 	for i, val := range *sets {
 		if val == nil {
