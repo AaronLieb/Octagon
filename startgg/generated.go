@@ -1156,7 +1156,7 @@ query GetParticipants ($slug: String) {
 	tournament(slug: $slug) {
 		id
 		name
-		participants(query: {}) {
+		participants(query: {page:0,perPage:100}) {
 			pageInfo {
 				total
 			}
