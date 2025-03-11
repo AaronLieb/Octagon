@@ -7,6 +7,7 @@ import (
 
 	"github.com/AaronLieb/octagon/cache"
 	"github.com/charmbracelet/log"
+	"github.com/dgraph-io/badger/v4"
 )
 
 const KEY_FMT = "rating-%d"
@@ -18,7 +19,9 @@ func checkCache(userId int) (float64, bool) {
 
 	bytes, err := cache.Get([]byte(key))
 	if err != nil {
-		log.Errorf("error while trying to read rating for '%d' from cache: %v", userId, err)
+		if err != badger.ErrKeyNotFound {
+			log.Errorf("error while trying to read rating for '%d' from cache: %v", userId, err)
+		}
 		return 0.0, false
 	}
 	bits := binary.LittleEndian.Uint64(bytes)
