@@ -26,3 +26,9 @@ npm install -g graphqurl
 gq https://api.start.gg/gql/alpha --introspect > schema.graphql -H 'Authorization: Bearer <API_KEY>'
 go run github.com/Khan/genqlient
 ```
+
+## Installation
+
+```bash
+go build && go install
+```
