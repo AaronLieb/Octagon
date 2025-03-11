@@ -32,9 +32,17 @@ func RedemptionInfoCommand() *cli.Command {
 
 func RedemptionInfo(ctx context.Context, cmd *cli.Command) error {
 	log.Debug("Redemption Info")
-	tournamentSlug := "octagon-102"
 
-	redEventSlug := fmt.Sprintf("tournament/%s/event/redemption-bracket", tournamentSlug)
+	tournamentShortSlug := cmd.String("tournament")
+
+	tournamentResp, err := startgg.GetTournament(ctx, tournamentShortSlug)
+	if err != nil {
+		return err
+	}
+
+	tournamentSlug := tournamentResp.Tournament.Slug
+
+	redEventSlug := fmt.Sprintf("%s/event/redemption-bracket", tournamentSlug)
 	redEntrantsResp, err := startgg.GetEntrantsOut(ctx, redEventSlug)
 	if err != nil {
 		return err
@@ -50,6 +58,11 @@ func RedemptionInfo(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 	entrants := entrantsResp.Event.Entrants.Nodes
+
+	if len(entrants) == 0 {
+		log.Error("there are no entrants that are out of main bracket and not in redemption")
+		return nil
+	}
 
 	for _, entrant := range entrants {
 		if entrant.Standing.IsFinal && entrant.Standing.Placement > CUTOFF && !slices.Contains(redemptionNames, entrant.Name) {
