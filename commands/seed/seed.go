@@ -30,6 +30,11 @@ func Command() *cli.Command {
 				Aliases: []string{"r"},
 				Usage:   "Whether you are seeding for redemption bracket or not",
 			},
+			&cli.StringFlag{
+				Name:    "file",
+				Aliases: []string{"f"},
+				Usage:   "A conflict file to read",
+			},
 		},
 		Action: seed,
 	}
@@ -92,7 +97,14 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	})
 
 	bracket := createBracket(len(players))
-	resolveConflicts(bracket, players)
+	conflictFiles := []string{
+		CONFLICT_FILE,
+	}
+	if cmd.String("file") != "" {
+		conflictFiles = append(conflictFiles, cmd.String("file"))
+	}
+	conflicts := getConflicts(conflictFiles)
+	resolveConflicts(bracket, conflicts, players)
 
 	var input string
 	fmt.Println("Publish seeding? (y/N)")

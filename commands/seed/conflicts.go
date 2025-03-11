@@ -63,9 +63,7 @@ func calculateConflictScore(bracket bracket, conflicts []conflict, players []pla
  * generated seeding variant with the lowest
  * conflictScore.
  */
-func resolveConflicts(bracket bracket, players []player) []player {
-	conflicts := readConflictsFile()
-
+func resolveConflicts(bracket bracket, conflicts []conflict, players []player) []player {
 	best := players
 	lowestScore := calculateConflictScore(bracket, conflicts, players, players)
 
@@ -108,11 +106,17 @@ func resolveConflicts(bracket bracket, players []player) []player {
 	log.Debug("Finished conflict resolution", "score", lowestScore, "checks", CONFLICT_RESOLUTION_ATTEMPTS)
 
 	return best
+func getConflicts(conflictFiles []string) []conflict {
+	var conflicts []conflict
+	for _, file := range conflictFiles {
+		conflicts = append(conflicts, readConflictsFile(file)...)
+	}
+	return conflicts
 }
 
-func readConflictsFile() []conflict {
+func readConflictsFile(fileName string) []conflict {
 	var conflicts []conflict
-	file, err := os.Open(CONFLICT_FILE)
+	file, err := os.Open(fileName)
 	if err != nil {
 		log.Warn("unable to find or open conflicts", "file", CONFLICT_FILE)
 		return conflicts
