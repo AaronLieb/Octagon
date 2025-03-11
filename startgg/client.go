@@ -54,6 +54,6 @@ func GetClient(ctx context.Context) (graphql.Client, error) {
 		Timeout: 10 * time.Second,
 	}
 
-	client := graphql.NewClient(URL, &httpClient)
+	client = graphql.NewClient(URL, &httpClient)
 	return client, nil
 }
