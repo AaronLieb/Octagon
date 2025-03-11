@@ -76,19 +76,19 @@ func resolveConflicts(bracket bracket, players []player) []player {
 	}
 
 	log.Info("Seeds after conflict resolution")
-	log.Infof("%-5s %-6s %20s %6s %-6s", "Seed", "Rating", "Name", "Change", "ID")
-	log.Info("----------------------------------------------")
+	log.Printf("%-5s %-6s %20s %6s %-6s", "Seed", "Rating", "Name", "Change", "ID")
+	log.Print("--------------------------------------------------")
 	for i, p := range best {
 		for j, q := range players {
 			if p == q {
 				diff := j - i
 				seed := i + 1
 				if diff > 0 {
-					log.Infof("%-5d %-6.1f %20s %1s%-6d%s %d", seed, p.rating, p.name, "\033[32m↑", diff, "\033[0m", p.id)
+					log.Printf("%-5d %-6.1f %20s %1s%-6d%s %d", seed, p.rating, p.name, "\033[32m↑", diff, "\033[0m", p.id)
 				} else if diff < 0 {
-					log.Infof("%-5d %-6.1f %20s %1s%-6d%s %d", seed, p.rating, p.name, "\033[31m↓", -diff, "\033[0m", p.id)
+					log.Printf("%-5d %-6.1f %20s %1s%-6d%s %d", seed, p.rating, p.name, "\033[31m↓", -diff, "\033[0m", p.id)
 				} else {
-					log.Infof("%-5d %-6.1f %20s  %-6s %d", seed, p.rating, p.name, "", p.id)
+					log.Printf("%-5d %-6.1f %20s  %-6s %d", seed, p.rating, p.name, "", p.id)
 				}
 			}
 		}
