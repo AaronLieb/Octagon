@@ -27,6 +27,12 @@ func Init(ctx context.Context) {
 }
 
 func Get(ctx context.Context, userId int) (float64, error) {
+	// temporary alias for subleaf
+	// TODO: Separate aliases into a config file
+	if userId == 4522139 {
+		userId = 2966086
+	}
+
 	log.Debug("Fetching rating", "userId", userId)
 
 	if database == nil {
