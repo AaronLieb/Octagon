@@ -52,7 +52,7 @@ func RedemptionInfo(ctx context.Context, cmd *cli.Command) error {
 		redemptionNames = append(redemptionNames, entrant.Name)
 	}
 
-	eventSlug := fmt.Sprintf("tournament/%s/event/ultimate-singles", tournamentSlug)
+	eventSlug := fmt.Sprintf("%s/event/ultimate-singles", tournamentSlug)
 	entrantsResp, err := startgg.GetEntrantsOut(ctx, eventSlug)
 	if err != nil {
 		return err
@@ -66,7 +66,8 @@ func RedemptionInfo(ctx context.Context, cmd *cli.Command) error {
 
 	for _, entrant := range entrants {
 		if entrant.Standing.IsFinal && entrant.Standing.Placement > CUTOFF && !slices.Contains(redemptionNames, entrant.Name) {
-			fmt.Println(entrant.Name)
+			player := entrant.Participants[0].Player
+			fmt.Printf("%-30s %d\n", player.GamerTag, player.Id)
 		}
 	}
 	return nil
