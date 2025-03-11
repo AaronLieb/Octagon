@@ -82,13 +82,18 @@ func resolveConflicts(bracket bracket, conflicts []conflict, players []player) [
 		}
 	}
 
-	// TODO: Separate this into a separate func
-	// need to pass diff values, or store them in player struct
 	log.Info("Seeds after conflict resolution", "score", lowestScore)
-	log.Printf("%-5s %-6s %25s %6s %-6s", "Seed", "Rating", "Name", "Change", "ID")
+	printSeeds(players, best)
+	log.Debug("Finished conflict resolution", "score", lowestScore, "checks", CONFLICT_RESOLUTION_ATTEMPTS)
+
+	return best
+}
+
+func printSeeds(before []player, after []player) {
+	log.Printf("%-5s %-6s %25s %6s %-7s", "Seed", "Rating", "Name", "Change", "ID")
 	log.Print("---------------------------------------------------------")
-	for i, p := range best {
-		for j, q := range players {
+	for i, p := range after {
+		for j, q := range before {
 			if p == q {
 				diff := j - i
 				seed := i + 1
@@ -102,10 +107,8 @@ func resolveConflicts(bracket bracket, conflicts []conflict, players []player) [
 			}
 		}
 	}
+}
 
-	log.Debug("Finished conflict resolution", "score", lowestScore, "checks", CONFLICT_RESOLUTION_ATTEMPTS)
-
-	return best
 func getConflicts(conflictFiles []string) []conflict {
 	var conflicts []conflict
 	for _, file := range conflictFiles {
