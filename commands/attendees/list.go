@@ -38,8 +38,6 @@ func listAttendees(ctx context.Context, cmd *cli.Command) error {
 
 	tournamentSlug := tournamentResp.Tournament.Slug
 
-	// eventSlug := fmt.Sprintf("tournament/%s/event/ultimate-singles", tournamentSlug)
-
 	resp, err := startgg.GetParticipants(ctx, tournamentSlug)
 	if err != nil {
 		return err
