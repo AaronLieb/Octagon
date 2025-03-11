@@ -1,13 +1,14 @@
 package seed
 
 import (
+	"cmp"
 	"context"
-	"crypto/rand"
 	"errors"
 	"fmt"
-	"math"
-	"math/big"
+	"slices"
 
+	"github.com/AaronLieb/octagon/ratings"
+	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 	"github.com/urfave/cli/v3"
 )
@@ -34,266 +35,114 @@ func Command() *cli.Command {
 	}
 }
 
+// TODO: add seed change to this?
+type player struct {
+	name   string
+	id     int
+	rating float64
+}
+
 func seed(ctx context.Context, cmd *cli.Command) error {
 	log.Debug("seed")
 
-	if cmd.Args().Len() < 1 {
-		return errors.New("missing argument: [numPlayers]")
+	tournamentShortSlug := cmd.String("tournament")
+
+	tournamentResp, err := startgg.GetTournament(ctx, tournamentShortSlug)
+	if err != nil {
+		return err
 	}
 
-	// numPlayers, err := strconv.Atoi(cmd.Args().First())
-	// if err != nil {
-	// 	return err
-	// }
+	tournamentSlug := tournamentResp.Tournament.Slug
 
-	test()
-	return nil
-}
+	slug := fmt.Sprintf("%s/event/ultimate-singles", tournamentSlug)
+	log.Debug(slug)
+	entrantsResp, err := startgg.GetUsersForEvent(ctx, slug)
+	if err != nil {
+		return err
+	}
+	entrants := entrantsResp.Event.Entrants.Nodes
 
-type set struct {
-	name      string
-	player1   int
-	player2   int
-	winnerSet *set
-	loserSet  *set
-}
-
-type conflict struct {
-	priority int
-	players  []int // ID
-}
-
-type bracket struct {
-	sets []*set
-}
-
-// returns true if p1 and p2 are in the conflict
-func (con *conflict) check(p1 int, p2 int) bool {
-	flag := true
-	for _, p := range con.players {
-		if p == p1 || p == p2 {
-			if flag {
-				flag = false
-			} else {
-				return true
-			}
+	players := make([]player, len(entrants))
+	for i, entrant := range entrants {
+		id := entrant.Participants[0].Player.Id
+		name := entrant.Participants[0].GamerTag
+		// id := entrant.Participants[0].User.Id
+		log.Debug("Seed", "name", name, "id", id)
+		rating, err := ratings.Get(ctx, id)
+		if err != nil {
+			log.Errorf("error while trying to fetch rating for '%s': %v", name, err)
 		}
-	}
-	return false
-}
-
-var firstSets map[int]*set
-
-/*
-* This is a recursive function that generates sets and links them.
-* The concept of a "" is not your traditional bracket round.
-* When referring to a seed as "high", the seed value is numerically low
-* When referring to a seed that is "low" the seed value is numerically high
- */
-func createSet(totRounds int, numPlayers int, round int, isWinners bool, highSeed int, winnerSet *set, loserSet *set, sets *[]*set) *set {
-	numInRound := int(math.Pow(2, float64(totRounds-round)+1))
-
-	lowSeed := numInRound - highSeed + 1
-
-	/* This math is not simplified,
-	 * but it makes sense in my head so
-	 * I'm gonna keep it this way */
-	if !isWinners {
-		if highSeed <= numInRound {
-			// second stage of losers round, middle seeds
-			lb := numInRound/2 + 1
-			ub := 2*numInRound - numInRound/2
-			diff := highSeed - lb
-			lowSeed = ub - diff
-
-			// offset seeds so players don't play same as winners
-			if diff >= numInRound/2 {
-				lowSeed += numInRound / 4
-			} else {
-				lowSeed -= numInRound / 4
-			}
-
-		} else {
-			// first stage of losers round, bottom seeds
-			lb := numInRound + 1
-			ub := numInRound * 2
-			diff := highSeed - lb
-			lowSeed = ub - diff
+		if rating == 0.0 {
+			log.Warnf("unable to fetch rating for '%s'", name)
+		}
+		players[i] = player{
+			name:   name,
+			id:     id,
+			rating: rating,
 		}
 	}
 
-	// base case
-	if lowSeed > numPlayers {
+	slices.SortFunc(players, func(a, b player) int {
+		return cmp.Compare(b.rating, a.rating)
+	})
+
+	bracket := createBracket(len(players))
+	resolveConflicts(bracket, players)
+
+	var input string
+	fmt.Println("Publish seeding? (y/N)")
+	fmt.Scanln(&input)
+
+	if input != "y" && input != "Y" {
+		log.Info("Cancelling seeding...")
 		return nil
 	}
 
-	newSet := &set{
-		player1:   highSeed,
-		player2:   lowSeed,
-		winnerSet: winnerSet,
-		loserSet:  loserSet,
+	err = publishSeeds(ctx, slug, players)
+	if err != nil {
+		return err
 	}
 
-	// TODO fix this shit
-	x := 0
-	for i, val := range *sets {
-		if val == nil {
-			x = i
-		}
-	}
-	(*sets)[x] = newSet
-
-	log.Debugf("s%-2d vs s%-2d r%-2d %2dp w:%t", newSet.player1, newSet.player2, round, numInRound, isWinners)
-
-	if !isWinners {
-		return newSet
-	}
-
-	loserSet2 := createSet(totRounds, numPlayers, round, false, lowSeed, loserSet, nil, sets)
-	if loserSet2 != nil {
-		loserSet1 := createSet(totRounds, numPlayers, round, false, loserSet2.player2, loserSet2, nil, sets)
-		if loserSet1 != nil {
-			createSet(totRounds, numPlayers, round-1, true, highSeed, newSet, loserSet1, sets)
-			createSet(totRounds, numPlayers, round-1, true, lowSeed, newSet, loserSet1, sets)
-		}
-	}
-
-	return newSet
+	return nil
 }
 
-func createBracket(numPlayers int) bracket {
-	log.Debug("Create bracket", "players", numPlayers)
+func publishSeeds(ctx context.Context, eventSlug string, players []player) error {
+	seedsResp, err := startgg.GetSeeds(ctx, eventSlug)
+	if err != nil {
+		return err
+	}
+	phases := seedsResp.Event.Phases
 
-	numRounds := int(math.Ceil(math.Log2(float64(numPlayers))))
-
-	losersFinals := &set{
-		player1:   2,
-		player2:   3,
-		winnerSet: nil,
-		loserSet:  nil,
+	if len(phases) == 0 {
+		return errors.New("no phases in event")
 	}
 
-	winnersFinals := &set{
-		player1:   1,
-		player2:   2,
-		winnerSet: nil,
-		loserSet:  nil,
-	}
-	log.Debugf("s%-2d vs s%-2d r%-2d %2dp w:%t", winnersFinals.player1, winnersFinals.player2, numRounds, 2, true)
-	log.Debugf("s%-2d vs s%-2d r%-2d %2dp w:%t", losersFinals.player1, losersFinals.player2, numRounds, 2, false)
+	phase := phases[0]
+	seeds := phase.Seeds.Nodes
 
-	sets := make([]*set, 50)
-	sets[0] = winnersFinals
-	sets[1] = losersFinals
-
-	// Losers semis
-	losersSemis := createSet(numRounds, numPlayers, numRounds, false, 3, losersFinals, nil, &sets)
-
-	// Winners semis
-	createSet(numRounds, numPlayers, numRounds-1, true, 1, winnersFinals, losersSemis, &sets)
-	createSet(numRounds, numPlayers, numRounds-1, true, 2, winnersFinals, losersSemis, &sets)
-
-	return bracket{sets: sets}
-}
-
-/*
- * Returns the conflict sum, which matches the following
- * 3 * p1_conflicts + 2 * p2_conflicts + p3_conflicts
- */
-func checkConflict(b bracket, cons []conflict, players []int) int {
-	conflictSum := 0
-
-	// BFS
-	for _, s := range b.sets {
-		for _, con := range cons {
-			if s == nil {
-				break
-			}
-			p1 := players[s.player1-1]
-			p2 := players[s.player2-1]
-			if con.check(p1, p2) {
-				log.Debug("conflict", "con", con, "p1", p1, "p2", p2)
-				conflictSum += (4 - con.priority)
+	seedMapping := make([]startgg.UpdatePhaseSeedInfo, len(players))
+	for _, seed := range seeds {
+		for s, player := range players {
+			if seed.Players[0].Id == player.id {
+				seedMapping[s] = startgg.UpdatePhaseSeedInfo{
+					SeedId:  seed.Id,
+					SeedNum: s + 1,
+				}
 			}
 		}
 	}
 
-	return conflictSum
-}
+	slices.SortFunc(seedMapping, func(a, b startgg.UpdatePhaseSeedInfo) int {
+		return cmp.Compare(a.SeedNum, b.SeedNum)
+	})
 
-/*
-* Randomly shifts seeding
-* Doesn't impact seeds 1 and 2
- */
-func randomize(players []int) ([]int, int) {
-	sum := 0
-	newPlayers := make([]int, len(players))
-	copy(newPlayers, players)
-	for j := range players[3:] {
-		i := j + 3
-		r := rand.Reader
-		x, _ := rand.Int(r, big.NewInt(5))
-		if x.Int64() == 1 {
-			temp := newPlayers[i]
-			newPlayers[i] = newPlayers[i-1]
-			newPlayers[i-1] = temp
-			sum += 1
-		}
+	updateSeedsResp, err := startgg.UpdateSeeding(ctx, phase.Id, seedMapping)
+	if err != nil {
+		return err
 	}
-	return newPlayers, sum
-}
+	log.Debug("updateSeedsResp", "phaseId", updateSeedsResp.UpdatePhaseSeeding.Id)
 
-func test() {
-	players := []int{
-		101,
-		102,
-		103,
-		104,
-		105,
-		106,
-		107,
-		108,
-	}
+	log.Infof("Successfully seeded %d players for %s", len(players), eventSlug)
 
-	var best []int
-	lowest := 999
-	for range 100 {
-		newPlayers, seedDiff := randomize(players)
-		log.Debug("test", "players", newPlayers, "seedDiff", seedDiff)
-
-		conflicts := []conflict{
-			{
-				priority: 1,
-				players:  []int{101, 108},
-			},
-			{
-				priority: 2,
-				players:  []int{103, 104},
-			},
-			{
-				priority: 3,
-				players:  []int{105, 103},
-			},
-			{
-				priority: 3,
-				players:  []int{107, 108},
-			},
-			{
-				priority: 3,
-				players:  []int{105, 104},
-			},
-			{
-				priority: 1,
-				players:  []int{101, 107},
-			},
-		}
-		bracket := createBracket(len(players))
-		sum := checkConflict(bracket, conflicts, newPlayers)
-		sum += seedDiff
-		if sum < lowest {
-			lowest = sum
-			best = newPlayers
-		}
-	}
-	fmt.Println(lowest, best)
+	return nil
 }

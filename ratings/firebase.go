@@ -26,18 +26,22 @@ func Init(ctx context.Context) {
 	}
 }
 
-func Get(ctx context.Context, userId string) {
+func Get(ctx context.Context, userId int) (float64, error) {
+	log.Debug("Fetching rating", "userId", userId)
+
 	if database == nil {
 		Init(ctx)
 	}
 
-	path := fmt.Sprintf("/players/%s/rating", userId)
+	path := fmt.Sprintf("/players/%d/rating", userId)
 	ratingRef := database.NewRef(path)
-	var rating float32
+	var rating float64
 	err := ratingRef.Get(ctx, &rating)
+	// TODO: add some better error handling, custom message
+	log.Debug("rating", "value", rating)
 	if err != nil {
-		log.Fatalf("error reading value: %v\n", err)
+		return 0, err
 	}
 
-	fmt.Println(rating)
+	return rating, nil
 }

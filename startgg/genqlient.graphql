@@ -17,7 +17,7 @@ query GetTournament($slug: String) {
 query GetEvent($slug: String) {
   event(slug: $slug) {
     id
-      name
+    name
   }
 }
 
@@ -36,16 +36,32 @@ query GetParticipants($slug: String) {
           nameFirst
           nameLast
         }
+        player {
+          id
+        }
       }
     }
   }
 }
 
-query GetEntrants($slug: String) {
+query GetUsersForEvent($slug: String) {
   event(slug: $slug) {
-    entrants(query: {}) {
+    entrants(query: {
+        page: 0
+        perPage: 100
+      }) {
       nodes {
-        name
+        id
+        participants {
+          gamerTag
+          id
+          user {
+            id
+          }
+          player {
+            id
+          }
+        }
       }
     }
   }
@@ -103,6 +119,27 @@ query GetSetsForEntrant($slug: String, $entrantId: ID) {
   }
 }
 
+query GetSeeds($slug: String) {
+  event(slug: $slug) {
+    phases {
+      id
+      seeds(query: {
+          page: 0
+          perPage: 100
+      }) {
+        nodes {
+          id
+          seedNum
+          players {
+            id
+            gamerTag
+          }
+        }
+      }
+    }
+  }
+}
+
 mutation GenerateRegistrationTokenForEvent($eventId: ID!, $userId: ID!) {
   generateRegistrationToken(registration: {
     eventIds: [$eventId]
@@ -119,5 +156,13 @@ mutation ReportSet($setId: ID!, $winnerId: ID!, $gameData: [BracketSetGameDataIn
   reportBracketSet(setId: $setId, winnerId: $winnerId, gameData: $gameData) {
     id
     state
+  }
+}
+
+mutation UpdateSeeding($phaseId: ID!, $seedMapping: [UpdatePhaseSeedInfo]!) {
+  updatePhaseSeeding(phaseId: $phaseId, seedMapping: $seedMapping, options: {
+      strictMode: true
+  }) {
+    id
   }
 }

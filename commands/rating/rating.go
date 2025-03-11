@@ -3,6 +3,7 @@ package rating
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/AaronLieb/octagon/ratings"
 	"github.com/charmbracelet/log"
@@ -23,8 +24,17 @@ func GetRating(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() < 1 {
 		return fmt.Errorf("please provide a userid")
 	}
-	userId := cmd.Args().First()
+	userIdStr := cmd.Args().First()
 
-	ratings.Get(ctx, userId)
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		return err
+	}
+
+	rating, err := ratings.Get(ctx, userId)
+	if err != nil {
+		return err
+	}
+	fmt.Println(rating)
 	return nil
 }
