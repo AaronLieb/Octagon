@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/AaronLieb/octagon/cache"
 	"github.com/AaronLieb/octagon/commands"
 	"github.com/charmbracelet/log"
 	"github.com/joho/godotenv"
@@ -22,6 +23,9 @@ func main() {
 	cmd := commands.Command()
 
 	log.Default().SetReportTimestamp(false)
+
+	db := cache.Open()
+	defer db.Close()
 
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		log.Fatal(err)

@@ -2,6 +2,7 @@ package commands
 
 import (
 	"github.com/AaronLieb/octagon/commands/attendees"
+	"github.com/AaronLieb/octagon/commands/cache"
 	"github.com/AaronLieb/octagon/commands/rating"
 	"github.com/AaronLieb/octagon/commands/report"
 	"github.com/AaronLieb/octagon/commands/seed"
@@ -20,6 +21,7 @@ func Command() *cli.Command {
 			report.Command(),
 			rating.Command(),
 			seed.Command(),
+			cache.Command(),
 		},
 	}
 }

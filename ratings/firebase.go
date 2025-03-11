@@ -39,6 +39,11 @@ func Get(ctx context.Context, userId int) (float64, error) {
 		Init(ctx)
 	}
 
+	cachedRating, found := checkCache(userId)
+	if found {
+		return cachedRating, nil
+	}
+
 	path := fmt.Sprintf("/players/%d/rating", userId)
 	ratingRef := database.NewRef(path)
 	var rating float64
@@ -48,6 +53,8 @@ func Get(ctx context.Context, userId int) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	updateCache(userId, rating)
 
 	return rating, nil
 }
