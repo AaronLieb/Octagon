@@ -21,6 +21,12 @@ func ListCommand() *cli.Command {
 				Usage:   "The slug for the tournament. Example: octagon-99",
 				Value:   "octagon",
 			},
+			&cli.StringFlag{
+				Name:    "output",
+				Aliases: []string{"o"},
+				Usage:   "The output type of the attendee list. (table, csv)",
+				Value:   "table",
+			},
 		},
 		Action: listAttendees,
 	}
@@ -45,8 +51,18 @@ func listAttendees(ctx context.Context, cmd *cli.Command) error {
 	tournament := resp.Tournament
 	participants := tournament.Participants.GetNodes()
 
-	for _, participant := range participants {
-		fmt.Printf("%s\t%s\t%s\n", participant.GamerTag, participant.ContactInfo.NameFirst, participant.ContactInfo.NameLast)
+	log.Infof("Fetched %d participants for %s", len(participants), tournamentSlug)
+
+	outputType := cmd.String("output")
+	if outputType == "csv" {
+		for _, participant := range participants {
+			fmt.Printf("%s\t%s\t%s\n", participant.GamerTag, participant.ContactInfo.NameFirst, participant.ContactInfo.NameLast)
+		}
+	} else {
+		for _, participant := range participants {
+			player := participant.Player
+			fmt.Printf("%-25s %-8d %-15s %-15s\n", participant.GamerTag, player.Id, participant.ContactInfo.NameFirst, participant.ContactInfo.NameLast)
+		}
 	}
 	return nil
 }
