@@ -79,6 +79,12 @@ query GetEntrantsOut($slug: String) {
           isFinal
           placement
         }
+        participants {
+          player {
+            id
+            gamerTag
+          }
+        }
       }
     }
   }
@@ -140,16 +146,18 @@ query GetSeeds($slug: String) {
   }
 }
 
-mutation GenerateRegistrationTokenForEvent($eventId: ID!, $userId: ID!) {
+mutation GenerateRegistrationToken($eventId: ID!, $userId: ID!) {
   generateRegistrationToken(registration: {
     eventIds: [$eventId]
   }, userId: $userId)
 }
 
-mutation GenerateRegistrationToken($userId: ID!) {
-  generateRegistrationToken(registration: {
-    eventIds: []
-  }, userId: $userId)
+mutation RegisterForTournament($eventId: ID!, $regToken: String!) {
+  registerForTournament(registration: {
+    eventIds: [$eventId]
+  }, registrationToken: $regToken) {
+    id
+  }
 }
 
 mutation ReportSet($setId: ID!, $winnerId: ID!, $gameData: [BracketSetGameDataInput]) {

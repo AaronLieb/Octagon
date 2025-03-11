@@ -56,17 +56,6 @@ func (v *BracketSetGameSelectionInput) GetEntrantId() int { return v.EntrantId }
 // GetCharacterId returns BracketSetGameSelectionInput.CharacterId, and is useful for accessing the field via an interface.
 func (v *BracketSetGameSelectionInput) GetCharacterId() int { return v.CharacterId }
 
-// GenerateRegistrationTokenForEventResponse is returned by GenerateRegistrationTokenForEvent on success.
-type GenerateRegistrationTokenForEventResponse struct {
-	// Generate tournament registration Token on behalf of user
-	GenerateRegistrationToken string `json:"generateRegistrationToken"`
-}
-
-// GetGenerateRegistrationToken returns GenerateRegistrationTokenForEventResponse.GenerateRegistrationToken, and is useful for accessing the field via an interface.
-func (v *GenerateRegistrationTokenForEventResponse) GetGenerateRegistrationToken() string {
-	return v.GenerateRegistrationToken
-}
-
 // GenerateRegistrationTokenResponse is returned by GenerateRegistrationToken on success.
 type GenerateRegistrationTokenResponse struct {
 	// Generate tournament registration Token on behalf of user
@@ -184,7 +173,8 @@ type GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant struct {
 	// The entrant name as it appears in bracket: gamerTag of the participant or team name
 	Name string `json:"name"`
 	// Standing for this entrant given an event. All entrants queried must be in the same event (for now).
-	Standing GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding `json:"standing"`
+	Standing     GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding                  `json:"standing"`
+	Participants []GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant `json:"participants"`
 }
 
 // GetName returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant.Name, and is useful for accessing the field via an interface.
@@ -193,6 +183,43 @@ func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant) GetName() str
 // GetStanding returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant.Standing, and is useful for accessing the field via an interface.
 func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant) GetStanding() GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding {
 	return v.Standing
+}
+
+// GetParticipants returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant.Participants, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrant) GetParticipants() []GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant {
+	return v.Participants
+}
+
+// GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant includes the requested fields of the GraphQL type Participant.
+// The GraphQL type's documentation follows.
+//
+// A participant of a tournament; either a spectator or competitor
+type GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant struct {
+	Player GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer `json:"player"`
+}
+
+// GetPlayer returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant.Player, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant) GetPlayer() GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer {
+	return v.Player
+}
+
+// GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer includes the requested fields of the GraphQL type Player.
+// The GraphQL type's documentation follows.
+//
+// A player
+type GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer struct {
+	Id       int    `json:"id"`
+	GamerTag string `json:"gamerTag"`
+}
+
+// GetId returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer.Id, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer) GetId() int {
+	return v.Id
+}
+
+// GetGamerTag returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer.GamerTag, and is useful for accessing the field via an interface.
+func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer) GetGamerTag() string {
+	return v.GamerTag
 }
 
 // GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantStanding includes the requested fields of the GraphQL type Standing.
@@ -698,6 +725,28 @@ type GetUsersForEventResponse struct {
 // GetEvent returns GetUsersForEventResponse.Event, and is useful for accessing the field via an interface.
 func (v *GetUsersForEventResponse) GetEvent() GetUsersForEventEvent { return v.Event }
 
+// RegisterForTournamentRegisterForTournamentParticipant includes the requested fields of the GraphQL type Participant.
+// The GraphQL type's documentation follows.
+//
+// A participant of a tournament; either a spectator or competitor
+type RegisterForTournamentRegisterForTournamentParticipant struct {
+	Id int `json:"id"`
+}
+
+// GetId returns RegisterForTournamentRegisterForTournamentParticipant.Id, and is useful for accessing the field via an interface.
+func (v *RegisterForTournamentRegisterForTournamentParticipant) GetId() int { return v.Id }
+
+// RegisterForTournamentResponse is returned by RegisterForTournament on success.
+type RegisterForTournamentResponse struct {
+	// Register for tournament
+	RegisterForTournament RegisterForTournamentRegisterForTournamentParticipant `json:"registerForTournament"`
+}
+
+// GetRegisterForTournament returns RegisterForTournamentResponse.RegisterForTournament, and is useful for accessing the field via an interface.
+func (v *RegisterForTournamentResponse) GetRegisterForTournament() RegisterForTournamentRegisterForTournamentParticipant {
+	return v.RegisterForTournament
+}
+
 // ReportSetReportBracketSet includes the requested fields of the GraphQL type Set.
 // The GraphQL type's documentation follows.
 //
@@ -763,22 +812,14 @@ type UpdateSeedingUpdatePhaseSeedingPhase struct {
 // GetId returns UpdateSeedingUpdatePhaseSeedingPhase.Id, and is useful for accessing the field via an interface.
 func (v *UpdateSeedingUpdatePhaseSeedingPhase) GetId() int { return v.Id }
 
-// __GenerateRegistrationTokenForEventInput is used internally by genqlient
-type __GenerateRegistrationTokenForEventInput struct {
+// __GenerateRegistrationTokenInput is used internally by genqlient
+type __GenerateRegistrationTokenInput struct {
 	EventId int `json:"eventId"`
 	UserId  int `json:"userId"`
 }
 
-// GetEventId returns __GenerateRegistrationTokenForEventInput.EventId, and is useful for accessing the field via an interface.
-func (v *__GenerateRegistrationTokenForEventInput) GetEventId() int { return v.EventId }
-
-// GetUserId returns __GenerateRegistrationTokenForEventInput.UserId, and is useful for accessing the field via an interface.
-func (v *__GenerateRegistrationTokenForEventInput) GetUserId() int { return v.UserId }
-
-// __GenerateRegistrationTokenInput is used internally by genqlient
-type __GenerateRegistrationTokenInput struct {
-	UserId int `json:"userId"`
-}
+// GetEventId returns __GenerateRegistrationTokenInput.EventId, and is useful for accessing the field via an interface.
+func (v *__GenerateRegistrationTokenInput) GetEventId() int { return v.EventId }
 
 // GetUserId returns __GenerateRegistrationTokenInput.UserId, and is useful for accessing the field via an interface.
 func (v *__GenerateRegistrationTokenInput) GetUserId() int { return v.UserId }
@@ -855,6 +896,18 @@ type __GetUsersForEventInput struct {
 // GetSlug returns __GetUsersForEventInput.Slug, and is useful for accessing the field via an interface.
 func (v *__GetUsersForEventInput) GetSlug() string { return v.Slug }
 
+// __RegisterForTournamentInput is used internally by genqlient
+type __RegisterForTournamentInput struct {
+	EventId  int    `json:"eventId"`
+	RegToken string `json:"regToken"`
+}
+
+// GetEventId returns __RegisterForTournamentInput.EventId, and is useful for accessing the field via an interface.
+func (v *__RegisterForTournamentInput) GetEventId() int { return v.EventId }
+
+// GetRegToken returns __RegisterForTournamentInput.RegToken, and is useful for accessing the field via an interface.
+func (v *__RegisterForTournamentInput) GetRegToken() string { return v.RegToken }
+
 // __ReportSetInput is used internally by genqlient
 type __ReportSetInput struct {
 	SetId    int                       `json:"setId"`
@@ -885,57 +938,20 @@ func (v *__UpdateSeedingInput) GetSeedMapping() []UpdatePhaseSeedInfo { return v
 
 // The mutation executed by GenerateRegistrationToken.
 const GenerateRegistrationToken_Operation = `
-mutation GenerateRegistrationToken ($userId: ID!) {
-	generateRegistrationToken(registration: {eventIds:[]}, userId: $userId)
+mutation GenerateRegistrationToken ($eventId: ID!, $userId: ID!) {
+	generateRegistrationToken(registration: {eventIds:[$eventId]}, userId: $userId)
 }
 `
 
 func GenerateRegistrationToken(
 	ctx_ context.Context,
+	eventId int,
 	userId int,
 ) (data_ *GenerateRegistrationTokenResponse, err_ error) {
 	req_ := &graphql.Request{
 		OpName: "GenerateRegistrationToken",
 		Query:  GenerateRegistrationToken_Operation,
 		Variables: &__GenerateRegistrationTokenInput{
-			UserId: userId,
-		},
-	}
-	var client_ graphql.Client
-
-	client_, err_ = GetClient(ctx_)
-	if err_ != nil {
-		return nil, err_
-	}
-
-	data_ = &GenerateRegistrationTokenResponse{}
-	resp_ := &graphql.Response{Data: data_}
-
-	err_ = client_.MakeRequest(
-		ctx_,
-		req_,
-		resp_,
-	)
-
-	return data_, err_
-}
-
-// The mutation executed by GenerateRegistrationTokenForEvent.
-const GenerateRegistrationTokenForEvent_Operation = `
-mutation GenerateRegistrationTokenForEvent ($eventId: ID!, $userId: ID!) {
-	generateRegistrationToken(registration: {eventIds:[$eventId]}, userId: $userId)
-}
-`
-
-func GenerateRegistrationTokenForEvent(
-	ctx_ context.Context,
-	eventId int,
-	userId int,
-) (data_ *GenerateRegistrationTokenForEventResponse, err_ error) {
-	req_ := &graphql.Request{
-		OpName: "GenerateRegistrationTokenForEvent",
-		Query:  GenerateRegistrationTokenForEvent_Operation,
-		Variables: &__GenerateRegistrationTokenForEventInput{
 			EventId: eventId,
 			UserId:  userId,
 		},
@@ -947,7 +963,7 @@ func GenerateRegistrationTokenForEvent(
 		return nil, err_
 	}
 
-	data_ = &GenerateRegistrationTokenForEventResponse{}
+	data_ = &GenerateRegistrationTokenResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -1051,6 +1067,12 @@ query GetEntrantsOut ($slug: String) {
 				standing {
 					isFinal
 					placement
+				}
+				participants {
+					player {
+						id
+						gamerTag
+					}
 				}
 			}
 		}
@@ -1372,6 +1394,47 @@ func GetUsersForEvent(
 	}
 
 	data_ = &GetUsersForEventResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by RegisterForTournament.
+const RegisterForTournament_Operation = `
+mutation RegisterForTournament ($eventId: ID!, $regToken: String!) {
+	registerForTournament(registration: {eventIds:[$eventId]}, registrationToken: $regToken) {
+		id
+	}
+}
+`
+
+func RegisterForTournament(
+	ctx_ context.Context,
+	eventId int,
+	regToken string,
+) (data_ *RegisterForTournamentResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "RegisterForTournament",
+		Query:  RegisterForTournament_Operation,
+		Variables: &__RegisterForTournamentInput{
+			EventId:  eventId,
+			RegToken: regToken,
+		},
+	}
+	var client_ graphql.Client
+
+	client_, err_ = GetClient(ctx_)
+	if err_ != nil {
+		return nil, err_
+	}
+
+	data_ = &RegisterForTournamentResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
