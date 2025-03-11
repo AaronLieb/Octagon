@@ -37,6 +37,26 @@ func (con *conflict) check(p1 int, p2 int) bool {
 	return false
 }
 
+func calculateConflictScore(bracket bracket, conflicts []conflict, players []player, newPlayers []player) float64 {
+	conflictScore, _ := checkConflict(bracket, conflicts, newPlayers)
+
+	seedDiffScore := 0.0
+	for i, p := range newPlayers {
+		for j, q := range players {
+			if p.id == q.id {
+				// Low importance means changing the seed has less significance
+				importance := 32.0 / math.Pow(math.Log2(float64(j)), 3)
+				// keep inbetween [0.25, 1]
+				importance = math.Max(1, math.Min(0.25, importance))
+				seedDiff := math.Abs(float64(i-j)) * importance
+				seedDiffScore += math.Pow(seedDiff, 1.5)
+			}
+		}
+	}
+	conflictScore += seedDiffScore / 2
+	return conflictScore
+}
+
 /* This is a Monte Carlo algorithm that randomly
  * swaps seeds in brackets and then evaluates the
  * score of that seeding. It keeps the randomly
@@ -46,36 +66,27 @@ func (con *conflict) check(p1 int, p2 int) bool {
 func resolveConflicts(bracket bracket, players []player) []player {
 	conflicts := readConflictsFile()
 
-	var best []player
-	lowestScore := 999.0
+	best := players
+	lowestScore := calculateConflictScore(bracket, conflicts, players, players)
 
-	for range CONFLICT_RESOLUTION_ATTEMPTS {
-		newPlayers := randomizeSeeds(players)
+	log.Infof("conflictScore before resolution: %.2f", lowestScore)
 
-		conflictScore, _ := checkConflict(bracket, conflicts, newPlayers)
+	if lowestScore != 0.0 {
+		for range CONFLICT_RESOLUTION_ATTEMPTS {
+			newPlayers := randomizeSeeds(players)
 
-		seedDiffScore := 0.0
-		for i, p := range newPlayers {
-			for j, q := range players {
-				if p.id == q.id {
-					// Low importance means changing the seed has less significance
-					importance := 32.0 / math.Pow(math.Log2(float64(j)), 3)
-					// keep inbetween [0.25, 1]
-					importance = math.Max(1, math.Min(0.25, importance))
-					seedDiff := math.Abs(float64(i-j)) * importance
-					seedDiffScore += math.Pow(seedDiff, 1.5)
-				}
+			conflictScore := calculateConflictScore(bracket, conflicts, players, newPlayers)
+
+			if conflictScore < lowestScore {
+				lowestScore = conflictScore
+				best = newPlayers
 			}
-		}
-		conflictScore += seedDiffScore / 2
-
-		if conflictScore < lowestScore {
-			lowestScore = conflictScore
-			best = newPlayers
 		}
 	}
 
-	log.Info("Seeds after conflict resolution")
+	// TODO: Separate this into a separate func
+	// need to pass diff values, or store them in player struct
+	log.Info("Seeds after conflict resolution", "score", lowestScore)
 	log.Printf("%-5s %-6s %25s %6s %-6s", "Seed", "Rating", "Name", "Change", "ID")
 	log.Print("---------------------------------------------------------")
 	for i, p := range best {
