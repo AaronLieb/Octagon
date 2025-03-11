@@ -11,18 +11,19 @@ import (
 )
 
 func main() {
+	if os.Getenv("DEBUG") == "1" {
+		log.SetLevel(log.DebugLevel)
+	}
+
+	log.Default().SetReportTimestamp(false)
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if os.Getenv("DEBUG") == "1" {
-		log.SetLevel(log.DebugLevel)
-	}
-
 	cmd := commands.Command()
 
-	log.Default().SetReportTimestamp(false)
 
 	db := cache.Open()
 	defer db.Close()
