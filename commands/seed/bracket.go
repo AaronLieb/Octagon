@@ -37,20 +37,27 @@ func createBracket(numPlayers int) bracket {
 		loserSet:  nil,
 	}
 	log.Debugf("s%-2d vs s%-2d r%-2d %2dp w:%t", winnersFinals.player1, winnersFinals.player2, numRounds, 2, true)
-	log.Debugf("s%-2d vs s%-2d r%-2d %2dp w:%t", losersFinals.player1, losersFinals.player2, numRounds, 2, false)
+	log.Debugf("s%-2d vs s%-2d r%-2d %2dp w:%t", losersFinals.player1, losersFinals.player2, numRounds-1, 2, false)
 
-	sets := make([]*set, 50)
-	sets[0] = winnersFinals
-	sets[1] = losersFinals
+	numSetsUpperBound := int(math.Pow(2, float64(numRounds+1)))
+	sets := make([]*set, numSetsUpperBound)
 
 	// Losers semis
-	losersSemis := createSet(numRounds, numPlayers, numRounds, false, 3, losersFinals, nil, &sets)
+	losersSemis := createSet(numRounds, numPlayers, numRounds-1, false, 3, losersFinals, nil, &sets)
 
 	// Winners semis
-	createSet(numRounds, numPlayers, numRounds-1, true, 1, winnersFinals, losersSemis, &sets)
-	createSet(numRounds, numPlayers, numRounds-1, true, 2, winnersFinals, losersSemis, &sets)
+	createSet(numRounds, numPlayers, numRounds-2, true, 1, winnersFinals, losersSemis, &sets)
+	createSet(numRounds, numPlayers, numRounds-2, true, 2, winnersFinals, losersSemis, &sets)
 
-	return bracket{sets: sets}
+	var playableSets []*set
+	for _, set := range sets {
+		if set != nil && set.player1 <= numPlayers && set.player2 <= numPlayers {
+			playableSets = append(playableSets, set)
+		}
+	}
+
+	log.Debug("playableSets", "len", len(playableSets))
+	return bracket{sets: playableSets}
 }
 
 /*
@@ -60,7 +67,12 @@ func createBracket(numPlayers int) bracket {
 * When referring to a seed that is "low" the seed value is numerically high
  */
 func createSet(totRounds int, numPlayers int, round int, isWinners bool, highSeed int, winnerSet *set, loserSet *set, sets *[]*set) *set {
-	numInRound := int(math.Pow(2, float64(totRounds-round)+1))
+	// base case
+	if round < 1 {
+		return nil
+	}
+
+	numInRound := int(math.Pow(2, float64(totRounds-round)))
 
 	lowSeed := numInRound - highSeed + 1
 
@@ -71,16 +83,19 @@ func createSet(totRounds int, numPlayers int, round int, isWinners bool, highSee
 		if highSeed <= numInRound {
 			// second stage of losers round, middle seeds
 			lb := numInRound/2 + 1
-			ub := 2*numInRound - numInRound/2
+			ub := lb + numInRound - 1
 			diff := highSeed - lb
 			lowSeed = ub - diff
+			// log.Debug("", "lb", lb, "ub", ub, "diff", diff, "lowSeed", lowSeed)
 
 			// offset seeds so players don't play same as winners
+			dx := (round)%2 + 1
 			if diff >= numInRound/2 {
-				lowSeed -= numInRound / 4
+				lowSeed -= dx
 			} else {
-				lowSeed += numInRound / 4
+				lowSeed += dx
 			}
+			// log.Debug("", "dx", dx, "lowSeed", lowSeed)
 
 		} else {
 			// first stage of losers round, bottom seeds
@@ -89,11 +104,6 @@ func createSet(totRounds int, numPlayers int, round int, isWinners bool, highSee
 			diff := highSeed - lb
 			lowSeed = ub - diff
 		}
-	}
-
-	// base case
-	if lowSeed > numPlayers {
-		return nil
 	}
 
 	newSet := &set{
@@ -119,13 +129,9 @@ func createSet(totRounds int, numPlayers int, round int, isWinners bool, highSee
 	}
 
 	loserSet2 := createSet(totRounds, numPlayers, round, false, lowSeed, loserSet, nil, sets)
-	if loserSet2 != nil {
-		loserSet1 := createSet(totRounds, numPlayers, round, false, loserSet2.player2, loserSet2, nil, sets)
-		if loserSet1 != nil {
-			createSet(totRounds, numPlayers, round-1, true, highSeed, newSet, loserSet1, sets)
-			createSet(totRounds, numPlayers, round-1, true, lowSeed, newSet, loserSet1, sets)
-		}
-	}
+	loserSet1 := createSet(totRounds, numPlayers, round, false, loserSet2.player2, loserSet2, nil, sets)
+	createSet(totRounds, numPlayers, round-1, true, highSeed, newSet, loserSet1, sets)
+	createSet(totRounds, numPlayers, round-1, true, lowSeed, newSet, loserSet1, sets)
 
 	return newSet
 }
