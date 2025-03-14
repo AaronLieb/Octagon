@@ -28,7 +28,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:    "report",
-		Usage:   "Report sets",
+		Usage:   "Report a set",
 		Aliases: []string{"r"},
 		Flags: []cli.Flag{
 			&cli.StringFlag{

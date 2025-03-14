@@ -16,7 +16,7 @@ const CUTOFF = 8
 func redemptionInfoCommand() *cli.Command {
 	return &cli.Command{
 		Name:    "redemption",
-		Usage:   "Redemption info",
+		Usage:   "Lists players eliminated from main bracket but not signed up for redemption",
 		Aliases: []string{"r"},
 		Flags: []cli.Flag{
 			&cli.StringFlag{

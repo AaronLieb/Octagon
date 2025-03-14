@@ -12,7 +12,7 @@ import (
 func listCommand() *cli.Command {
 	return &cli.Command{
 		Name:    "list",
-		Usage:   "list conflicts",
+		Usage:   "lists all conflicts",
 		Aliases: []string{"l"},
 		Action:  listConflict,
 	}

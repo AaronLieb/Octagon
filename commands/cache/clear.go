@@ -11,7 +11,7 @@ import (
 func ClearCommand() *cli.Command {
 	return &cli.Command{
 		Name:    "clear",
-		Usage:   "clears the cache",
+		Usage:   "clears the entire cache",
 		Aliases: []string{"c"},
 		Action:  clear,
 	}

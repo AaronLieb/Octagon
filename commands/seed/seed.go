@@ -15,10 +15,16 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+const desc = `Will fetch player ratings from an external rating database
+and seed the players accordingly. It will then attempt to read all
+player conflicts and generate a variation of the original seeding
+that minimizes seeding changes while maximizing conflict resolution`
+
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:        "seed",
-		Description: "Seed a bracket",
+		Usage:       "Seeds an event",
+		Description: desc,
 		Aliases:     []string{"s"},
 		Flags: []cli.Flag{
 			&cli.StringFlag{

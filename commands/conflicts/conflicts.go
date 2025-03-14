@@ -6,11 +6,12 @@ import (
 
 func Command() *cli.Command {
 	return &cli.Command{
-		Name:        "conflicts",
-		Description: "manage conflicts",
-		Aliases:     []string{"c"},
+		Name:      "conflicts",
+		UsageText: "octagon conflicts [subcommand]",
+		Usage:     "View and manage conflicts",
+		Aliases:   []string{"c"},
 		Commands: []*cli.Command{
-			addCommand(),
+			createCommand(),
 			listCommand(),
 		},
 	}

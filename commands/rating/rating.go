@@ -10,10 +10,16 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+const desc = `Will fetch player ratings from an external rating database.
+Currently, this command will not function without credentials to a
+firebase realtime database containing player ratings.`
+
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:        "rating",
-		Description: "Fetch a player's rating",
+		Usage:       "Fetch a player's rating",
+		Description: desc,
+		UsageText:   "octagon rating [playerId]",
 		Action:      GetRating,
 	}
 }

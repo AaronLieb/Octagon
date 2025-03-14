@@ -13,7 +13,7 @@ import (
 func addCommand() *cli.Command {
 	return &cli.Command{
 		Name:    "add",
-		Usage:   "Add attendee",
+		Usage:   "Add an attendee",
 		Aliases: []string{"a"},
 		Flags: []cli.Flag{
 			&cli.StringFlag{

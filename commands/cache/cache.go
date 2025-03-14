@@ -6,8 +6,9 @@ import (
 
 func Command() *cli.Command {
 	return &cli.Command{
-		Name:  "cache",
-		Usage: "cache commands ",
+		Name:      "cache",
+		UsageText: "octagon cache [subcommand]",
+		Usage:     "Manage the internal cache",
 		Commands: []*cli.Command{
 			ClearCommand(),
 		},
