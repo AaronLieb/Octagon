@@ -24,7 +24,6 @@ func main() {
 
 	cmd := commands.Command()
 
-
 	db := cache.Open()
 	defer db.Close()
 
