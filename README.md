@@ -14,6 +14,40 @@ Calls the start.gg GraphQL API
 
 ## Development
 
+Run the CLI with the following command
+
+```bash
+go run . <args>
+```
+
+If you want to see debug logs,
+add a DEBUG environment variable in the config or inline
+
+```bash
+DEBUG=1 go run . <args>
+```
+
+## Installation
+
+```bash
+go build && go install
+```
+
+## Configuration
+
+When running the `octagon` command it will check for a configuration file in `~/.config/octagon/octagonrc`.
+If it is unable to find a config file there, it will look for a local .env file.
+
+### Config fields
+
+```dotenv
+STARTGG_API_KEY=
+FIREBASE_API_KEY=
+FIREBASE_DATABASE_URL=
+```
+
+## Updating Schemas
+
 When the start.gg GraphQL schema updates,
 you need to fetch the updated `schema.graphql` file and run
 
@@ -21,8 +55,6 @@ you need to fetch the updated `schema.graphql` file and run
 go get github.com/Khan/genqlient
 npm install -g graphqurl
 ```
-
-## Updating Schemas
 
 Dev API
 
@@ -38,10 +70,4 @@ Prod API
 gq https://www.start.gg/api/-/gql --introspect \
 -H 'x-web-source: gg-web-gql-client, gg-web-rest'
 go run github.com/Khan/genqlient
-```
-
-## Installation
-
-```bash
-go build && go install
 ```
