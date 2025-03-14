@@ -8,8 +8,8 @@ import (
 
 func addCommand() *cli.Command {
 	return &cli.Command{
-		Name:    "add",
-		Usage:   "List attendees",
+		Name:    "create",
+		Usage:   "create conflict",
 		Aliases: []string{"create", "c", "a"},
 		Action:  addConflict,
 	}

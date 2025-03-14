@@ -7,10 +7,11 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:        "conflicts",
-		Description: "Manage Conflicts",
+		Description: "manage conflicts",
 		Aliases:     []string{"c"},
 		Commands: []*cli.Command{
 			addCommand(),
+			listCommand(),
 		},
 	}
 }
