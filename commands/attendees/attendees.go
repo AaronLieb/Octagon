@@ -10,9 +10,9 @@ func Command() *cli.Command {
 		Usage:   "View and modify tournament/event attendees ",
 		Aliases: []string{"a"},
 		Commands: []*cli.Command{
-			AddCommand(),
-			ListCommand(),
-			RedemptionInfoCommand(),
+			addCommand(),
+			listCommand(),
+			redemptionInfoCommand(),
 		},
 	}
 }

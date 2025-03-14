@@ -13,7 +13,7 @@ import (
 // out before top8
 const CUTOFF = 8
 
-func RedemptionInfoCommand() *cli.Command {
+func redemptionInfoCommand() *cli.Command {
 	return &cli.Command{
 		Name:    "redemption",
 		Usage:   "Redemption info",

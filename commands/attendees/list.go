@@ -10,7 +10,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func ListCommand() *cli.Command {
+func listCommand() *cli.Command {
 	return &cli.Command{
 		Name:    "list",
 		Usage:   "List attendees",
