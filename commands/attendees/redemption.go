@@ -35,12 +35,10 @@ func RedemptionInfo(ctx context.Context, cmd *cli.Command) error {
 
 	tournamentShortSlug := cmd.String("tournament")
 
-	tournamentResp, err := startgg.GetTournament(ctx, tournamentShortSlug)
+	tournamentSlug, err := startgg.GetTournamentSlug(ctx, tournamentShortSlug)
 	if err != nil {
 		return err
 	}
-
-	tournamentSlug := tournamentResp.Tournament.Slug
 
 	redEventSlug := fmt.Sprintf("%s/event/redemption-bracket", tournamentSlug)
 	redEntrantsResp, err := startgg.GetEntrantsOut(ctx, redEventSlug)

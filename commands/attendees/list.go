@@ -37,12 +37,10 @@ func listAttendees(ctx context.Context, cmd *cli.Command) error {
 
 	tournamentShortSlug := cmd.String("tournament")
 
-	tournamentResp, err := startgg.GetTournament(ctx, tournamentShortSlug)
+	tournamentSlug, err := startgg.GetTournamentSlug(ctx, tournamentShortSlug)
 	if err != nil {
 		return err
 	}
-
-	tournamentSlug := tournamentResp.Tournament.Slug
 
 	resp, err := startgg.GetParticipants(ctx, tournamentSlug)
 	if err != nil {
