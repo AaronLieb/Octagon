@@ -66,7 +66,7 @@ FIREBASE_API_KEY=
 FIREBASE_DATABASE_URL=
 ```
 
-## Installation
+## Installation & Usage
 
 This will add the `octagon` command to your GOPATH,
 allowing the command to be run from anywhere.
@@ -77,6 +77,12 @@ go build && go install
 
 If you are using a local .env configuration instead of ~/.config/octagon,
 the command will fail outside of the source code directory.
+
+View the command usage
+
+```bash
+octagon -h
+```
 
 ## Updating Schemas
 
