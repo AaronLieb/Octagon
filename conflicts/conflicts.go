@@ -1,18 +1,18 @@
 package conflicts
 
 import (
-	"encoding/csv"
+	"encoding/json"
 	"math"
 	"math/rand/v2"
 	"os"
-	"strconv"
 
 	"github.com/AaronLieb/octagon/bracket"
+	"github.com/AaronLieb/octagon/config"
 	"github.com/charmbracelet/log"
 )
 
 const (
-	CONFLICT_FILE                = "conflicts.csv"
+	CONFLICT_FILE                = "conflicts.json"
 	CONFLICT_RESOLUTION_ATTEMPTS = 0
 	CONFLICT_RESOLUTION_VARIANCE = 3
 )
@@ -20,8 +20,8 @@ const (
 // returns true if p1 and p2 are in the conflict
 func (con *conflict) check(p1 int, p2 int) bool {
 	flag := true
-	for _, p := range con.players {
-		if p == p1 || p == p2 {
+	for _, p := range con.Players {
+		if p.Id == p1 || p.Id == p2 {
 			if flag {
 				flag = false
 			} else {
@@ -109,7 +109,7 @@ func printSeeds(before []bracket.Player, after []bracket.Player) {
 }
 
 func GetConflicts(conflictFiles []string) []conflict {
-	var conflicts []conflict
+	conflicts := readConflictsFile(CONFLICT_FILE)
 	for _, file := range conflictFiles {
 		conflicts = append(conflicts, readConflictsFile(file)...)
 	}
@@ -117,44 +117,25 @@ func GetConflicts(conflictFiles []string) []conflict {
 }
 
 func readConflictsFile(fileName string) []conflict {
-	var conflicts []conflict
-	file, err := os.Open(fileName)
+	var cons []conflict
+	path := config.GetConfigPath() + fileName
+	file, err := os.ReadFile(path)
 	if err != nil {
-		log.Warn("unable to find or open conflicts", "file", CONFLICT_FILE)
-		return conflicts
-	}
-	defer file.Close()
-	reader := csv.NewReader(file)
-	reader.FieldsPerRecord = -1
-	records, err := reader.ReadAll()
-	if err != nil {
-		log.Fatal(err)
+		log.Warn("unable to read conflicts file: %v", err)
+		return cons
 	}
 
-	log.Info("Reading conflicts", "file", CONFLICT_FILE, "n", len(records))
-	conflicts = make([]conflict, len(records))
-	for i, row := range records {
-		priority, err := strconv.Atoi(row[0])
-		if err != nil {
-			log.Fatalf("unable to parse priority in line %d of conflicts file: %v\n", i, err)
-		}
-		players := make([]int, len(row[1:]))
-		for j, s := range row[1:] {
-			p, err := strconv.Atoi(s)
-			if err != nil {
-				log.Fatalf("unable to parse player id in line %d of conflicts file: %v\n", i, err)
-			}
-			players[j] = p
-		}
-		conflicts[i] = conflict{
-			priority: priority,
-			players:  players,
-		}
+	err = json.Unmarshal(file, &cons)
+	if err != nil {
+		log.Errorf("unable to unmarshal conflicts file: %v", err)
+		return cons
 	}
-	if len(conflicts) == 0 {
+
+	log.Info("Reading conflicts", "path", path, "n", len(cons))
+	if len(cons) == 0 {
 		log.Warn("No conflicts found in conflict file")
 	}
-	return conflicts
+	return cons
 }
 
 /*
@@ -194,7 +175,7 @@ func checkConflict(b bracket.Bracket, cons []conflict, players []bracket.Player)
 			p1 := players[s.Player1-1].Id
 			p2 := players[s.Player2-1].Id
 			if con.check(p1, p2) {
-				conflictScore += float64(2 + con.priority)
+				conflictScore += float64(2 + con.Priority)
 				conflictSum += 1
 			}
 		}

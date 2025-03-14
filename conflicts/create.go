@@ -24,10 +24,19 @@ func CreateConflictsForSetsPlayed(ctx context.Context, eventSlug string) []confl
 	for i, set := range sets {
 		p1 := set.Slots[0].Entrant.Participants[0].Player
 		p2 := set.Slots[1].Entrant.Participants[0].Player
-		log.Debug("conflict", "p1", p1.GamerTag, "p2", p2.GamerTag)
+		log.Debug("creating recently played conflict", "p1", p1.GamerTag, "p2", p2.GamerTag)
 		conflicts[i] = conflict{
-			priority: 2,
-			players:  []int{p1.Id, p2.Id},
+			Priority: 2,
+			Players: []player{
+				{
+					Name: p1.GamerTag,
+					Id:   p1.Id,
+				},
+				{
+					Name: p1.GamerTag,
+					Id:   p2.Id,
+				},
+			},
 		}
 	}
 

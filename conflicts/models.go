@@ -1,6 +1,11 @@
 package conflicts
 
+type player struct {
+	Name string `json:"name"`
+	Id   int    `json:"id"`
+}
+
 type conflict struct {
-	priority int
-	players  []int // ID
+	Priority int      `json:"priority"`
+	Players  []player `json:"players"`
 }
