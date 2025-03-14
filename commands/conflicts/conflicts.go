@@ -1,4 +1,4 @@
-package cache
+package conflicts
 
 import (
 	"github.com/urfave/cli/v3"
@@ -6,10 +6,11 @@ import (
 
 func Command() *cli.Command {
 	return &cli.Command{
-		Name:  "cache",
-		Usage: "cache commands ",
+		Name:        "conflicts",
+		Description: "Manage Conflicts",
+		Aliases:     []string{"c"},
 		Commands: []*cli.Command{
-			ClearCommand(),
+			addCommand(),
 		},
 	}
 }
