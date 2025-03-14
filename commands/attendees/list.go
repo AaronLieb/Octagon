@@ -3,6 +3,7 @@ package attendees
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
@@ -37,30 +38,25 @@ func listAttendees(ctx context.Context, cmd *cli.Command) error {
 
 	tournamentShortSlug := cmd.String("tournament")
 
-	tournamentSlug, err := startgg.GetTournamentSlug(ctx, tournamentShortSlug)
-	if err != nil {
-		return err
-	}
-
-	resp, err := startgg.GetParticipants(ctx, tournamentSlug)
+	resp, err := startgg.GetParticipants(ctx, tournamentShortSlug)
 	if err != nil {
 		return err
 	}
 	tournament := resp.Tournament
 	participants := tournament.Participants.GetNodes()
 
-	log.Infof("Fetched %d participants for %s", len(participants), tournamentSlug)
+	log.Infof("Fetched %d participants for %s", len(participants), tournament.Name)
 
-	outputType := cmd.String("output")
-	if outputType == "csv" {
-		for _, participant := range participants {
-			fmt.Printf("%s\t%s\t%s\n", participant.GamerTag, participant.ContactInfo.NameFirst, participant.ContactInfo.NameLast)
-		}
-	} else {
-		for _, participant := range participants {
-			player := participant.Player
+	outputType := strings.ToLower(cmd.String("output"))
+	for _, participant := range participants {
+
+		player := participant.Player
+		if outputType == "csv" {
+			fmt.Printf("%d\t%s\n", player.Id, participant.GamerTag)
+		} else {
 			fmt.Printf("%-25s %-8d %-15s %-15s\n", participant.GamerTag, player.Id, participant.ContactInfo.NameFirst, participant.ContactInfo.NameLast)
 		}
+
 	}
 	return nil
 }
