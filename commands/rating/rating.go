@@ -12,9 +12,9 @@ import (
 
 func Command() *cli.Command {
 	return &cli.Command{
-		Name:   "rating",
-		Usage:  "get a player's rating",
-		Action: GetRating,
+		Name:        "rating",
+		Description: "Fetch a player's rating",
+		Action:      GetRating,
 	}
 }
 

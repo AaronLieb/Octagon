@@ -17,9 +17,9 @@ import (
 
 func Command() *cli.Command {
 	return &cli.Command{
-		Name:    "seed",
-		Usage:   "Seed a bracket",
-		Aliases: []string{"s"},
+		Name:        "seed",
+		Description: "Seed a bracket",
+		Aliases:     []string{"s"},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "tournament",

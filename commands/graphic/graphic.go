@@ -9,9 +9,9 @@ import (
 
 func Command() *cli.Command {
 	return &cli.Command{
-		Name:    "graphic",
-		Usage:   "Generate a top8 graphic",
-		Aliases: []string{"g"},
+		Name:        "graphic",
+		Description: "Generate a top8 graphic",
+		Aliases:     []string{"g"},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "tournament",

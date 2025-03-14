@@ -6,9 +6,9 @@ import (
 
 func Command() *cli.Command {
 	return &cli.Command{
-		Name:    "attendees",
-		Usage:   "View and modify tournament/event attendees ",
-		Aliases: []string{"a"},
+		Name:        "attendees",
+		Description: "Manage tournament attendees",
+		Aliases:     []string{"a"},
 		Commands: []*cli.Command{
 			addCommand(),
 			listCommand(),
