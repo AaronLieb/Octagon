@@ -40,7 +40,6 @@ func Command() *cli.Command {
 	}
 }
 
-// TODO: add seed change to this and move printing to seed.go
 // TODO: add aliases/main account
 type player struct {
 	name   string
@@ -64,6 +63,8 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Bool("redemption") {
 		event = "redemption-bracket"
 	}
+
+	conflicts := createConflictsForSetsPlayed(ctx, "tournament/octagon-102/event/ultimate-singles")
 
 	slug := fmt.Sprintf("%s/event/%s", tournamentSlug, event)
 	log.Debug(slug)
@@ -103,7 +104,7 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	if cmd.String("file") != "" {
 		conflictFiles = append(conflictFiles, cmd.String("file"))
 	}
-	conflicts := getConflicts(conflictFiles)
+	conflicts = append(conflicts, getConflicts(conflictFiles)...)
 	resolveConflicts(bracket, conflicts, players)
 
 	var input string

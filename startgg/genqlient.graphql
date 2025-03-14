@@ -128,6 +128,26 @@ query GetSetsForEntrant($slug: String, $entrantId: ID) {
   }
 }
 
+query GetSets($slug: String) {
+  event(slug: $slug) {
+    sets(page: 0, perPage: 100, sortType: CALL_ORDER) {
+      nodes {
+        id
+        slots {
+          entrant {
+            participants {
+              player {
+                gamerTag
+                id
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 query GetSeeds($slug: String) {
   event(slug: $slug) {
     phases {

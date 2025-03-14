@@ -1,13 +1,14 @@
 package seed
 
 import (
-	"crypto/rand"
+	"context"
 	"encoding/csv"
 	"math"
-	"math/big"
+	"math/rand/v2"
 	"os"
 	"strconv"
 
+	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 )
 
@@ -18,8 +19,8 @@ type conflict struct {
 
 const (
 	CONFLICT_FILE                = "conflicts.csv"
-	CONFLICT_RESOLUTION_ATTEMPTS = 1000
-	CONFLICT_RESOLUTION_VARIANCE = 5
+	CONFLICT_RESOLUTION_ATTEMPTS = 0
+	CONFLICT_RESOLUTION_VARIANCE = 3
 )
 
 // returns true if p1 and p2 are in the conflict
@@ -84,6 +85,10 @@ func resolveConflicts(bracket bracket, conflicts []conflict, players []player) [
 
 	log.Info("Seeds after conflict resolution", "score", lowestScore)
 	printSeeds(players, best)
+	_, numConflicts := checkConflict(bracket, conflicts, best)
+	// if numConflicts != 0 {
+	log.Warnf("%d conflicts were unresolved", numConflicts)
+	// }
 	log.Debug("Finished conflict resolution", "score", lowestScore, "checks", CONFLICT_RESOLUTION_ATTEMPTS)
 
 	return best
@@ -167,9 +172,7 @@ func randomizeSeeds(players []player) []player {
 	copy(newPlayers, players)
 	for j := range players[3:] {
 		i := j + 3
-		r := rand.Reader
-		x, _ := rand.Int(r, big.NewInt(CONFLICT_RESOLUTION_VARIANCE))
-		if x.Int64() == 1 {
+		if rand.IntN(CONFLICT_RESOLUTION_VARIANCE) == 0 {
 			temp := newPlayers[i]
 			newPlayers[i] = newPlayers[i-1]
 			newPlayers[i-1] = temp
@@ -195,11 +198,38 @@ func checkConflict(b bracket, cons []conflict, players []player) (float64, int) 
 			p1 := players[s.player1-1].id
 			p2 := players[s.player2-1].id
 			if con.check(p1, p2) {
-				conflictScore += float64(5 - con.priority)
+				conflictScore += float64(2 + con.priority)
 				conflictSum += 1
 			}
 		}
 	}
 
 	return conflictScore, conflictSum
+}
+
+func createConflictsForSetsPlayed(ctx context.Context, eventSlug string) []conflict {
+	log.Debug("create conflicts for set played")
+
+	var conflicts []conflict
+
+	setsResp, err := startgg.GetSets(ctx, eventSlug)
+	if err != nil {
+		log.Errorf("unable to fetch sets for '%s'", eventSlug)
+		return conflicts
+	}
+	sets := setsResp.Event.Sets.Nodes
+	log.Debug("sets", "n", len(sets))
+
+	conflicts = make([]conflict, len(sets))
+	for i, set := range sets {
+		p1 := set.Slots[0].Entrant.Participants[0].Player
+		p2 := set.Slots[1].Entrant.Participants[0].Player
+		log.Debug("conflict", "p1", p1.GamerTag, "p2", p2.GamerTag)
+		conflicts[i] = conflict{
+			priority: 2,
+			players:  []int{p1.Id, p2.Id},
+		}
+	}
+
+	return conflicts
 }
