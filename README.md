@@ -22,8 +22,21 @@ go get github.com/Khan/genqlient
 npm install -g graphqurl
 ```
 
+## Updating Schemas
+
+Dev API
+
 ```bash
-gq https://api.start.gg/gql/alpha --introspect > schema.graphql -H 'Authorization: Bearer <API_KEY>'
+gq https://api.start.gg/gql/alpha --introspect > schema.graphql \
+  -H 'Authorization: Bearer <API_KEY>'
+go run github.com/Khan/genqlient
+```
+
+Prod API
+
+```bash
+gq https://www.start.gg/api/-/gql --introspect \
+-H 'x-web-source: gg-web-gql-client, gg-web-rest'
 go run github.com/Khan/genqlient
 ```
 
