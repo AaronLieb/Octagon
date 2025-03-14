@@ -1,9 +1,9 @@
 # Default genqlient config; for full documentation see:
 # https://github.com/Khan/genqlient/blob/main/docs/genqlient.yaml
-schema: startgg/schema.graphql
+schema: schema.graphql
 operations:
-  - startgg/genqlient.graphql
-generated: startgg/generated.go
+  - genqlient.graphql
+generated: generated.go
 client_getter: github.com/AaronLieb/octagon/startgg.GetClient
 # This has to be specified because ID is treated as a String by default. Startgg schema expects an int
 bindings:
