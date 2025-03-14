@@ -6,8 +6,8 @@ import (
 
 	"github.com/AaronLieb/octagon/cache"
 	"github.com/AaronLieb/octagon/commands"
+	"github.com/AaronLieb/octagon/config"
 	"github.com/charmbracelet/log"
-	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -17,10 +17,7 @@ func main() {
 
 	log.Default().SetReportTimestamp(false)
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
+	config.Load()
 
 	cmd := commands.Command()
 
