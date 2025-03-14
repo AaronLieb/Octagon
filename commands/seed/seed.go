@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/AaronLieb/octagon/bracket"
+	"github.com/AaronLieb/octagon/conflicts"
 	"github.com/AaronLieb/octagon/ratings"
 	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
@@ -40,13 +42,6 @@ func Command() *cli.Command {
 	}
 }
 
-// TODO: add aliases/main account
-type player struct {
-	name   string
-	id     int
-	rating float64
-}
-
 func seed(ctx context.Context, cmd *cli.Command) error {
 	log.Debug("seed")
 
@@ -64,7 +59,7 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 		event = "redemption-bracket"
 	}
 
-	conflicts := createConflictsForSetsPlayed(ctx, "tournament/octagon-102/event/ultimate-singles")
+	cons := conflicts.CreateConflictsForSetsPlayed(ctx, "tournament/octagon-102/event/ultimate-singles")
 
 	slug := fmt.Sprintf("%s/event/%s", tournamentSlug, event)
 	log.Debug(slug)
@@ -74,7 +69,7 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	}
 	entrants := entrantsResp.Event.Entrants.Nodes
 
-	players := make([]player, len(entrants))
+	players := make([]bracket.Player, len(entrants))
 	for i, entrant := range entrants {
 		id := entrant.Participants[0].Player.Id
 		name := entrant.Participants[0].GamerTag
@@ -86,26 +81,24 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 		if rating == 0.0 {
 			log.Warnf("unable to fetch rating for '%s'", name)
 		}
-		players[i] = player{
-			name:   name,
-			id:     id,
-			rating: rating,
+		players[i] = bracket.Player{
+			Name:   name,
+			Id:     id,
+			Rating: rating,
 		}
 	}
 
-	slices.SortFunc(players, func(a, b player) int {
-		return cmp.Compare(b.rating, a.rating)
+	slices.SortFunc(players, func(a, b bracket.Player) int {
+		return cmp.Compare(b.Rating, a.Rating)
 	})
 
-	bracket := createBracket(len(players))
-	conflictFiles := []string{
-		CONFLICT_FILE,
-	}
+	bracket := bracket.CreateBracket(len(players))
+	var conflictFiles []string
 	if cmd.String("file") != "" {
 		conflictFiles = append(conflictFiles, cmd.String("file"))
 	}
-	conflicts = append(conflicts, getConflicts(conflictFiles)...)
-	resolveConflicts(bracket, conflicts, players)
+	cons = append(cons, conflicts.GetConflicts(conflictFiles)...)
+	conflicts.ResolveConflicts(bracket, cons, players)
 
 	var input string
 	fmt.Println("Publish seeding? (y/N)")
@@ -124,7 +117,7 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func publishSeeds(ctx context.Context, eventSlug string, players []player) error {
+func publishSeeds(ctx context.Context, eventSlug string, players []bracket.Player) error {
 	seedsResp, err := startgg.GetSeeds(ctx, eventSlug)
 	if err != nil {
 		return err
@@ -141,7 +134,7 @@ func publishSeeds(ctx context.Context, eventSlug string, players []player) error
 	seedMapping := make([]startgg.UpdatePhaseSeedInfo, len(players))
 	for _, seed := range seeds {
 		for s, player := range players {
-			if seed.Players[0].Id == player.id {
+			if seed.Players[0].Id == player.Id {
 				seedMapping[s] = startgg.UpdatePhaseSeedInfo{
 					SeedId:  seed.Id,
 					SeedNum: s + 1,

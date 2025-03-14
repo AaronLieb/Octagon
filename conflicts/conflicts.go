@@ -1,21 +1,15 @@
-package seed
+package conflicts
 
 import (
-	"context"
 	"encoding/csv"
 	"math"
 	"math/rand/v2"
 	"os"
 	"strconv"
 
-	"github.com/AaronLieb/octagon/startgg"
+	"github.com/AaronLieb/octagon/bracket"
 	"github.com/charmbracelet/log"
 )
-
-type conflict struct {
-	priority int
-	players  []int // ID
-}
 
 const (
 	CONFLICT_FILE                = "conflicts.csv"
@@ -38,13 +32,13 @@ func (con *conflict) check(p1 int, p2 int) bool {
 	return false
 }
 
-func calculateConflictScore(bracket bracket, conflicts []conflict, players []player, newPlayers []player) float64 {
+func calculateConflictScore(bracket bracket.Bracket, conflicts []conflict, players []bracket.Player, newPlayers []bracket.Player) float64 {
 	conflictScore, _ := checkConflict(bracket, conflicts, newPlayers)
 
 	seedDiffScore := 0.0
 	for i, p := range newPlayers {
 		for j, q := range players {
-			if p.id == q.id {
+			if p.Id == q.Id {
 				// Low importance means changing the seed has less significance
 				importance := 32.0 / math.Pow(math.Log2(float64(j)), 3)
 				// keep inbetween [0.25, 1]
@@ -64,7 +58,7 @@ func calculateConflictScore(bracket bracket, conflicts []conflict, players []pla
  * generated seeding variant with the lowest
  * conflictScore.
  */
-func resolveConflicts(bracket bracket, conflicts []conflict, players []player) []player {
+func ResolveConflicts(bracket bracket.Bracket, conflicts []conflict, players []bracket.Player) []bracket.Player {
 	best := players
 	lowestScore := calculateConflictScore(bracket, conflicts, players, players)
 
@@ -94,7 +88,7 @@ func resolveConflicts(bracket bracket, conflicts []conflict, players []player) [
 	return best
 }
 
-func printSeeds(before []player, after []player) {
+func printSeeds(before []bracket.Player, after []bracket.Player) {
 	log.Printf("%-5s %-6s %25s %6s %-7s", "Seed", "Rating", "Name", "Change", "ID")
 	log.Print("---------------------------------------------------------")
 	for i, p := range after {
@@ -103,18 +97,18 @@ func printSeeds(before []player, after []player) {
 				diff := j - i
 				seed := i + 1
 				if diff > 0 {
-					log.Printf("%-5d %-6.1f %25s %1s%-6d%s %d", seed, p.rating, p.name, "\033[32m↑", diff, "\033[0m", p.id)
+					log.Printf("%-5d %-6.1f %25s %1s%-6d%s %d", seed, p.Rating, p.Name, "\033[32m↑", diff, "\033[0m", p.Id)
 				} else if diff < 0 {
-					log.Printf("%-5d %-6.1f %25s %1s%-6d%s %d", seed, p.rating, p.name, "\033[31m↓", -diff, "\033[0m", p.id)
+					log.Printf("%-5d %-6.1f %25s %1s%-6d%s %d", seed, p.Rating, p.Name, "\033[31m↓", -diff, "\033[0m", p.Id)
 				} else {
-					log.Printf("%-5d %-6.1f %25s  %-6s %d", seed, p.rating, p.name, "", p.id)
+					log.Printf("%-5d %-6.1f %25s  %-6s %d", seed, p.Rating, p.Name, "", p.Id)
 				}
 			}
 		}
 	}
 }
 
-func getConflicts(conflictFiles []string) []conflict {
+func GetConflicts(conflictFiles []string) []conflict {
 	var conflicts []conflict
 	for _, file := range conflictFiles {
 		conflicts = append(conflicts, readConflictsFile(file)...)
@@ -167,8 +161,8 @@ func readConflictsFile(fileName string) []conflict {
 * Randomly shifts seeding
 * Doesn't impact seeds 1 and 2
  */
-func randomizeSeeds(players []player) []player {
-	newPlayers := make([]player, len(players))
+func randomizeSeeds(players []bracket.Player) []bracket.Player {
+	newPlayers := make([]bracket.Player, len(players))
 	copy(newPlayers, players)
 	for j := range players[3:] {
 		i := j + 3
@@ -183,20 +177,22 @@ func randomizeSeeds(players []player) []player {
 }
 
 /*
- * Returns the conflict sum, which matches the following
- * 4 * p1_conflicts + 3 * p2_conflicts + 2 * p3_conflicts
+ * Returns the conflict sum, lower value is better.
+ * If a conflict is unresolved, it will add to the sum.
+ * The higher the priority of the conflict the more it
+ * adds to the sum
  */
-func checkConflict(b bracket, cons []conflict, players []player) (float64, int) {
+func checkConflict(b bracket.Bracket, cons []conflict, players []bracket.Player) (float64, int) {
 	conflictScore := 0.0
 	conflictSum := 0
 
-	for _, s := range b.sets {
+	for _, s := range b.Sets {
 		for _, con := range cons {
 			if s == nil {
 				break
 			}
-			p1 := players[s.player1-1].id
-			p2 := players[s.player2-1].id
+			p1 := players[s.Player1-1].Id
+			p2 := players[s.Player2-1].Id
 			if con.check(p1, p2) {
 				conflictScore += float64(2 + con.priority)
 				conflictSum += 1
@@ -205,31 +201,4 @@ func checkConflict(b bracket, cons []conflict, players []player) (float64, int) 
 	}
 
 	return conflictScore, conflictSum
-}
-
-func createConflictsForSetsPlayed(ctx context.Context, eventSlug string) []conflict {
-	log.Debug("create conflicts for set played")
-
-	var conflicts []conflict
-
-	setsResp, err := startgg.GetSets(ctx, eventSlug)
-	if err != nil {
-		log.Errorf("unable to fetch sets for '%s'", eventSlug)
-		return conflicts
-	}
-	sets := setsResp.Event.Sets.Nodes
-	log.Debug("sets", "n", len(sets))
-
-	conflicts = make([]conflict, len(sets))
-	for i, set := range sets {
-		p1 := set.Slots[0].Entrant.Participants[0].Player
-		p2 := set.Slots[1].Entrant.Participants[0].Player
-		log.Debug("conflict", "p1", p1.GamerTag, "p2", p2.GamerTag)
-		conflicts[i] = conflict{
-			priority: 2,
-			players:  []int{p1.Id, p2.Id},
-		}
-	}
-
-	return conflicts
 }
