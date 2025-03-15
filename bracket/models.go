@@ -15,5 +15,7 @@ type Set struct {
 }
 
 type Bracket struct {
-	Sets []*Set
+	Sets          []*Set
+	WinnersRounds [][]*Set
+	LosersRounds  [][]*Set
 }

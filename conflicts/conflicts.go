@@ -13,7 +13,7 @@ import (
 
 const (
 	CONFLICT_FILE                = "conflicts.json"
-	CONFLICT_RESOLUTION_ATTEMPTS = 0
+	CONFLICT_RESOLUTION_ATTEMPTS = 100000
 	CONFLICT_RESOLUTION_VARIANCE = 3
 )
 
@@ -32,7 +32,7 @@ func (con *conflict) check(p1 int, p2 int) bool {
 	return false
 }
 
-func calculateConflictScore(bracket bracket.Bracket, conflicts []conflict, players []bracket.Player, newPlayers []bracket.Player) float64 {
+func calculateConflictScore(bracket *bracket.Bracket, conflicts []conflict, players []bracket.Player, newPlayers []bracket.Player) float64 {
 	conflictScore, _ := checkConflict(bracket, conflicts, newPlayers)
 
 	seedDiffScore := 0.0
@@ -58,7 +58,7 @@ func calculateConflictScore(bracket bracket.Bracket, conflicts []conflict, playe
  * generated seeding variant with the lowest
  * conflictScore.
  */
-func ResolveConflicts(bracket bracket.Bracket, conflicts []conflict, players []bracket.Player) []bracket.Player {
+func ResolveConflicts(bracket *bracket.Bracket, conflicts []conflict, players []bracket.Player) []bracket.Player {
 	best := players
 	lowestScore := calculateConflictScore(bracket, conflicts, players, players)
 
@@ -80,9 +80,9 @@ func ResolveConflicts(bracket bracket.Bracket, conflicts []conflict, players []b
 	log.Info("Seeds after conflict resolution", "score", lowestScore)
 	printSeeds(players, best)
 	_, numConflicts := checkConflict(bracket, conflicts, best)
-	// if numConflicts != 0 {
-	log.Warnf("%d conflicts were unresolved", numConflicts)
-	// }
+	if numConflicts != 0 {
+		log.Warnf("%d conflicts were unresolved", numConflicts)
+	}
 	log.Debug("Finished conflict resolution", "score", lowestScore, "checks", CONFLICT_RESOLUTION_ATTEMPTS)
 
 	return best
@@ -163,7 +163,7 @@ func randomizeSeeds(players []bracket.Player) []bracket.Player {
  * The higher the priority of the conflict the more it
  * adds to the sum
  */
-func checkConflict(b bracket.Bracket, cons []conflict, players []bracket.Player) (float64, int) {
+func checkConflict(b *bracket.Bracket, cons []conflict, players []bracket.Player) (float64, int) {
 	conflictScore := 0.0
 	conflictSum := 0
 

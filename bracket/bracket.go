@@ -2,124 +2,114 @@ package bracket
 
 import (
 	"math"
-
-	"github.com/charmbracelet/log"
 )
 
-func CreateBracket(numPlayers int) Bracket {
-	log.Debug("Create bracket", "players", numPlayers)
+func createSets(round []int) []*Set {
+	sets := make([]*Set, len(round)/2)
 
-	numRounds := int(math.Ceil(math.Log2(float64(numPlayers))))
-
-	losersFinals := &Set{
-		Player1:   2,
-		Player2:   3,
-		WinnerSet: nil,
-		LoserSet:  nil,
-	}
-
-	winnersFinals := &Set{
-		Player1:   1,
-		Player2:   2,
-		WinnerSet: nil,
-		LoserSet:  nil,
-	}
-	log.Debugf("s%-2d vs s%-2d r%-2d %2dp w:%t", winnersFinals.Player1, winnersFinals.Player2, numRounds, 2, true)
-	log.Debugf("s%-2d vs s%-2d r%-2d %2dp w:%t", losersFinals.Player1, losersFinals.Player2, numRounds-1, 2, false)
-
-	numSetsUpperBound := int(math.Pow(2, float64(numRounds+1)))
-	sets := make([]*Set, numSetsUpperBound)
-
-	// Losers semis
-	losersSemis := createSet(numRounds, numPlayers, numRounds-1, false, 3, losersFinals, nil, &sets)
-
-	// Winners semis
-	createSet(numRounds, numPlayers, numRounds-2, true, 1, winnersFinals, losersSemis, &sets)
-	createSet(numRounds, numPlayers, numRounds-2, true, 2, winnersFinals, losersSemis, &sets)
-
-	var playableSets []*Set
-	for _, set := range sets {
-		if set != nil && set.Player1 <= numPlayers && set.Player2 <= numPlayers {
-			playableSets = append(playableSets, set)
+	for i := range sets {
+		sets[i] = &Set{
+			Player1: round[2*i],
+			Player2: round[2*i+1],
 		}
 	}
 
-	log.Debug("playableSets", "len", len(playableSets))
-	return Bracket{Sets: playableSets}
+	return sets
 }
 
-/*
-* This is a recursive function that generates sets and links them.
-* The concept of a "round" is not your traditional bracket round.
-* When referring to a seed as "high", the seed value is numerically low
-* When referring to a seed that is "low" the seed value is numerically high
- */
-func createSet(totRounds int, numPlayers int, round int, isWinners bool, highSeed int, winnerSet *Set, loserSet *Set, sets *[]*Set) *Set {
-	// base case
-	if round < 1 {
-		return nil
+func carryDown(lr []int, wr []int) []int {
+	r := make([]int, len(lr))
+	for i := 0; i < len(lr); i += 2 {
+		r[i] = wr[len(wr)-i*2-2]
+		r[i+1] = lr[i]
+	}
+	return r
+}
+
+func reduce(round []int) []int {
+	half := make([]int, len(round)/2)
+	for i := range half {
+		half[i] = round[2*i]
+	}
+	return half
+}
+
+// temporary code that I need to refactor
+// way too much reptition, logic can be pulled out
+// to funcs
+func CreateBracket(numPlayers int) *Bracket {
+	n := int(math.Pow(2, math.Ceil(math.Log2(float64(numPlayers)))))
+
+	var sets []*Set
+	var losersRounds [][]*Set
+	var winnersRounds [][]*Set
+	var wrSets, lr1Sets, lr2Sets []*Set
+	wr := CreateRound(n, 0)
+	lr1 := CreateRound(n/2, n/2)
+	lr2 := carryDown(lr1, wr)
+	wrSets = createSets(wr)
+	lr1Sets = createSets(lr1)
+	lr2Sets = createSets(lr2)
+	sets = append(sets, wrSets...)
+	sets = append(sets, lr1Sets...)
+	sets = append(sets, lr2Sets...)
+	winnersRounds = append(winnersRounds, wrSets)
+	losersRounds = append(losersRounds, lr1Sets)
+	losersRounds = append(losersRounds, lr2Sets)
+
+	for len(wr) > 4 {
+		wr = reduce(wr)
+		lr1 = reduce(lr2)
+		lr2 = carryDown(lr1, wr)
+
+		wrSets = createSets(wr)
+		lr1Sets = createSets(lr1)
+		lr2Sets = createSets(lr2)
+		sets = append(sets, wrSets...)
+		sets = append(sets, lr1Sets...)
+		sets = append(sets, lr2Sets...)
+		winnersRounds = append(winnersRounds, wrSets)
+		losersRounds = append(losersRounds, lr1Sets)
+		losersRounds = append(losersRounds, lr2Sets)
 	}
 
-	numInRound := int(math.Pow(2, float64(totRounds-round)))
+	wr = reduce(wr)
+	wrSets = createSets(wr)
+	sets = append(sets, wrSets...)
+	winnersRounds = append(winnersRounds, wrSets)
 
-	lowSeed := numInRound - highSeed + 1
-
-	/* This math is not simplified,
-	 * but it makes sense in my head so
-	 * I'm gonna keep it this way */
-	if !isWinners {
-		if highSeed <= numInRound {
-			// second stage of losers round, middle seeds
-			lb := numInRound/2 + 1
-			ub := lb + numInRound - 1
-			diff := highSeed - lb
-			lowSeed = ub - diff
-			// log.Debug("", "lb", lb, "ub", ub, "diff", diff, "lowSeed", lowSeed)
-
-			// offset seeds so players don't play same as winners
-			dx := (round)%2 + 1
-			if diff >= numInRound/2 {
-				lowSeed -= dx
-			} else {
-				lowSeed += dx
-			}
-			// log.Debug("", "dx", dx, "lowSeed", lowSeed)
-
-		} else {
-			// first stage of losers round, bottom seeds
-			lb := numInRound + 1
-			ub := numInRound * 2
-			diff := highSeed - lb
-			lowSeed = ub - diff
+	var setsFiltered []*Set
+	for _, set := range sets {
+		if set.Player1 <= numPlayers && set.Player2 <= numPlayers {
+			setsFiltered = append(setsFiltered, set)
 		}
 	}
 
-	newSet := &Set{
-		Player1:   highSeed,
-		Player2:   lowSeed,
-		WinnerSet: winnerSet,
-		LoserSet:  loserSet,
+	bracket := &Bracket{
+		Sets:          setsFiltered,
+		WinnersRounds: winnersRounds,
+		LosersRounds:  losersRounds,
 	}
 
-	// TODO: fix this shit
-	x := 0
-	for i, val := range *sets {
-		if val == nil {
-			x = i
-		}
-	}
-	(*sets)[x] = newSet
+	return bracket
+}
 
-	log.Debugf("s%-2d vs s%-2d r%-2d %2dp w:%t", newSet.Player1, newSet.Player2, round, numInRound, isWinners)
-
-	if !isWinners {
-		return newSet
+func CreateRound(n int, k int) []int {
+	if n < 2 {
+		return []int{}
 	}
 
-	loserSet2 := createSet(totRounds, numPlayers, round, false, lowSeed, loserSet, nil, sets)
-	loserSet1 := createSet(totRounds, numPlayers, round, false, loserSet2.Player2, loserSet2, nil, sets)
-	createSet(totRounds, numPlayers, round-1, true, highSeed, newSet, loserSet1, sets)
-	createSet(totRounds, numPlayers, round-1, true, lowSeed, newSet, loserSet1, sets)
+	if n == 2 {
+		return []int{1, 2}
+	}
 
-	return newSet
+	half := CreateRound(n/2, 0)
+	newHalf := make([]int, len(half)*2)
+
+	for i, num := range half {
+		newHalf[2*i] = num + k
+		newHalf[2*i+1] = n + 1 - num + k
+	}
+
+	return newHalf
 }

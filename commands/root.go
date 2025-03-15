@@ -2,6 +2,7 @@ package commands
 
 import (
 	"github.com/AaronLieb/octagon/commands/attendees"
+	"github.com/AaronLieb/octagon/commands/bracket"
 	"github.com/AaronLieb/octagon/commands/cache"
 	"github.com/AaronLieb/octagon/commands/conflicts"
 	"github.com/AaronLieb/octagon/commands/rating"
@@ -31,6 +32,7 @@ https://start.gg/octagon`,
 			seed.Command(),
 			cache.Command(),
 			conflicts.Command(),
+			bracket.Command(),
 		},
 	}
 }
