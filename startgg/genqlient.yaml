@@ -8,4 +8,4 @@ client_getter: github.com/AaronLieb/octagon/startgg.GetClient
 # This has to be specified because ID is treated as a String by default. Startgg schema expects an int
 bindings:
   ID:
-    type: int
+    type: interface{}

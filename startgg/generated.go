@@ -11,7 +11,7 @@ import (
 // Game specific H2H set data such as character, stage, and stock info
 type BracketSetGameDataInput struct {
 	// Entrant ID of game winner
-	WinnerId int `json:"winnerId"`
+	WinnerId interface{} `json:"winnerId"`
 	// Game number
 	GameNum int `json:"gameNum"`
 	// Score for entrant 1 (if applicable). For smash, this is stocks remaining.
@@ -19,13 +19,13 @@ type BracketSetGameDataInput struct {
 	// Score for entrant 2 (if applicable). For smash, this is stocks remaining.
 	Entrant2Score int `json:"entrant2Score"`
 	// ID of the stage that was played for this game (if applicable)
-	StageId int `json:"stageId"`
+	StageId interface{} `json:"stageId"`
 	// List of selections for the game, typically character selections.
 	Selections []BracketSetGameSelectionInput `json:"selections"`
 }
 
 // GetWinnerId returns BracketSetGameDataInput.WinnerId, and is useful for accessing the field via an interface.
-func (v *BracketSetGameDataInput) GetWinnerId() int { return v.WinnerId }
+func (v *BracketSetGameDataInput) GetWinnerId() interface{} { return v.WinnerId }
 
 // GetGameNum returns BracketSetGameDataInput.GameNum, and is useful for accessing the field via an interface.
 func (v *BracketSetGameDataInput) GetGameNum() int { return v.GameNum }
@@ -37,7 +37,7 @@ func (v *BracketSetGameDataInput) GetEntrant1Score() int { return v.Entrant1Scor
 func (v *BracketSetGameDataInput) GetEntrant2Score() int { return v.Entrant2Score }
 
 // GetStageId returns BracketSetGameDataInput.StageId, and is useful for accessing the field via an interface.
-func (v *BracketSetGameDataInput) GetStageId() int { return v.StageId }
+func (v *BracketSetGameDataInput) GetStageId() interface{} { return v.StageId }
 
 // GetSelections returns BracketSetGameDataInput.Selections, and is useful for accessing the field via an interface.
 func (v *BracketSetGameDataInput) GetSelections() []BracketSetGameSelectionInput { return v.Selections }
@@ -45,13 +45,13 @@ func (v *BracketSetGameDataInput) GetSelections() []BracketSetGameSelectionInput
 // Game specific H2H selections made by the entrants, such as character info
 type BracketSetGameSelectionInput struct {
 	// Entrant ID that made selection
-	EntrantId int `json:"entrantId"`
+	EntrantId interface{} `json:"entrantId"`
 	// Character selected by this entrant for this game.
 	CharacterId int `json:"characterId"`
 }
 
 // GetEntrantId returns BracketSetGameSelectionInput.EntrantId, and is useful for accessing the field via an interface.
-func (v *BracketSetGameSelectionInput) GetEntrantId() int { return v.EntrantId }
+func (v *BracketSetGameSelectionInput) GetEntrantId() interface{} { return v.EntrantId }
 
 // GetCharacterId returns BracketSetGameSelectionInput.CharacterId, and is useful for accessing the field via an interface.
 func (v *BracketSetGameSelectionInput) GetCharacterId() int { return v.CharacterId }
@@ -72,13 +72,13 @@ func (v *GenerateRegistrationTokenResponse) GetGenerateRegistrationToken() strin
 //
 // A user
 type GetCurrentUserCurrentUser struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 	// Public facing user name that respects user publishing settings
 	Name string `json:"name"`
 }
 
 // GetId returns GetCurrentUserCurrentUser.Id, and is useful for accessing the field via an interface.
-func (v *GetCurrentUserCurrentUser) GetId() int { return v.Id }
+func (v *GetCurrentUserCurrentUser) GetId() interface{} { return v.Id }
 
 // GetName returns GetCurrentUserCurrentUser.Name, and is useful for accessing the field via an interface.
 func (v *GetCurrentUserCurrentUser) GetName() string { return v.Name }
@@ -121,13 +121,13 @@ func (v *GetEntrantByNameEventEntrantsEntrantConnection) GetNodes() []GetEntrant
 //
 // An entrant in an event
 type GetEntrantByNameEventEntrantsEntrantConnectionNodesEntrant struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 	// The entrant name as it appears in bracket: gamerTag of the participant or team name
 	Name string `json:"name"`
 }
 
 // GetId returns GetEntrantByNameEventEntrantsEntrantConnectionNodesEntrant.Id, and is useful for accessing the field via an interface.
-func (v *GetEntrantByNameEventEntrantsEntrantConnectionNodesEntrant) GetId() int { return v.Id }
+func (v *GetEntrantByNameEventEntrantsEntrantConnectionNodesEntrant) GetId() interface{} { return v.Id }
 
 // GetName returns GetEntrantByNameEventEntrantsEntrantConnectionNodesEntrant.Name, and is useful for accessing the field via an interface.
 func (v *GetEntrantByNameEventEntrantsEntrantConnectionNodesEntrant) GetName() string { return v.Name }
@@ -208,12 +208,12 @@ func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsPar
 //
 // A player
 type GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer struct {
-	Id       int    `json:"id"`
-	GamerTag string `json:"gamerTag"`
+	Id       interface{} `json:"id"`
+	GamerTag string      `json:"gamerTag"`
 }
 
 // GetId returns GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer.Id, and is useful for accessing the field via an interface.
-func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer) GetId() int {
+func (v *GetEntrantsOutEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer) GetId() interface{} {
 	return v.Id
 }
 
@@ -255,13 +255,13 @@ func (v *GetEntrantsOutResponse) GetEvent() GetEntrantsOutEvent { return v.Event
 //
 // An event in a tournament
 type GetEventEvent struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 	// Title of event set by organizer
 	Name string `json:"name"`
 }
 
 // GetId returns GetEventEvent.Id, and is useful for accessing the field via an interface.
-func (v *GetEventEvent) GetId() int { return v.Id }
+func (v *GetEventEvent) GetId() interface{} { return v.Id }
 
 // GetName returns GetEventEvent.Name, and is useful for accessing the field via an interface.
 func (v *GetEventEvent) GetName() string { return v.Name }
@@ -289,18 +289,23 @@ func (v *GetParticipantsResponse) GetTournament() GetParticipantsTournament { re
 //
 // A tournament
 type GetParticipantsTournament struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 	// The tournament name
 	Name string `json:"name"`
+	// The short slug used to form the url
+	ShortSlug string `json:"shortSlug"`
 	// Paginated, queryable list of participants
 	Participants GetParticipantsTournamentParticipantsParticipantConnection `json:"participants"`
 }
 
 // GetId returns GetParticipantsTournament.Id, and is useful for accessing the field via an interface.
-func (v *GetParticipantsTournament) GetId() int { return v.Id }
+func (v *GetParticipantsTournament) GetId() interface{} { return v.Id }
 
 // GetName returns GetParticipantsTournament.Name, and is useful for accessing the field via an interface.
 func (v *GetParticipantsTournament) GetName() string { return v.Name }
+
+// GetShortSlug returns GetParticipantsTournament.ShortSlug, and is useful for accessing the field via an interface.
+func (v *GetParticipantsTournament) GetShortSlug() string { return v.ShortSlug }
 
 // GetParticipants returns GetParticipantsTournament.Participants, and is useful for accessing the field via an interface.
 func (v *GetParticipantsTournament) GetParticipants() GetParticipantsTournamentParticipantsParticipantConnection {
@@ -328,7 +333,7 @@ func (v *GetParticipantsTournamentParticipantsParticipantConnection) GetNodes() 
 //
 // A participant of a tournament; either a spectator or competitor
 type GetParticipantsTournamentParticipantsParticipantConnectionNodesParticipant struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 	// The tag that was used when the participant registered, e.g. Mang0
 	GamerTag string `json:"gamerTag"`
 	// Contact Info selected during registration. Falls back to User.location and/or
@@ -340,7 +345,7 @@ type GetParticipantsTournamentParticipantsParticipantConnectionNodesParticipant 
 }
 
 // GetId returns GetParticipantsTournamentParticipantsParticipantConnectionNodesParticipant.Id, and is useful for accessing the field via an interface.
-func (v *GetParticipantsTournamentParticipantsParticipantConnectionNodesParticipant) GetId() int {
+func (v *GetParticipantsTournamentParticipantsParticipantConnectionNodesParticipant) GetId() interface{} {
 	return v.Id
 }
 
@@ -385,11 +390,11 @@ func (v *GetParticipantsTournamentParticipantsParticipantConnectionNodesParticip
 //
 // A player
 type GetParticipantsTournamentParticipantsParticipantConnectionNodesParticipantPlayer struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 }
 
 // GetId returns GetParticipantsTournamentParticipantsParticipantConnectionNodesParticipantPlayer.Id, and is useful for accessing the field via an interface.
-func (v *GetParticipantsTournamentParticipantsParticipantConnectionNodesParticipantPlayer) GetId() int {
+func (v *GetParticipantsTournamentParticipantsParticipantConnectionNodesParticipantPlayer) GetId() interface{} {
 	return v.Id
 }
 
@@ -402,6 +407,113 @@ type GetParticipantsTournamentParticipantsParticipantConnectionPageInfo struct {
 func (v *GetParticipantsTournamentParticipantsParticipantConnectionPageInfo) GetTotal() int {
 	return v.Total
 }
+
+// GetReportableSetsEvent includes the requested fields of the GraphQL type Event.
+// The GraphQL type's documentation follows.
+//
+// An event in a tournament
+type GetReportableSetsEvent struct {
+	// Paginated sets for this Event
+	Sets GetReportableSetsEventSetsSetConnection `json:"sets"`
+}
+
+// GetSets returns GetReportableSetsEvent.Sets, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEvent) GetSets() GetReportableSetsEventSetsSetConnection { return v.Sets }
+
+// GetReportableSetsEventSetsSetConnection includes the requested fields of the GraphQL type SetConnection.
+type GetReportableSetsEventSetsSetConnection struct {
+	Nodes []GetReportableSetsEventSetsSetConnectionNodesSet `json:"nodes"`
+}
+
+// GetNodes returns GetReportableSetsEventSetsSetConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnection) GetNodes() []GetReportableSetsEventSetsSetConnectionNodesSet {
+	return v.Nodes
+}
+
+// GetReportableSetsEventSetsSetConnectionNodesSet includes the requested fields of the GraphQL type Set.
+// The GraphQL type's documentation follows.
+//
+// A set
+type GetReportableSetsEventSetsSetConnectionNodesSet struct {
+	Id interface{} `json:"id"`
+	// A possible spot in a set. Use this to get all entrants in a set. Use this for all bracket types (FFA, elimination, etc)
+	Slots []GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot `json:"slots"`
+}
+
+// GetId returns GetReportableSetsEventSetsSetConnectionNodesSet.Id, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnectionNodesSet) GetId() interface{} { return v.Id }
+
+// GetSlots returns GetReportableSetsEventSetsSetConnectionNodesSet.Slots, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnectionNodesSet) GetSlots() []GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot {
+	return v.Slots
+}
+
+// GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot includes the requested fields of the GraphQL type SetSlot.
+// The GraphQL type's documentation follows.
+//
+// A slot in a set where a seed currently or will eventually exist in order to participate in the set.
+type GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot struct {
+	Entrant GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrant `json:"entrant"`
+}
+
+// GetEntrant returns GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot.Entrant, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot) GetEntrant() GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrant {
+	return v.Entrant
+}
+
+// GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrant includes the requested fields of the GraphQL type Entrant.
+// The GraphQL type's documentation follows.
+//
+// An entrant in an event
+type GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrant struct {
+	Participants []GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipant `json:"participants"`
+}
+
+// GetParticipants returns GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrant.Participants, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrant) GetParticipants() []GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipant {
+	return v.Participants
+}
+
+// GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipant includes the requested fields of the GraphQL type Participant.
+// The GraphQL type's documentation follows.
+//
+// A participant of a tournament; either a spectator or competitor
+type GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipant struct {
+	Player GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer `json:"player"`
+}
+
+// GetPlayer returns GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipant.Player, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipant) GetPlayer() GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer {
+	return v.Player
+}
+
+// GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer includes the requested fields of the GraphQL type Player.
+// The GraphQL type's documentation follows.
+//
+// A player
+type GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer struct {
+	GamerTag string      `json:"gamerTag"`
+	Id       interface{} `json:"id"`
+}
+
+// GetGamerTag returns GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer.GamerTag, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer) GetGamerTag() string {
+	return v.GamerTag
+}
+
+// GetId returns GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer.Id, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer) GetId() interface{} {
+	return v.Id
+}
+
+// GetReportableSetsResponse is returned by GetReportableSets on success.
+type GetReportableSetsResponse struct {
+	// Returns an event given its id or slug
+	Event GetReportableSetsEvent `json:"event"`
+}
+
+// GetEvent returns GetReportableSetsResponse.Event, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsResponse) GetEvent() GetReportableSetsEvent { return v.Event }
 
 // GetSeedsEvent includes the requested fields of the GraphQL type Event.
 // The GraphQL type's documentation follows.
@@ -420,13 +532,13 @@ func (v *GetSeedsEvent) GetPhases() []GetSeedsEventPhasesPhase { return v.Phases
 //
 // A phase in an event
 type GetSeedsEventPhasesPhase struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 	// Paginated seeds for this phase
 	Seeds GetSeedsEventPhasesPhaseSeedsSeedConnection `json:"seeds"`
 }
 
 // GetId returns GetSeedsEventPhasesPhase.Id, and is useful for accessing the field via an interface.
-func (v *GetSeedsEventPhasesPhase) GetId() int { return v.Id }
+func (v *GetSeedsEventPhasesPhase) GetId() interface{} { return v.Id }
 
 // GetSeeds returns GetSeedsEventPhasesPhase.Seeds, and is useful for accessing the field via an interface.
 func (v *GetSeedsEventPhasesPhase) GetSeeds() GetSeedsEventPhasesPhaseSeedsSeedConnection {
@@ -448,14 +560,14 @@ func (v *GetSeedsEventPhasesPhaseSeedsSeedConnection) GetNodes() []GetSeedsEvent
 //
 // A seed for an entrant
 type GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeed struct {
-	Id      int `json:"id"`
-	SeedNum int `json:"seedNum"`
+	Id      interface{} `json:"id"`
+	SeedNum int         `json:"seedNum"`
 	// The player(s) associated with this seed's entrant
 	Players []GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer `json:"players"`
 }
 
 // GetId returns GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeed.Id, and is useful for accessing the field via an interface.
-func (v *GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeed) GetId() int { return v.Id }
+func (v *GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeed) GetId() interface{} { return v.Id }
 
 // GetSeedNum returns GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeed.SeedNum, and is useful for accessing the field via an interface.
 func (v *GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeed) GetSeedNum() int { return v.SeedNum }
@@ -470,12 +582,14 @@ func (v *GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeed) GetPlayers() []Ge
 //
 // A player
 type GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer struct {
-	Id       int    `json:"id"`
-	GamerTag string `json:"gamerTag"`
+	Id       interface{} `json:"id"`
+	GamerTag string      `json:"gamerTag"`
 }
 
 // GetId returns GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer.Id, and is useful for accessing the field via an interface.
-func (v *GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer) GetId() int { return v.Id }
+func (v *GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer) GetId() interface{} {
+	return v.Id
+}
 
 // GetGamerTag returns GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer.GamerTag, and is useful for accessing the field via an interface.
 func (v *GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer) GetGamerTag() string {
@@ -518,13 +632,13 @@ func (v *GetSetsEventSetsSetConnection) GetNodes() []GetSetsEventSetsSetConnecti
 //
 // A set
 type GetSetsEventSetsSetConnectionNodesSet struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 	// A possible spot in a set. Use this to get all entrants in a set. Use this for all bracket types (FFA, elimination, etc)
 	Slots []GetSetsEventSetsSetConnectionNodesSetSlotsSetSlot `json:"slots"`
 }
 
 // GetId returns GetSetsEventSetsSetConnectionNodesSet.Id, and is useful for accessing the field via an interface.
-func (v *GetSetsEventSetsSetConnectionNodesSet) GetId() int { return v.Id }
+func (v *GetSetsEventSetsSetConnectionNodesSet) GetId() interface{} { return v.Id }
 
 // GetSlots returns GetSetsEventSetsSetConnectionNodesSet.Slots, and is useful for accessing the field via an interface.
 func (v *GetSetsEventSetsSetConnectionNodesSet) GetSlots() []GetSetsEventSetsSetConnectionNodesSetSlotsSetSlot {
@@ -575,8 +689,8 @@ func (v *GetSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsPar
 //
 // A player
 type GetSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer struct {
-	GamerTag string `json:"gamerTag"`
-	Id       int    `json:"id"`
+	GamerTag string      `json:"gamerTag"`
+	Id       interface{} `json:"id"`
 }
 
 // GetGamerTag returns GetSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer.GamerTag, and is useful for accessing the field via an interface.
@@ -585,7 +699,7 @@ func (v *GetSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsPar
 }
 
 // GetId returns GetSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer.Id, and is useful for accessing the field via an interface.
-func (v *GetSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer) GetId() int {
+func (v *GetSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipantPlayer) GetId() interface{} {
 	return v.Id
 }
 
@@ -622,13 +736,13 @@ func (v *GetSetsForEntrantEventSetsSetConnection) GetNodes() []GetSetsForEntrant
 //
 // A set
 type GetSetsForEntrantEventSetsSetConnectionNodesSet struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 	// A possible spot in a set. Use this to get all entrants in a set. Use this for all bracket types (FFA, elimination, etc)
 	Slots []GetSetsForEntrantEventSetsSetConnectionNodesSetSlotsSetSlot `json:"slots"`
 }
 
 // GetId returns GetSetsForEntrantEventSetsSetConnectionNodesSet.Id, and is useful for accessing the field via an interface.
-func (v *GetSetsForEntrantEventSetsSetConnectionNodesSet) GetId() int { return v.Id }
+func (v *GetSetsForEntrantEventSetsSetConnectionNodesSet) GetId() interface{} { return v.Id }
 
 // GetSlots returns GetSetsForEntrantEventSetsSetConnectionNodesSet.Slots, and is useful for accessing the field via an interface.
 func (v *GetSetsForEntrantEventSetsSetConnectionNodesSet) GetSlots() []GetSetsForEntrantEventSetsSetConnectionNodesSetSlotsSetSlot {
@@ -702,7 +816,7 @@ func (v *GetTournamentResponse) GetTournament() GetTournamentTournament { return
 //
 // A tournament
 type GetTournamentTournament struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 	// The tournament name
 	Name string `json:"name"`
 	// The slug used to form the url
@@ -712,7 +826,7 @@ type GetTournamentTournament struct {
 }
 
 // GetId returns GetTournamentTournament.Id, and is useful for accessing the field via an interface.
-func (v *GetTournamentTournament) GetId() int { return v.Id }
+func (v *GetTournamentTournament) GetId() interface{} { return v.Id }
 
 // GetName returns GetTournamentTournament.Name, and is useful for accessing the field via an interface.
 func (v *GetTournamentTournament) GetName() string { return v.Name }
@@ -752,12 +866,12 @@ func (v *GetUsersForEventEventEntrantsEntrantConnection) GetNodes() []GetUsersFo
 //
 // An entrant in an event
 type GetUsersForEventEventEntrantsEntrantConnectionNodesEntrant struct {
-	Id           int                                                                                 `json:"id"`
+	Id           interface{}                                                                         `json:"id"`
 	Participants []GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant `json:"participants"`
 }
 
 // GetId returns GetUsersForEventEventEntrantsEntrantConnectionNodesEntrant.Id, and is useful for accessing the field via an interface.
-func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrant) GetId() int { return v.Id }
+func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrant) GetId() interface{} { return v.Id }
 
 // GetParticipants returns GetUsersForEventEventEntrantsEntrantConnectionNodesEntrant.Participants, and is useful for accessing the field via an interface.
 func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrant) GetParticipants() []GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant {
@@ -770,8 +884,8 @@ func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrant) GetParticip
 // A participant of a tournament; either a spectator or competitor
 type GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant struct {
 	// The tag that was used when the participant registered, e.g. Mang0
-	GamerTag string `json:"gamerTag"`
-	Id       int    `json:"id"`
+	GamerTag string      `json:"gamerTag"`
+	Id       interface{} `json:"id"`
 	// The user this participant is associated to.
 	User   GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantUser   `json:"user"`
 	Player GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer `json:"player"`
@@ -783,7 +897,7 @@ func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsP
 }
 
 // GetId returns GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant.Id, and is useful for accessing the field via an interface.
-func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant) GetId() int {
+func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipant) GetId() interface{} {
 	return v.Id
 }
 
@@ -802,11 +916,11 @@ func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsP
 //
 // A player
 type GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 }
 
 // GetId returns GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer.Id, and is useful for accessing the field via an interface.
-func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer) GetId() int {
+func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantPlayer) GetId() interface{} {
 	return v.Id
 }
 
@@ -815,11 +929,11 @@ func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsP
 //
 // A user
 type GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantUser struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 }
 
 // GetId returns GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantUser.Id, and is useful for accessing the field via an interface.
-func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantUser) GetId() int {
+func (v *GetUsersForEventEventEntrantsEntrantConnectionNodesEntrantParticipantsParticipantUser) GetId() interface{} {
 	return v.Id
 }
 
@@ -837,11 +951,11 @@ func (v *GetUsersForEventResponse) GetEvent() GetUsersForEventEvent { return v.E
 //
 // A participant of a tournament; either a spectator or competitor
 type RegisterForTournamentRegisterForTournamentParticipant struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 }
 
 // GetId returns RegisterForTournamentRegisterForTournamentParticipant.Id, and is useful for accessing the field via an interface.
-func (v *RegisterForTournamentRegisterForTournamentParticipant) GetId() int { return v.Id }
+func (v *RegisterForTournamentRegisterForTournamentParticipant) GetId() interface{} { return v.Id }
 
 // RegisterForTournamentResponse is returned by RegisterForTournament on success.
 type RegisterForTournamentResponse struct {
@@ -859,12 +973,12 @@ func (v *RegisterForTournamentResponse) GetRegisterForTournament() RegisterForTo
 //
 // A set
 type ReportSetReportBracketSet struct {
-	Id    int `json:"id"`
-	State int `json:"state"`
+	Id    interface{} `json:"id"`
+	State int         `json:"state"`
 }
 
 // GetId returns ReportSetReportBracketSet.Id, and is useful for accessing the field via an interface.
-func (v *ReportSetReportBracketSet) GetId() int { return v.Id }
+func (v *ReportSetReportBracketSet) GetId() interface{} { return v.Id }
 
 // GetState returns ReportSetReportBracketSet.State, and is useful for accessing the field via an interface.
 func (v *ReportSetReportBracketSet) GetState() int { return v.State }
@@ -883,19 +997,19 @@ func (v *ReportSetResponse) GetReportBracketSet() []ReportSetReportBracketSet {
 }
 
 type UpdatePhaseSeedInfo struct {
-	SeedId       int `json:"seedId"`
-	SeedNum      int `json:"seedNum"`
-	PhaseGroupId int `json:"phaseGroupId"`
+	SeedId       interface{} `json:"seedId"`
+	SeedNum      interface{} `json:"seedNum"`
+	PhaseGroupId interface{} `json:"phaseGroupId"`
 }
 
 // GetSeedId returns UpdatePhaseSeedInfo.SeedId, and is useful for accessing the field via an interface.
-func (v *UpdatePhaseSeedInfo) GetSeedId() int { return v.SeedId }
+func (v *UpdatePhaseSeedInfo) GetSeedId() interface{} { return v.SeedId }
 
 // GetSeedNum returns UpdatePhaseSeedInfo.SeedNum, and is useful for accessing the field via an interface.
-func (v *UpdatePhaseSeedInfo) GetSeedNum() int { return v.SeedNum }
+func (v *UpdatePhaseSeedInfo) GetSeedNum() interface{} { return v.SeedNum }
 
 // GetPhaseGroupId returns UpdatePhaseSeedInfo.PhaseGroupId, and is useful for accessing the field via an interface.
-func (v *UpdatePhaseSeedInfo) GetPhaseGroupId() int { return v.PhaseGroupId }
+func (v *UpdatePhaseSeedInfo) GetPhaseGroupId() interface{} { return v.PhaseGroupId }
 
 // UpdateSeedingResponse is returned by UpdateSeeding on success.
 type UpdateSeedingResponse struct {
@@ -913,23 +1027,23 @@ func (v *UpdateSeedingResponse) GetUpdatePhaseSeeding() UpdateSeedingUpdatePhase
 //
 // A phase in an event
 type UpdateSeedingUpdatePhaseSeedingPhase struct {
-	Id int `json:"id"`
+	Id interface{} `json:"id"`
 }
 
 // GetId returns UpdateSeedingUpdatePhaseSeedingPhase.Id, and is useful for accessing the field via an interface.
-func (v *UpdateSeedingUpdatePhaseSeedingPhase) GetId() int { return v.Id }
+func (v *UpdateSeedingUpdatePhaseSeedingPhase) GetId() interface{} { return v.Id }
 
 // __GenerateRegistrationTokenInput is used internally by genqlient
 type __GenerateRegistrationTokenInput struct {
-	EventId int `json:"eventId"`
-	UserId  int `json:"userId"`
+	EventId interface{} `json:"eventId"`
+	UserId  interface{} `json:"userId"`
 }
 
 // GetEventId returns __GenerateRegistrationTokenInput.EventId, and is useful for accessing the field via an interface.
-func (v *__GenerateRegistrationTokenInput) GetEventId() int { return v.EventId }
+func (v *__GenerateRegistrationTokenInput) GetEventId() interface{} { return v.EventId }
 
 // GetUserId returns __GenerateRegistrationTokenInput.UserId, and is useful for accessing the field via an interface.
-func (v *__GenerateRegistrationTokenInput) GetUserId() int { return v.UserId }
+func (v *__GenerateRegistrationTokenInput) GetUserId() interface{} { return v.UserId }
 
 // __GetEntrantByNameInput is used internally by genqlient
 type __GetEntrantByNameInput struct {
@@ -967,6 +1081,14 @@ type __GetParticipantsInput struct {
 // GetSlug returns __GetParticipantsInput.Slug, and is useful for accessing the field via an interface.
 func (v *__GetParticipantsInput) GetSlug() string { return v.Slug }
 
+// __GetReportableSetsInput is used internally by genqlient
+type __GetReportableSetsInput struct {
+	Slug string `json:"slug"`
+}
+
+// GetSlug returns __GetReportableSetsInput.Slug, and is useful for accessing the field via an interface.
+func (v *__GetReportableSetsInput) GetSlug() string { return v.Slug }
+
 // __GetSeedsInput is used internally by genqlient
 type __GetSeedsInput struct {
 	Slug string `json:"slug"`
@@ -977,15 +1099,15 @@ func (v *__GetSeedsInput) GetSlug() string { return v.Slug }
 
 // __GetSetsForEntrantInput is used internally by genqlient
 type __GetSetsForEntrantInput struct {
-	Slug      string `json:"slug"`
-	EntrantId int    `json:"entrantId"`
+	Slug      string      `json:"slug"`
+	EntrantId interface{} `json:"entrantId"`
 }
 
 // GetSlug returns __GetSetsForEntrantInput.Slug, and is useful for accessing the field via an interface.
 func (v *__GetSetsForEntrantInput) GetSlug() string { return v.Slug }
 
 // GetEntrantId returns __GetSetsForEntrantInput.EntrantId, and is useful for accessing the field via an interface.
-func (v *__GetSetsForEntrantInput) GetEntrantId() int { return v.EntrantId }
+func (v *__GetSetsForEntrantInput) GetEntrantId() interface{} { return v.EntrantId }
 
 // __GetSetsInput is used internally by genqlient
 type __GetSetsInput struct {
@@ -1013,40 +1135,40 @@ func (v *__GetUsersForEventInput) GetSlug() string { return v.Slug }
 
 // __RegisterForTournamentInput is used internally by genqlient
 type __RegisterForTournamentInput struct {
-	EventId  int    `json:"eventId"`
-	RegToken string `json:"regToken"`
+	EventId  interface{} `json:"eventId"`
+	RegToken string      `json:"regToken"`
 }
 
 // GetEventId returns __RegisterForTournamentInput.EventId, and is useful for accessing the field via an interface.
-func (v *__RegisterForTournamentInput) GetEventId() int { return v.EventId }
+func (v *__RegisterForTournamentInput) GetEventId() interface{} { return v.EventId }
 
 // GetRegToken returns __RegisterForTournamentInput.RegToken, and is useful for accessing the field via an interface.
 func (v *__RegisterForTournamentInput) GetRegToken() string { return v.RegToken }
 
 // __ReportSetInput is used internally by genqlient
 type __ReportSetInput struct {
-	SetId    int                       `json:"setId"`
-	WinnerId int                       `json:"winnerId"`
+	SetId    interface{}               `json:"setId"`
+	WinnerId interface{}               `json:"winnerId"`
 	GameData []BracketSetGameDataInput `json:"gameData"`
 }
 
 // GetSetId returns __ReportSetInput.SetId, and is useful for accessing the field via an interface.
-func (v *__ReportSetInput) GetSetId() int { return v.SetId }
+func (v *__ReportSetInput) GetSetId() interface{} { return v.SetId }
 
 // GetWinnerId returns __ReportSetInput.WinnerId, and is useful for accessing the field via an interface.
-func (v *__ReportSetInput) GetWinnerId() int { return v.WinnerId }
+func (v *__ReportSetInput) GetWinnerId() interface{} { return v.WinnerId }
 
 // GetGameData returns __ReportSetInput.GameData, and is useful for accessing the field via an interface.
 func (v *__ReportSetInput) GetGameData() []BracketSetGameDataInput { return v.GameData }
 
 // __UpdateSeedingInput is used internally by genqlient
 type __UpdateSeedingInput struct {
-	PhaseId     int                   `json:"phaseId"`
+	PhaseId     interface{}           `json:"phaseId"`
 	SeedMapping []UpdatePhaseSeedInfo `json:"seedMapping"`
 }
 
 // GetPhaseId returns __UpdateSeedingInput.PhaseId, and is useful for accessing the field via an interface.
-func (v *__UpdateSeedingInput) GetPhaseId() int { return v.PhaseId }
+func (v *__UpdateSeedingInput) GetPhaseId() interface{} { return v.PhaseId }
 
 // GetSeedMapping returns __UpdateSeedingInput.SeedMapping, and is useful for accessing the field via an interface.
 func (v *__UpdateSeedingInput) GetSeedMapping() []UpdatePhaseSeedInfo { return v.SeedMapping }
@@ -1060,8 +1182,8 @@ mutation GenerateRegistrationToken ($eventId: ID!, $userId: ID!) {
 
 func GenerateRegistrationToken(
 	ctx_ context.Context,
-	eventId int,
-	userId int,
+	eventId interface{},
+	userId interface{},
 ) (data_ *GenerateRegistrationTokenResponse, err_ error) {
 	req_ := &graphql.Request{
 		OpName: "GenerateRegistrationToken",
@@ -1271,6 +1393,7 @@ query GetParticipants ($slug: String) {
 	tournament(slug: $slug) {
 		id
 		name
+		shortSlug
 		participants(query: {page:0,perPage:100}) {
 			pageInfo {
 				total
@@ -1310,6 +1433,59 @@ func GetParticipants(
 	}
 
 	data_ = &GetParticipantsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetReportableSets.
+const GetReportableSets_Operation = `
+query GetReportableSets ($slug: String) {
+	event(slug: $slug) {
+		sets(page: 0, perPage: 100, sortType: CALL_ORDER, filters: {hideEmpty:true,showByes:false}) {
+			nodes {
+				id
+				slots {
+					entrant {
+						participants {
+							player {
+								gamerTag
+								id
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+`
+
+func GetReportableSets(
+	ctx_ context.Context,
+	slug string,
+) (data_ *GetReportableSetsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetReportableSets",
+		Query:  GetReportableSets_Operation,
+		Variables: &__GetReportableSetsInput{
+			Slug: slug,
+		},
+	}
+	var client_ graphql.Client
+
+	client_, err_ = GetClient(ctx_)
+	if err_ != nil {
+		return nil, err_
+	}
+
+	data_ = &GetReportableSetsResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -1449,7 +1625,7 @@ query GetSetsForEntrant ($slug: String, $entrantId: ID) {
 func GetSetsForEntrant(
 	ctx_ context.Context,
 	slug string,
-	entrantId int,
+	entrantId interface{},
 ) (data_ *GetSetsForEntrantResponse, err_ error) {
 	req_ := &graphql.Request{
 		OpName: "GetSetsForEntrant",
@@ -1584,7 +1760,7 @@ mutation RegisterForTournament ($eventId: ID!, $regToken: String!) {
 
 func RegisterForTournament(
 	ctx_ context.Context,
-	eventId int,
+	eventId interface{},
 	regToken string,
 ) (data_ *RegisterForTournamentResponse, err_ error) {
 	req_ := &graphql.Request{
@@ -1626,8 +1802,8 @@ mutation ReportSet ($setId: ID!, $winnerId: ID!, $gameData: [BracketSetGameDataI
 
 func ReportSet(
 	ctx_ context.Context,
-	setId int,
-	winnerId int,
+	setId interface{},
+	winnerId interface{},
 	gameData []BracketSetGameDataInput,
 ) (data_ *ReportSetResponse, err_ error) {
 	req_ := &graphql.Request{
@@ -1669,7 +1845,7 @@ mutation UpdateSeeding ($phaseId: ID!, $seedMapping: [UpdatePhaseSeedInfo]!) {
 
 func UpdateSeeding(
 	ctx_ context.Context,
-	phaseId int,
+	phaseId interface{},
 	seedMapping []UpdatePhaseSeedInfo,
 ) (data_ *UpdateSeedingResponse, err_ error) {
 	req_ := &graphql.Request{

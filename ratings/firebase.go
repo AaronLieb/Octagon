@@ -7,6 +7,7 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/db"
+	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 	"google.golang.org/api/option"
 )
@@ -26,7 +27,7 @@ func Init(ctx context.Context) {
 	}
 }
 
-func Get(ctx context.Context, userId int) (float64, error) {
+func Get(ctx context.Context, userId startgg.ID) (float64, error) {
 	// temporary alias for subleaf
 	// TODO: Separate aliases into a config file
 	if userId == 4522139 {

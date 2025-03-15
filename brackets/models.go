@@ -1,8 +1,10 @@
-package bracket
+package brackets
+
+import "github.com/AaronLieb/octagon/startgg"
 
 type Player struct {
 	Name   string
-	Id     int
+	Id     startgg.ID
 	Rating float64
 }
 

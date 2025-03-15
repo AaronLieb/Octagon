@@ -12,6 +12,7 @@ func Command() *cli.Command {
 		Aliases:   []string{"b"},
 		Commands: []*cli.Command{
 			printCommand(),
+			seedCommand(),
 		},
 	}
 }

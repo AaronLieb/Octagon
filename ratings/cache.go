@@ -6,13 +6,14 @@ import (
 	"math"
 
 	"github.com/AaronLieb/octagon/cache"
+	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 	"github.com/dgraph-io/badger/v4"
 )
 
 const KEY_FMT = "rating-%d"
 
-func checkCache(userId int) (float64, bool) {
+func checkCache(userId startgg.ID) (float64, bool) {
 	key := fmt.Sprintf(KEY_FMT, userId)
 
 	log.Debugf("checking cache for '%s'", key)
@@ -32,7 +33,7 @@ func checkCache(userId int) (float64, bool) {
 	return val, true
 }
 
-func updateCache(userId int, rating float64) {
+func updateCache(userId startgg.ID, rating float64) {
 	key := fmt.Sprintf(KEY_FMT, userId)
 
 	log.Debugf("updating cache for '%s'", key)

@@ -1,4 +1,4 @@
-package bracket
+package brackets
 
 import (
 	"math"

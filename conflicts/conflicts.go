@@ -6,8 +6,9 @@ import (
 	"math/rand/v2"
 	"os"
 
-	"github.com/AaronLieb/octagon/bracket"
+	"github.com/AaronLieb/octagon/brackets"
 	"github.com/AaronLieb/octagon/config"
+	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 )
 
@@ -18,7 +19,7 @@ const (
 )
 
 // returns true if p1 and p2 are in the conflict
-func (con *conflict) check(p1 int, p2 int) bool {
+func (con *conflict) check(p1 startgg.ID, p2 startgg.ID) bool {
 	flag := true
 	for _, p := range con.Players {
 		if p.Id == p1 || p.Id == p2 {
@@ -32,7 +33,7 @@ func (con *conflict) check(p1 int, p2 int) bool {
 	return false
 }
 
-func calculateConflictScore(bracket *bracket.Bracket, conflicts []conflict, players []bracket.Player, newPlayers []bracket.Player) float64 {
+func calculateConflictScore(bracket *brackets.Bracket, conflicts []conflict, players []brackets.Player, newPlayers []brackets.Player) float64 {
 	conflictScore, _ := checkConflict(bracket, conflicts, newPlayers)
 
 	seedDiffScore := 0.0
@@ -58,7 +59,7 @@ func calculateConflictScore(bracket *bracket.Bracket, conflicts []conflict, play
  * generated seeding variant with the lowest
  * conflictScore.
  */
-func ResolveConflicts(bracket *bracket.Bracket, conflicts []conflict, players []bracket.Player) []bracket.Player {
+func ResolveConflicts(bracket *brackets.Bracket, conflicts []conflict, players []brackets.Player) []brackets.Player {
 	best := players
 	lowestScore := calculateConflictScore(bracket, conflicts, players, players)
 
@@ -88,7 +89,7 @@ func ResolveConflicts(bracket *bracket.Bracket, conflicts []conflict, players []
 	return best
 }
 
-func printSeeds(before []bracket.Player, after []bracket.Player) {
+func printSeeds(before []brackets.Player, after []brackets.Player) {
 	log.Printf("%-5s %-6s %25s %6s %-7s", "Seed", "Rating", "Name", "Change", "ID")
 	log.Print("---------------------------------------------------------")
 	for i, p := range after {
@@ -142,8 +143,8 @@ func readConflictsFile(fileName string) []conflict {
 * Randomly shifts seeding
 * Doesn't impact seeds 1 and 2
  */
-func randomizeSeeds(players []bracket.Player) []bracket.Player {
-	newPlayers := make([]bracket.Player, len(players))
+func randomizeSeeds(players []brackets.Player) []brackets.Player {
+	newPlayers := make([]brackets.Player, len(players))
 	copy(newPlayers, players)
 	for j := range players[3:] {
 		i := j + 3
@@ -163,7 +164,7 @@ func randomizeSeeds(players []bracket.Player) []bracket.Player {
  * The higher the priority of the conflict the more it
  * adds to the sum
  */
-func checkConflict(b *bracket.Bracket, cons []conflict, players []bracket.Player) (float64, int) {
+func checkConflict(b *brackets.Bracket, cons []conflict, players []brackets.Player) (float64, int) {
 	conflictScore := 0.0
 	conflictSum := 0
 

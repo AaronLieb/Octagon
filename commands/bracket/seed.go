@@ -1,4 +1,4 @@
-package seed
+package bracket
 
 import (
 	"cmp"
@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/AaronLieb/octagon/bracket"
+	"github.com/AaronLieb/octagon/brackets"
 	"github.com/AaronLieb/octagon/conflicts"
 	"github.com/AaronLieb/octagon/ratings"
 	"github.com/AaronLieb/octagon/startgg"
@@ -20,7 +20,7 @@ and seed the players accordingly. It will then attempt to read all
 player conflicts and generate a variation of the original seeding
 that minimizes seeding changes while maximizing conflict resolution`
 
-func Command() *cli.Command {
+func seedCommand() *cli.Command {
 	return &cli.Command{
 		Name:        "seed",
 		Usage:       "Seeds an event",
@@ -73,7 +73,7 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	}
 	entrants := entrantsResp.Event.Entrants.Nodes
 
-	players := make([]bracket.Player, len(entrants))
+	players := make([]brackets.Player, len(entrants))
 	for i, entrant := range entrants {
 		id := entrant.Participants[0].Player.Id
 		name := entrant.Participants[0].GamerTag
@@ -85,18 +85,18 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 		if rating == 0.0 {
 			log.Warnf("unable to fetch rating for '%s'", name)
 		}
-		players[i] = bracket.Player{
+		players[i] = brackets.Player{
 			Name:   name,
 			Id:     id,
 			Rating: rating,
 		}
 	}
 
-	slices.SortFunc(players, func(a, b bracket.Player) int {
+	slices.SortFunc(players, func(a, b brackets.Player) int {
 		return cmp.Compare(b.Rating, a.Rating)
 	})
 
-	bracket := bracket.CreateBracket(len(players))
+	bracket := brackets.CreateBracket(len(players))
 	var conflictFiles []string
 	if cmd.String("file") != "" {
 		conflictFiles = append(conflictFiles, cmd.String("file"))
@@ -121,7 +121,7 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func publishSeeds(ctx context.Context, eventSlug string, players []bracket.Player) error {
+func publishSeeds(ctx context.Context, eventSlug string, players []brackets.Player) error {
 	seedsResp, err := startgg.GetSeeds(ctx, eventSlug)
 	if err != nil {
 		return err
@@ -148,7 +148,7 @@ func publishSeeds(ctx context.Context, eventSlug string, players []bracket.Playe
 	}
 
 	slices.SortFunc(seedMapping, func(a, b startgg.UpdatePhaseSeedInfo) int {
-		return cmp.Compare(a.SeedNum, b.SeedNum)
+		return cmp.Compare(a.SeedNum.(int), b.SeedNum.(int))
 	})
 
 	updateSeedsResp, err := startgg.UpdateSeeding(ctx, phase.Id, seedMapping)

@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	if os.Getenv("DEBUG") == "1" {
+	if len(os.Getenv("DEBUG")) > 0 {
 		log.SetLevel(log.DebugLevel)
 	}
 

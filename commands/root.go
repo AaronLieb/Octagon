@@ -7,7 +7,7 @@ import (
 	"github.com/AaronLieb/octagon/commands/conflicts"
 	"github.com/AaronLieb/octagon/commands/rating"
 	"github.com/AaronLieb/octagon/commands/report"
-	"github.com/AaronLieb/octagon/commands/seed"
+	"github.com/AaronLieb/octagon/commands/test"
 	"github.com/urfave/cli/v3"
 )
 
@@ -29,10 +29,10 @@ https://start.gg/octagon`,
 			attendees.Command(),
 			report.Command(),
 			rating.Command(),
-			seed.Command(),
 			cache.Command(),
 			conflicts.Command(),
 			bracket.Command(),
+			test.Command(),
 		},
 	}
 }
