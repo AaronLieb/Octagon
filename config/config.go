@@ -30,7 +30,7 @@ func Load() {
 	if err != nil {
 		log.Warnf("unable to load default configuration: %v", err)
 	} else {
-		log.Debug("successfully loaded config from %s", DEFAULT_CONFIG_PATH)
+		log.Debugf("successfully loaded config from %s", DEFAULT_CONFIG_PATH)
 		return
 	}
 	err = godotenv.Load()
