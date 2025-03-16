@@ -157,6 +157,7 @@ query GetReportableSets($slug: String) {
       }) {
       nodes {
         id
+        round
         slots {
           entrant {
             participants {

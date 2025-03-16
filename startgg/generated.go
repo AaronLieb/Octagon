@@ -436,12 +436,17 @@ func (v *GetReportableSetsEventSetsSetConnection) GetNodes() []GetReportableSets
 // A set
 type GetReportableSetsEventSetsSetConnectionNodesSet struct {
 	Id interface{} `json:"id"`
+	// The round number of the set. Negative numbers are losers bracket
+	Round int `json:"round"`
 	// A possible spot in a set. Use this to get all entrants in a set. Use this for all bracket types (FFA, elimination, etc)
 	Slots []GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot `json:"slots"`
 }
 
 // GetId returns GetReportableSetsEventSetsSetConnectionNodesSet.Id, and is useful for accessing the field via an interface.
 func (v *GetReportableSetsEventSetsSetConnectionNodesSet) GetId() interface{} { return v.Id }
+
+// GetRound returns GetReportableSetsEventSetsSetConnectionNodesSet.Round, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnectionNodesSet) GetRound() int { return v.Round }
 
 // GetSlots returns GetReportableSetsEventSetsSetConnectionNodesSet.Slots, and is useful for accessing the field via an interface.
 func (v *GetReportableSetsEventSetsSetConnectionNodesSet) GetSlots() []GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot {
@@ -1451,6 +1456,7 @@ query GetReportableSets ($slug: String) {
 		sets(page: 0, perPage: 100, sortType: CALL_ORDER, filters: {hideEmpty:true,showByes:false}) {
 			nodes {
 				id
+				round
 				slots {
 					entrant {
 						participants {

@@ -43,7 +43,7 @@ func Command() *cli.Command {
 				Usage:   "Whether you are reporting for redemption bracket or not",
 			},
 		},
-		Action: report,
+		Action: test,
 	}
 }
 
