@@ -59,11 +59,13 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	event := "ultimate-singles"
+	consEvent := "tournament/octagon-103/event/ultimate-singles"
 	if cmd.Bool("redemption") {
 		event = "redemption-bracket"
+		consEvent = "tournament/octagon-104/event/ultimate-singles"
 	}
 
-	cons := conflicts.CreateConflictsForSetsPlayed(ctx, "tournament/octagon-102/event/ultimate-singles")
+	cons := conflicts.CreateConflictsForSetsPlayed(ctx, consEvent)
 
 	slug := fmt.Sprintf("%s/event/%s", tournamentSlug, event)
 	log.Debug(slug)
@@ -138,7 +140,7 @@ func publishSeeds(ctx context.Context, eventSlug string, players []brackets.Play
 	seedMapping := make([]startgg.UpdatePhaseSeedInfo, len(players))
 	for _, seed := range seeds {
 		for s, player := range players {
-			if seed.Players[0].Id == player.Id {
+			if startgg.ToString(seed.Players[0].Id) == startgg.ToString(player.Id) {
 				seedMapping[s] = startgg.UpdatePhaseSeedInfo{
 					SeedId:  seed.Id,
 					SeedNum: s + 1,

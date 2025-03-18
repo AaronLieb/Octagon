@@ -52,9 +52,9 @@ func listAttendees(ctx context.Context, cmd *cli.Command) error {
 
 		player := participant.Player
 		if outputType == "csv" {
-			fmt.Printf("%d\t%s\n", player.Id, participant.GamerTag)
+			fmt.Printf("%s\t%s\n", startgg.ToString(player.Id), participant.GamerTag)
 		} else {
-			fmt.Printf("%-25s %-8d %-15s %-15s\n", participant.GamerTag, player.Id, participant.ContactInfo.NameFirst, participant.ContactInfo.NameLast)
+			fmt.Printf("%-25s %-8s %-15s %-15s\n", participant.GamerTag, startgg.ToString(player.Id), participant.ContactInfo.NameFirst, participant.ContactInfo.NameLast)
 		}
 
 	}
