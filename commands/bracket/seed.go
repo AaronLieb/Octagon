@@ -75,7 +75,7 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 
 	players := make([]brackets.Player, len(entrants))
 	for i, entrant := range entrants {
-		id := entrant.Participants[0].Player.Id
+		id := int64(entrant.Participants[0].Player.Id.(float64))
 		name := entrant.Participants[0].GamerTag
 		log.Debug("Seed", "name", name, "id", id)
 		rating, err := ratings.Get(ctx, id)

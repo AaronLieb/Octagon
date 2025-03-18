@@ -45,7 +45,7 @@ func Get(ctx context.Context, userId startgg.ID) (float64, error) {
 		return cachedRating, nil
 	}
 
-	path := fmt.Sprintf("/players/%d/rating", userId)
+	path := fmt.Sprintf("/players/%d/rating", userId.(int))
 	ratingRef := database.NewRef(path)
 	var rating float64
 	err := ratingRef.Get(ctx, &rating)
