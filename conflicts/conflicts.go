@@ -15,14 +15,15 @@ import (
 const (
 	CONFLICT_FILE                = "conflicts.json"
 	CONFLICT_RESOLUTION_ATTEMPTS = 100000
-	CONFLICT_RESOLUTION_VARIANCE = 3
+	// TODO: start with high value, then go lower to make sure we don't miss the obvious
+	CONFLICT_RESOLUTION_VARIANCE = 5
 )
 
 // returns true if p1 and p2 are in the conflict
 func (con *conflict) check(p1 startgg.ID, p2 startgg.ID) bool {
 	flag := true
 	for _, p := range con.Players {
-		if p.Id == p1 || p.Id == p2 {
+		if startgg.ToString(p.Id) == startgg.ToString(p1) || startgg.ToString(p.Id) == startgg.ToString(p2) {
 			if flag {
 				flag = false
 			} else {
@@ -36,6 +37,7 @@ func (con *conflict) check(p1 startgg.ID, p2 startgg.ID) bool {
 func calculateConflictScore(bracket *brackets.Bracket, conflicts []conflict, players []brackets.Player, newPlayers []brackets.Player) float64 {
 	conflictScore, _ := checkConflict(bracket, conflicts, newPlayers)
 
+	// TODO: Prune this once the conflict score gets above certain value
 	seedDiffScore := 0.0
 	for i, p := range newPlayers {
 		for j, q := range players {
@@ -43,7 +45,7 @@ func calculateConflictScore(bracket *brackets.Bracket, conflicts []conflict, pla
 				// Low importance means changing the seed has less significance
 				importance := 32.0 / math.Pow(math.Log2(float64(j)), 3)
 				// keep inbetween [0.25, 1]
-				importance = math.Max(1, math.Min(0.25, importance))
+				importance = math.Min(1, math.Max(0.25, importance))
 				seedDiff := math.Abs(float64(i-j)) * importance
 				seedDiffScore += math.Pow(seedDiff, 1.5)
 			}
