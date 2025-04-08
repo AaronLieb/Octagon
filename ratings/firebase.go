@@ -32,6 +32,8 @@ func Get(ctx context.Context, userId startgg.ID) (float64, error) {
 	// TODO: Separate aliases into a config file
 	if userId == 4522139 {
 		userId = 2966086
+	} else if userId == 4620434 {
+		userId = 31584
 	}
 
 	log.Debug("Fetching rating", "userId", userId)
