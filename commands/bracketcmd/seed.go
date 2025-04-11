@@ -1,4 +1,4 @@
-package bracket
+package bracketcmd
 
 import (
 	"cmp"
@@ -63,7 +63,7 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	consEvent := "tournament/octagon-106/event/ultimate-singles"
 	if cmd.Bool("redemption") {
 		event = "redemption-bracket"
-		consEvent = "tournament/octagon-107/event/ultimate-singles"
+		consEvent = "tournament/octagon/event/ultimate-singles"
 	}
 
 	cons := conflicts.CreateConflictsForSetsPlayed(ctx, consEvent)

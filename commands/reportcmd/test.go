@@ -1,11 +1,11 @@
-package report
+package reportcmd
 
 import (
 	"context"
 	"fmt"
 
-	sgg "github.com/AaronLieb/octagon/commands/report/startgg"
-	"github.com/AaronLieb/octagon/commands/report/ui"
+	sgg "github.com/AaronLieb/octagon/commands/reportcmd/startgg"
+	"github.com/AaronLieb/octagon/commands/reportcmd/ui"
 	"github.com/AaronLieb/octagon/startgg"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"

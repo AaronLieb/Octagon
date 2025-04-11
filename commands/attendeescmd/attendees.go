@@ -1,4 +1,4 @@
-package attendees
+package attendeescmd
 
 import (
 	"github.com/urfave/cli/v3"

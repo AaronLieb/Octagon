@@ -1,4 +1,4 @@
-package seed
+package graphiccmd
 
 import (
 	"context"

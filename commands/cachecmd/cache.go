@@ -1,4 +1,4 @@
-package cache
+package cachecmd
 
 import (
 	"github.com/urfave/cli/v3"

@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"github.com/AaronLieb/octagon/commands/attendees"
-	"github.com/AaronLieb/octagon/commands/bracket"
-	"github.com/AaronLieb/octagon/commands/cache"
-	"github.com/AaronLieb/octagon/commands/conflicts"
-	"github.com/AaronLieb/octagon/commands/rating"
-	"github.com/AaronLieb/octagon/commands/report"
+	"github.com/AaronLieb/octagon/commands/attendeescmd"
+	"github.com/AaronLieb/octagon/commands/bracketcmd"
+	"github.com/AaronLieb/octagon/commands/cachecmd"
+	"github.com/AaronLieb/octagon/commands/conflictscmd"
+	"github.com/AaronLieb/octagon/commands/ratingcmd"
+	"github.com/AaronLieb/octagon/commands/reportcmd"
 	"github.com/urfave/cli/v3"
 )
 
@@ -25,12 +25,12 @@ https://start.gg/octagon`,
 		// EnableShellCompletion:  true,
 		UseShortOptionHandling: true,
 		Commands: []*cli.Command{
-			attendees.Command(),
-			report.Command(),
-			rating.Command(),
-			cache.Command(),
-			conflicts.Command(),
-			bracket.Command(),
+			attendeescmd.Command(),
+			reportcmd.Command(),
+			ratingcmd.Command(),
+			cachecmd.Command(),
+			conflictscmd.Command(),
+			bracketcmd.Command(),
 		},
 	}
 }

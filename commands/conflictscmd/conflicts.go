@@ -1,4 +1,4 @@
-package conflicts
+package conflictscmd
 
 import (
 	"github.com/urfave/cli/v3"
