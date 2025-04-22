@@ -14,8 +14,7 @@ import (
 
 const (
 	CONFLICT_FILE                = "conflicts.json"
-	CONFLICT_RESOLUTION_ATTEMPTS = 100000
-	// TODO: start with high value, then go lower to make sure we don't miss the obvious
+	CONFLICT_RESOLUTION_ATTEMPTS = 1000
 	CONFLICT_RESOLUTION_VARIANCE = 5
 )
 
@@ -32,6 +31,12 @@ func (con *conflict) check(p1 startgg.ID, p2 startgg.ID) bool {
 		}
 	}
 	return false
+}
+
+func printConflicts(cons []conflict) {
+	for _, con := range cons {
+		log.Printf("%-15s %15s\np%d - %s\n", con.Players[0].Name, con.Players[1].Name, con.Priority, con.Reason)
+	}
 }
 
 func calculateConflictScore(bracket *brackets.Bracket, conflicts []conflict, players []brackets.Player, newPlayers []brackets.Player) float64 {
@@ -66,16 +71,23 @@ func ResolveConflicts(bracket *brackets.Bracket, conflicts []conflict, players [
 	lowestScore := calculateConflictScore(bracket, conflicts, players, players)
 
 	log.Infof("conflictScore before resolution: %.2f", lowestScore)
+	// unresolved := listUnresolvedConflicts(bracket, conflicts, players)
+	printConflicts(conflicts)
 
 	if lowestScore != 0.0 {
-		for range CONFLICT_RESOLUTION_ATTEMPTS {
-			newPlayers := randomizeSeeds(players)
+		for v := CONFLICT_RESOLUTION_VARIANCE; v > 2; v-- {
+			attempts := int(CONFLICT_RESOLUTION_ATTEMPTS * math.Pow(float64(CONFLICT_RESOLUTION_VARIANCE-v+1), 1.5))
+			log.Debug("Running monte carlo algo", "variance", v, "attempts", attempts)
+			for range attempts {
+				newPlayers := randomizeSeeds(players, v)
 
-			conflictScore := calculateConflictScore(bracket, conflicts, players, newPlayers)
+				conflictScore := calculateConflictScore(bracket, conflicts, players, newPlayers)
 
-			if conflictScore < lowestScore {
-				lowestScore = conflictScore
-				best = newPlayers
+				if conflictScore < lowestScore {
+					log.Debug("Found new best", "variance", v)
+					lowestScore = conflictScore
+					best = newPlayers
+				}
 			}
 		}
 	}
@@ -85,6 +97,8 @@ func ResolveConflicts(bracket *brackets.Bracket, conflicts []conflict, players [
 	_, numConflicts := checkConflict(bracket, conflicts, best)
 	if numConflicts != 0 {
 		log.Warnf("%d conflicts were unresolved", numConflicts)
+		unresolved := listUnresolvedConflicts(bracket, conflicts, best)
+		printConflicts(unresolved)
 	}
 	log.Debug("Finished conflict resolution", "score", lowestScore, "checks", CONFLICT_RESOLUTION_ATTEMPTS)
 
@@ -145,12 +159,12 @@ func readConflictsFile(fileName string) []conflict {
 * Randomly shifts seeding
 * Doesn't impact seeds 1 and 2
  */
-func randomizeSeeds(players []brackets.Player) []brackets.Player {
+func randomizeSeeds(players []brackets.Player, variance int) []brackets.Player {
 	newPlayers := make([]brackets.Player, len(players))
 	copy(newPlayers, players)
 	for j := range players[3:] {
 		i := j + 3
-		if rand.IntN(CONFLICT_RESOLUTION_VARIANCE) == 0 {
+		if rand.IntN(variance) == 0 {
 			temp := newPlayers[i]
 			newPlayers[i] = newPlayers[i-1]
 			newPlayers[i-1] = temp
@@ -185,4 +199,25 @@ func checkConflict(b *brackets.Bracket, cons []conflict, players []brackets.Play
 	}
 
 	return conflictScore, conflictSum
+}
+
+/*
+ * Returns a list of conflicts that were unresolved
+ */
+func listUnresolvedConflicts(b *brackets.Bracket, cons []conflict, players []brackets.Player) []conflict {
+	var unresolved []conflict
+	for _, s := range b.Sets {
+		log.Debugf("%d:%s, %d:%s %s", s.Player1, players[s.Player1-1].Name, s.Player2, players[s.Player2-1].Name, s.Name)
+		for _, con := range cons {
+			if s == nil {
+				break
+			}
+			p1 := players[s.Player1-1].Id
+			p2 := players[s.Player2-1].Id
+			if con.check(p1, p2) {
+				unresolved = append(unresolved, con)
+			}
+		}
+	}
+	return unresolved
 }
