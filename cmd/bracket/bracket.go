@@ -1,4 +1,4 @@
-package bracketcmd
+package bracket
 
 import (
 	"github.com/urfave/cli/v3"

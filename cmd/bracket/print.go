@@ -1,4 +1,4 @@
-package bracketcmd
+package bracket
 
 import (
 	"context"

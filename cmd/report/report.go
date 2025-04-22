@@ -1,4 +1,4 @@
-package reportcmd
+package report
 
 import (
 	"context"

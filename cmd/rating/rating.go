@@ -1,4 +1,4 @@
-package ratingcmd
+package rating
 
 import (
 	"context"

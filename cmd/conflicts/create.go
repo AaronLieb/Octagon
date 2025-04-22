@@ -1,4 +1,4 @@
-package conflictscmd
+package conflicts
 
 import (
 	"context"

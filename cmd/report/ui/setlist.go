@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 
-	"github.com/AaronLieb/octagon/commands/reportcmd/startgg"
+	"github.com/AaronLieb/octagon/cmd/report/startgg"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

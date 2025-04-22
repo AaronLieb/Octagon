@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/AaronLieb/octagon/cache"
-	"github.com/AaronLieb/octagon/commands"
+	"github.com/AaronLieb/octagon/cmd"
 	"github.com/AaronLieb/octagon/config"
 	"github.com/charmbracelet/log"
 )
@@ -19,7 +19,7 @@ func main() {
 
 	config.Load()
 
-	cmd := commands.Command()
+	cmd := cmd.Command()
 
 	db := cache.Open()
 	defer db.Close()

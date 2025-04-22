@@ -1,4 +1,4 @@
-package attendeescmd
+package attendees
 
 import (
 	"context"
