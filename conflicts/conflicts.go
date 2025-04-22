@@ -15,7 +15,7 @@ import (
 const (
 	CONFLICT_FILE                = "conflicts.json"
 	CONFLICT_RESOLUTION_ATTEMPTS = 1000
-	CONFLICT_RESOLUTION_VARIANCE = 5
+	CONFLICT_RESOLUTION_VARIANCE = 6
 )
 
 // returns true if p1 and p2 are in the conflict
@@ -71,12 +71,12 @@ func ResolveConflicts(bracket *brackets.Bracket, conflicts []conflict, players [
 	lowestScore := calculateConflictScore(bracket, conflicts, players, players)
 
 	log.Infof("conflictScore before resolution: %.2f", lowestScore)
-	// unresolved := listUnresolvedConflicts(bracket, conflicts, players)
-	printConflicts(conflicts)
+	unresolved := listUnresolvedConflicts(bracket, conflicts, players)
+	printConflicts(unresolved)
 
 	if lowestScore != 0.0 {
 		for v := CONFLICT_RESOLUTION_VARIANCE; v > 2; v-- {
-			attempts := int(CONFLICT_RESOLUTION_ATTEMPTS * math.Pow(float64(CONFLICT_RESOLUTION_VARIANCE-v+1), 1.5))
+			attempts := int(math.Max(CONFLICT_RESOLUTION_ATTEMPTS*math.Pow(float64(6-v), 1.5), CONFLICT_RESOLUTION_ATTEMPTS))
 			log.Debug("Running monte carlo algo", "variance", v, "attempts", attempts)
 			for range attempts {
 				newPlayers := randomizeSeeds(players, v)
@@ -207,7 +207,6 @@ func checkConflict(b *brackets.Bracket, cons []conflict, players []brackets.Play
 func listUnresolvedConflicts(b *brackets.Bracket, cons []conflict, players []brackets.Player) []conflict {
 	var unresolved []conflict
 	for _, s := range b.Sets {
-		log.Debugf("%d:%s, %d:%s %s", s.Player1, players[s.Player1-1].Name, s.Player2, players[s.Player2-1].Name, s.Name)
 		for _, con := range cons {
 			if s == nil {
 				break
