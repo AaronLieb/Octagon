@@ -1,10 +1,11 @@
 package brackets
 
 import (
+	"fmt"
 	"testing"
 )
 
-func assertSetExistsInRound(t *testing.T, bracket *Bracket, s1 int, s2 int, roundNum int, isWinners bool) {
+func setExistsInRound(bracket *Bracket, s1 int, s2 int, roundNum int, isWinners bool) bool {
 	var round []*Set
 	if isWinners {
 		round = bracket.WinnersRounds[roundNum]
@@ -13,95 +14,88 @@ func assertSetExistsInRound(t *testing.T, bracket *Bracket, s1 int, s2 int, roun
 	}
 	for _, set := range round {
 		if set.Player1 == s1 && set.Player2 == s2 {
-			return
+			return true
 		}
 	}
-	t.Fatalf(`Expected to find set {%d, %d}`, s1, s2)
+	return false
 }
 
 func TestCreateBracket(t *testing.T) {
-	b := CreateBracket(8)
+	type testSet struct {
+		p1      int
+		p2      int
+		round   int
+		winners bool
+	}
+	tests := make(map[int][]testSet)
+	tests[8] = []testSet{
+		{1, 8, 0, true},
+		{2, 7, 0, true},
+		{3, 6, 0, true},
+		{5, 8, 0, false},
+		{6, 7, 0, false},
 
-	// wr1
-	assertSetExistsInRound(t, b, 1, 8, 0, true)
-	assertSetExistsInRound(t, b, 2, 7, 0, true)
-	assertSetExistsInRound(t, b, 3, 6, 0, true)
+		{4, 6, 1, false},
+		{3, 5, 1, false},
 
-	// lr1
-	assertSetExistsInRound(t, b, 5, 8, 0, false)
-	assertSetExistsInRound(t, b, 6, 7, 0, false)
+		{3, 4, 2, false},
+		{2, 3, 3, false},
+	}
+	tests[16] = []testSet{
+		{9, 16, 0, false},
+		{6, 9, 1, false},
+		{12, 13, 0, false},
+		{7, 12, 1, false},
+		{8, 11, 1, false},
+		{5, 8, 2, false},
+	}
 
-	// lr2
-	assertSetExistsInRound(t, b, 4, 6, 1, false)
-	assertSetExistsInRound(t, b, 3, 5, 1, false)
+	tests[32] = []testSet{
+		{1, 32, 0, true},
+		{16, 17, 0, true},
+		{4, 29, 0, true},
+		{13, 20, 0, true},
 
-	// lr3
-	assertSetExistsInRound(t, b, 3, 4, 2, false)
+		{21, 28, 0, false},
+		{20, 29, 0, false},
+		{22, 27, 0, false},
+		{18, 31, 0, false},
 
-	// lr4
-	assertSetExistsInRound(t, b, 2, 3, 3, false)
+		{12, 18, 1, false},
+		{16, 22, 1, false},
+		{13, 23, 1, false},
 
-	b = CreateBracket(16)
+		{12, 13, 2, false},
+		{9, 16, 2, false},
+	}
 
-	assertSetExistsInRound(t, b, 9, 16, 0, false)
-	assertSetExistsInRound(t, b, 6, 9, 1, false)
+	tests[64] = []testSet{
+		{22, 43, 0, true},
+		{11, 54, 0, true},
+		{6, 59, 0, true},
 
-	assertSetExistsInRound(t, b, 12, 13, 0, false)
-	assertSetExistsInRound(t, b, 7, 12, 1, false)
+		{43, 54, 0, false},
 
-	assertSetExistsInRound(t, b, 8, 11, 1, false)
-	assertSetExistsInRound(t, b, 5, 8, 2, false)
+		{32, 43, 1, false},
+		{20, 39, 1, false},
+		{22, 33, 1, false},
 
-	b = CreateBracket(32)
+		{21, 28, 2, false},
+		{19, 30, 2, false},
 
-	// winners r1
-	assertSetExistsInRound(t, b, 1, 32, 0, true)
-	assertSetExistsInRound(t, b, 16, 17, 0, true)
-	assertSetExistsInRound(t, b, 4, 29, 0, true)
-	assertSetExistsInRound(t, b, 13, 20, 0, true)
+		{11, 21, 3, false},
+		{14, 20, 3, false},
+		{9, 23, 3, false},
+	}
 
-	// losers r1
-	assertSetExistsInRound(t, b, 21, 28, 0, false)
-	assertSetExistsInRound(t, b, 20, 29, 0, false)
-	assertSetExistsInRound(t, b, 22, 27, 0, false)
-	assertSetExistsInRound(t, b, 18, 31, 0, false)
-
-	// losers r2
-	assertSetExistsInRound(t, b, 12, 18, 1, false)
-	assertSetExistsInRound(t, b, 16, 22, 1, false)
-	assertSetExistsInRound(t, b, 13, 23, 1, false)
-
-	// losers r3
-	assertSetExistsInRound(t, b, 12, 13, 2, false)
-	assertSetExistsInRound(t, b, 9, 16, 2, false)
-
-	b = CreateBracket(64)
-
-	// winners r1
-	assertSetExistsInRound(t, b, 22, 43, 0, true)
-	assertSetExistsInRound(t, b, 11, 54, 0, true)
-	assertSetExistsInRound(t, b, 27, 38, 0, true)
-	assertSetExistsInRound(t, b, 27, 38, 0, true)
-	assertSetExistsInRound(t, b, 6, 59, 0, true)
-	assertSetExistsInRound(t, b, 30, 35, 0, true)
-	assertSetExistsInRound(t, b, 23, 42, 0, true)
-	assertSetExistsInRound(t, b, 7, 58, 0, true)
-	assertSetExistsInRound(t, b, 2, 63, 0, true)
-
-	// losers r1
-	assertSetExistsInRound(t, b, 43, 54, 0, false)
-
-	// losers r2
-	assertSetExistsInRound(t, b, 32, 43, 1, false)
-	assertSetExistsInRound(t, b, 20, 39, 1, false)
-	assertSetExistsInRound(t, b, 22, 33, 1, false)
-
-	// losers r3
-	assertSetExistsInRound(t, b, 21, 28, 2, false)
-	assertSetExistsInRound(t, b, 19, 30, 2, false)
-
-	// losers r3
-	assertSetExistsInRound(t, b, 11, 21, 3, false)
-	assertSetExistsInRound(t, b, 14, 20, 3, false)
-	assertSetExistsInRound(t, b, 9, 23, 3, false)
+	for bracketSize, test := range tests {
+		b := CreateBracket(bracketSize)
+		for _, set := range test {
+			t.Run(fmt.Sprintf("Bracket Size %d", bracketSize), func(t *testing.T) {
+				if !setExistsInRound(b, set.p1, set.p2, set.round, set.winners) {
+					t.Fatalf(`Expected to find set {%d, %d} r:%d, w:%t n:%d`, set.p1, set.p2, set.round, set.winners, bracketSize)
+				}
+			})
+		}
+	}
 }
