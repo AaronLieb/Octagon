@@ -17,8 +17,14 @@ func createSets(round []int) []*Set {
 	return sets
 }
 
-func carryDown(lr []int, wr []int) []int {
+func carryDown(lr []int, wr []int, flip bool) []int {
 	r := make([]int, len(lr))
+	if flip && len(lr) > 2 {
+		n := len(wr)
+		for i := 0; i < n/2; i++ {
+			wr[i], wr[n/2+i] = wr[n/2+i], wr[i]
+		}
+	}
 	for i := 0; i < len(lr); i += 2 {
 		r[i] = wr[len(wr)-i*2-2]
 		r[i+1] = lr[i]
@@ -46,7 +52,7 @@ func CreateBracket(numPlayers int) *Bracket {
 	var wrSets, lr1Sets, lr2Sets []*Set
 	wr := CreateRound(n, 0)
 	lr1 := CreateRound(n/2, n/2)
-	lr2 := carryDown(lr1, wr)
+	lr2 := carryDown(lr1, wr, false)
 	wrSets = createSets(wr)
 	lr1Sets = createSets(lr1)
 	lr2Sets = createSets(lr2)
@@ -57,10 +63,12 @@ func CreateBracket(numPlayers int) *Bracket {
 	losersRounds = append(losersRounds, lr1Sets)
 	losersRounds = append(losersRounds, lr2Sets)
 
+	flip := true
 	for len(wr) > 4 {
 		wr = reduce(wr)
 		lr1 = reduce(lr2)
-		lr2 = carryDown(lr1, wr)
+		lr2 = carryDown(lr1, wr, flip)
+		flip = !flip
 
 		wrSets = createSets(wr)
 		lr1Sets = createSets(lr1)
