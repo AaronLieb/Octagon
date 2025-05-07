@@ -60,10 +60,10 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 
 	// TODO: Don't hard code this, dynamically generate octagon numbers
 	event := "ultimate-singles"
-	consEvent := "tournament/octagon-108/event/ultimate-singles"
+	consEvent := "tournament/octagon-110/event/ultimate-singles"
 	if cmd.Bool("redemption") {
 		event = "redemption-bracket"
-		consEvent = "tournament/octagon/event/ultimate-singles"
+		consEvent = "tournament/octagon-111-1/event/ultimate-singles"
 	}
 
 	cons := conflicts.CreateConflictsForSetsPlayed(ctx, consEvent)
