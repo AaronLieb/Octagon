@@ -22,7 +22,13 @@ func CreateConflictsForSetsPlayed(ctx context.Context, eventSlug string) []confl
 	log.Debug("sets", "n", len(sets))
 
 	for _, set := range sets {
+		if len(set.Slots[0].Entrant.Participants) == 0 {
+			continue
+		}
 		p1 := set.Slots[0].Entrant.Participants[0].Player
+		if len(set.Slots[1].Entrant.Participants) == 0 {
+			continue
+		}
 		p2 := set.Slots[1].Entrant.Participants[0].Player
 		log.Debug("creating recently played conflict", "p1", p1.GamerTag, "p2", p2.GamerTag)
 		conflicts = append(conflicts, conflict{
