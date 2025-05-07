@@ -105,7 +105,7 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 		conflictFiles = append(conflictFiles, cmd.String("file"))
 	}
 	cons = append(cons, conflicts.GetConflicts(conflictFiles)...)
-	conflicts.ResolveConflicts(bracket, cons, players)
+	players = conflicts.ResolveConflicts(bracket, cons, players)
 
 	var input string
 	fmt.Println("Publish seeding? (y/N)")
