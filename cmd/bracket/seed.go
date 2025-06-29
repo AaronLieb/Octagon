@@ -5,7 +5,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"slices"
+	"strconv"
 
 	"github.com/AaronLieb/octagon/brackets"
 	"github.com/AaronLieb/octagon/conflicts"
@@ -15,10 +17,14 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-const desc = `Will fetch player ratings from an external rating database
+const (
+	desc = `Will fetch player ratings from an external rating database
 and seed the players accordingly. It will then attempt to read all
 player conflicts and generate a variation of the original seeding
 that minimizes seeding changes while maximizing conflict resolution`
+	SINGLES    = "ultimate-singles"
+	REDEMPTION = "redemption-bracket"
+)
 
 func seedCommand() *cli.Command {
 	return &cli.Command{
@@ -48,6 +54,11 @@ func seedCommand() *cli.Command {
 	}
 }
 
+func filterOutNonNumbers(input string) string {
+	reg, _ := regexp.Compile("[^0-9]+")
+	return reg.ReplaceAllString(input, "")
+}
+
 func seed(ctx context.Context, cmd *cli.Command) error {
 	log.Debug("seed")
 
@@ -58,13 +69,20 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	// TODO: Don't hard code this, dynamically generate octagon numbers
-	event := "ultimate-singles"
-	consEvent := "tournament/octagon-110/event/ultimate-singles"
-	if cmd.Bool("redemption") {
-		event = "redemption-bracket"
-		consEvent = "tournament/octagon-111-1/event/ultimate-singles"
+	tournamentSeriesNumber, err := strconv.Atoi(filterOutNonNumbers(tournamentSlug))
+	if err != nil {
+		log.Warnf("Unable to determine tournament series number for '%s', skipping conflict generation", tournamentSlug)
 	}
+
+	event := SINGLES
+	consSeriesNumber := tournamentSeriesNumber - 1
+
+	if cmd.Bool("redemption") {
+		event = REDEMPTION
+		consSeriesNumber = tournamentSeriesNumber
+	}
+
+	consEvent := fmt.Sprintf("tournament/octagon-%d/event/ultimate-singles", consSeriesNumber)
 
 	cons := conflicts.CreateConflictsForSetsPlayed(ctx, consEvent)
 
