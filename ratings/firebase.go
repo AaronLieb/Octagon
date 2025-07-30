@@ -28,11 +28,8 @@ func Init(ctx context.Context) {
 }
 
 func Get(ctx context.Context, userId startgg.ID) (float64, error) {
-	// temporary alias for subleaf
 	// TODO: Separate aliases into a config file
-	if userId == 4522139 {
-		userId = 2966086
-	} else if userId == 4620434 {
+	if userId == 4620434 {
 		userId = 31584
 	}
 
