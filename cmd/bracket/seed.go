@@ -55,8 +55,8 @@ func seedCommand() *cli.Command {
 }
 
 func filterOutNonNumbers(input string) string {
-	reg, _ := regexp.Compile("[^0-9]+")
-	return reg.ReplaceAllString(input, "")
+	reg, _ := regexp.Compile("[0-9]+")
+	return reg.FindString(input)
 }
 
 func seed(ctx context.Context, cmd *cli.Command) error {
