@@ -35,7 +35,7 @@ func (con *conflict) check(p1 startgg.ID, p2 startgg.ID) bool {
 
 func printConflicts(cons []conflict) {
 	for _, con := range cons {
-		log.Printf("%-15s %15s\np%d - %s\n", con.Players[0].Name, con.Players[1].Name, con.Priority, con.Reason)
+		log.Printf("%-15s %15s  |  p%d - %s", con.Players[0].Name, con.Players[1].Name, con.Priority, con.Reason)
 	}
 }
 
@@ -166,8 +166,15 @@ func randomizeSeeds(players []brackets.Player, variance int) []brackets.Player {
 		i := j + 3
 		if rand.IntN(variance) == 0 {
 			temp := newPlayers[i]
-			newPlayers[i] = newPlayers[i-1]
-			newPlayers[i-1] = temp
+			n := 1
+			// if rand.IntN(variance) == 0 {
+			// 	n = rand.IntN(2) + 2
+			// 	if n > i {
+			// 		n = i
+			// 	}
+			// }
+			newPlayers[i] = newPlayers[i-n]
+			newPlayers[i-n] = temp
 		}
 	}
 
