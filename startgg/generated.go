@@ -601,6 +601,100 @@ func (v *GetSeedsEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer) GetG
 	return v.GamerTag
 }
 
+// GetSeedsPaginatedEvent includes the requested fields of the GraphQL type Event.
+// The GraphQL type's documentation follows.
+//
+// An event in a tournament
+type GetSeedsPaginatedEvent struct {
+	// The phases that belong to an event.
+	Phases []GetSeedsPaginatedEventPhasesPhase `json:"phases"`
+}
+
+// GetPhases returns GetSeedsPaginatedEvent.Phases, and is useful for accessing the field via an interface.
+func (v *GetSeedsPaginatedEvent) GetPhases() []GetSeedsPaginatedEventPhasesPhase { return v.Phases }
+
+// GetSeedsPaginatedEventPhasesPhase includes the requested fields of the GraphQL type Phase.
+// The GraphQL type's documentation follows.
+//
+// A phase in an event
+type GetSeedsPaginatedEventPhasesPhase struct {
+	Id interface{} `json:"id"`
+	// Paginated seeds for this phase
+	Seeds GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnection `json:"seeds"`
+}
+
+// GetId returns GetSeedsPaginatedEventPhasesPhase.Id, and is useful for accessing the field via an interface.
+func (v *GetSeedsPaginatedEventPhasesPhase) GetId() interface{} { return v.Id }
+
+// GetSeeds returns GetSeedsPaginatedEventPhasesPhase.Seeds, and is useful for accessing the field via an interface.
+func (v *GetSeedsPaginatedEventPhasesPhase) GetSeeds() GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnection {
+	return v.Seeds
+}
+
+// GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnection includes the requested fields of the GraphQL type SeedConnection.
+type GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnection struct {
+	Nodes []GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeed `json:"nodes"`
+}
+
+// GetNodes returns GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnection) GetNodes() []GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeed {
+	return v.Nodes
+}
+
+// GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeed includes the requested fields of the GraphQL type Seed.
+// The GraphQL type's documentation follows.
+//
+// A seed for an entrant
+type GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeed struct {
+	Id      interface{} `json:"id"`
+	SeedNum int         `json:"seedNum"`
+	// The player(s) associated with this seed's entrant
+	Players []GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer `json:"players"`
+}
+
+// GetId returns GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeed.Id, and is useful for accessing the field via an interface.
+func (v *GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeed) GetId() interface{} {
+	return v.Id
+}
+
+// GetSeedNum returns GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeed.SeedNum, and is useful for accessing the field via an interface.
+func (v *GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeed) GetSeedNum() int {
+	return v.SeedNum
+}
+
+// GetPlayers returns GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeed.Players, and is useful for accessing the field via an interface.
+func (v *GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeed) GetPlayers() []GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer {
+	return v.Players
+}
+
+// GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer includes the requested fields of the GraphQL type Player.
+// The GraphQL type's documentation follows.
+//
+// A player
+type GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer struct {
+	Id       interface{} `json:"id"`
+	GamerTag string      `json:"gamerTag"`
+}
+
+// GetId returns GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer.Id, and is useful for accessing the field via an interface.
+func (v *GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer) GetId() interface{} {
+	return v.Id
+}
+
+// GetGamerTag returns GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer.GamerTag, and is useful for accessing the field via an interface.
+func (v *GetSeedsPaginatedEventPhasesPhaseSeedsSeedConnectionNodesSeedPlayersPlayer) GetGamerTag() string {
+	return v.GamerTag
+}
+
+// GetSeedsPaginatedResponse is returned by GetSeedsPaginated on success.
+type GetSeedsPaginatedResponse struct {
+	// Returns an event given its id or slug
+	Event GetSeedsPaginatedEvent `json:"event"`
+}
+
+// GetEvent returns GetSeedsPaginatedResponse.Event, and is useful for accessing the field via an interface.
+func (v *GetSeedsPaginatedResponse) GetEvent() GetSeedsPaginatedEvent { return v.Event }
+
 // GetSeedsResponse is returned by GetSeeds on success.
 type GetSeedsResponse struct {
 	// Returns an event given its id or slug
@@ -1102,6 +1196,18 @@ type __GetSeedsInput struct {
 // GetSlug returns __GetSeedsInput.Slug, and is useful for accessing the field via an interface.
 func (v *__GetSeedsInput) GetSlug() string { return v.Slug }
 
+// __GetSeedsPaginatedInput is used internally by genqlient
+type __GetSeedsPaginatedInput struct {
+	Slug string `json:"slug"`
+	Page int    `json:"page"`
+}
+
+// GetSlug returns __GetSeedsPaginatedInput.Slug, and is useful for accessing the field via an interface.
+func (v *__GetSeedsPaginatedInput) GetSlug() string { return v.Slug }
+
+// GetPage returns __GetSeedsPaginatedInput.Page, and is useful for accessing the field via an interface.
+func (v *__GetSeedsPaginatedInput) GetPage() int { return v.Page }
+
 // __GetSetsForEntrantInput is used internally by genqlient
 type __GetSetsForEntrantInput struct {
 	Slug      string      `json:"slug"`
@@ -1543,6 +1649,59 @@ func GetSeeds(
 	}
 
 	data_ = &GetSeedsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetSeedsPaginated.
+const GetSeedsPaginated_Operation = `
+query GetSeedsPaginated ($slug: String, $page: Int) {
+	event(slug: $slug) {
+		phases {
+			id
+			seeds(query: {page:$page,perPage:100}) {
+				nodes {
+					id
+					seedNum
+					players {
+						id
+						gamerTag
+					}
+				}
+			}
+		}
+	}
+}
+`
+
+func GetSeedsPaginated(
+	ctx_ context.Context,
+	slug string,
+	page int,
+) (data_ *GetSeedsPaginatedResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetSeedsPaginated",
+		Query:  GetSeedsPaginated_Operation,
+		Variables: &__GetSeedsPaginatedInput{
+			Slug: slug,
+			Page: page,
+		},
+	}
+	var client_ graphql.Client
+
+	client_, err_ = GetClient(ctx_)
+	if err_ != nil {
+		return nil, err_
+	}
+
+	data_ = &GetSeedsPaginatedResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

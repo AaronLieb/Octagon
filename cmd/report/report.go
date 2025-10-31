@@ -70,12 +70,12 @@ func report(ctx context.Context, cmd *cli.Command) error {
 
 	tournamentSlug := cmd.String("tournament")
 
-	event := "ultimate-singles"
+	event := startgg.EventUltimateSingles
 	if cmd.Bool("redemption") {
-		event = "redemption-bracket"
+		event = startgg.EventRedemptionBracket
 	}
 
-	eventSlug := fmt.Sprintf("tournament/%s/event/%s", tournamentSlug, event)
+	eventSlug := fmt.Sprintf(startgg.TournamentEventSlugFormat, tournamentSlug, event)
 
 	// Find Entrant Id
 	entrantResp, err := startgg.GetEntrantByName(ctx, eventSlug, player)

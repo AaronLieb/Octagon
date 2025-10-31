@@ -44,7 +44,7 @@ func addAttendee(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("missing argument: [userId]")
 	}
 
-	userId, err := strconv.Atoi(cmd.Args().First())
+	userID, err := strconv.Atoi(cmd.Args().First())
 	if err != nil {
 		return fmt.Errorf("unable to parse argument [userId]: %v", err)
 	}
@@ -58,19 +58,19 @@ func addAttendee(ctx context.Context, cmd *cli.Command) error {
 
 	tournamentSlug := tournamentResp.Tournament.Slug
 
-	eventName := "ultimate-singles"
+	eventName := startgg.EventUltimateSingles
 	if cmd.Bool("redemption") {
-		eventName = "redemption-bracket"
+		eventName = startgg.EventRedemptionBracket
 	}
 
-	eventSlug := fmt.Sprintf("%s/event/%s", tournamentSlug, eventName)
+	eventSlug := fmt.Sprintf(startgg.EventSlugFormat, tournamentSlug, eventName)
 	eventResp, err := startgg.GetEvent(ctx, eventSlug)
 	if err != nil {
 		return err
 	}
 	event := eventResp.Event
 
-	tokenResp, err := startgg.GenerateRegistrationToken(ctx, event.Id, userId)
+	tokenResp, err := startgg.GenerateRegistrationToken(ctx, event.Id, userID)
 	if err != nil {
 		return err
 	}

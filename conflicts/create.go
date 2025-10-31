@@ -36,11 +36,11 @@ func CreateConflictsForSetsPlayed(ctx context.Context, eventSlug string) []confl
 			Players: []player{
 				{
 					Name: p1.GamerTag,
-					Id:   p1.Id,
+					ID:   p1.Id,
 				},
 				{
 					Name: p2.GamerTag,
-					Id:   p2.Id,
+					ID:   p2.Id,
 				},
 			},
 			Reason: fmt.Sprintf("recently played in %s", eventSlug),

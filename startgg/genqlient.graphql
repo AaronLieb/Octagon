@@ -194,6 +194,27 @@ query GetSeeds($slug: String) {
   }
 }
 
+query GetSeedsPaginated($slug: String, $page: Int) {
+  event(slug: $slug) {
+    phases {
+      id
+      seeds(query: {
+          page: $page
+          perPage: 100
+      }) {
+        nodes {
+          id
+          seedNum
+          players {
+            id
+            gamerTag
+          }
+        }
+      }
+    }
+  }
+}
+
 mutation GenerateRegistrationToken($eventId: ID!, $userId: ID!) {
   generateRegistrationToken(registration: {
     eventIds: [$eventId]

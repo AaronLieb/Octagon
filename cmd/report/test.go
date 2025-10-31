@@ -28,7 +28,7 @@ func test(ctx context.Context, cmd *cli.Command) error {
 		log.Fatalf("unable to find tournament '%s': %v", tournamentName, err)
 	}
 
-	eventSlug := fmt.Sprintf("%s/event/ultimate-singles", tournamentSlug)
+	eventSlug := fmt.Sprintf(startgg.EventSlugFormat, tournamentSlug, startgg.EventUltimateSingles)
 	sets := sgg.FetchReportableSets(ctx, eventSlug)
 
 	p := tea.NewProgram(ui.InitialModel(sets))

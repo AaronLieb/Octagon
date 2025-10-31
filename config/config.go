@@ -1,3 +1,4 @@
+/* Package config handles configuration of the `octagon` command */
 package config
 
 import (
@@ -8,8 +9,8 @@ import (
 )
 
 const (
-	DEFAULT_CONFIG_PATH = "/.config/octagon/"
-	DEFAULT_ENV_NAME    = "octagonrc"
+	DefaultConfigPath = "/.config/octagon/"
+	DefaultEnvName    = "octagonrc"
 )
 
 func GetConfigPath() string {
@@ -17,7 +18,7 @@ func GetConfigPath() string {
 	if err != nil {
 		log.Warnf("unable to find user home directory")
 	}
-	return homeDir + DEFAULT_CONFIG_PATH
+	return homeDir + DefaultConfigPath
 }
 
 func Load() {
@@ -26,11 +27,11 @@ func Load() {
 		log.Warnf("unable to find user home directory")
 	}
 
-	err = godotenv.Load(homeDir + DEFAULT_CONFIG_PATH + DEFAULT_ENV_NAME)
+	err = godotenv.Load(homeDir + DefaultConfigPath + DefaultEnvName)
 	if err != nil {
 		log.Warnf("unable to load default configuration: %v", err)
 	} else {
-		log.Debugf("successfully loaded config from %s", DEFAULT_CONFIG_PATH)
+		log.Debugf("successfully loaded config from %s", DefaultConfigPath)
 		return
 	}
 	err = godotenv.Load()

@@ -1,22 +1,32 @@
 package startgg
 
-import "strconv"
+import (
+	"encoding/json"
+	"strconv"
+)
 
-type ID interface{}
+type ID any
 
-func ToString(value interface{}) string {
-	str := ""
+type CachedPlayer struct {
+	Name string `json:"name"`
+	ID   ID     `json:"id"`
+}
 
-	switch value := value.(type) {
+func ToString(value any) string {
+	switch v := value.(type) {
 	case float64:
-		str = strconv.FormatFloat(value, 'f', 0, 64)
+		return strconv.FormatFloat(v, 'f', 0, 64)
 	case int64:
-		str = strconv.FormatInt(value, 10)
+		return strconv.FormatInt(v, 10)
 	case int:
-		str = strconv.Itoa(value)
+		return strconv.Itoa(v)
 	case string:
-		str = value
+		return v
+	default:
+		return ""
 	}
+}
 
-	return str
+func UnmarshalJSON(data []byte, v any) error {
+	return json.Unmarshal(data, v)
 }

@@ -1,3 +1,4 @@
+/* Package cache uses Badger to manage caching */
 package cache
 
 import (

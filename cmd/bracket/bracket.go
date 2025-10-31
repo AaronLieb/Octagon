@@ -1,3 +1,5 @@
+/* Package bracket provides commands for viewing and manipulating startgg brackets
+* octagon bracket <subcommand> */
 package bracket
 
 import (
@@ -13,6 +15,7 @@ func Command() *cli.Command {
 		Commands: []*cli.Command{
 			printCommand(),
 			seedCommand(),
+			seedsCommand(),
 		},
 	}
 }

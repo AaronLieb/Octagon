@@ -2,7 +2,16 @@ package startgg
 
 import "context"
 
-// TODO: Cache response
+const (
+	// Event names
+	EventUltimateSingles   = "ultimate-singles"
+	EventRedemptionBracket = "redemption-bracket"
+
+	// URL format strings
+	EventSlugFormat           = "%s/event/%s"
+	TournamentEventSlugFormat = "tournament/%s/event/%s"
+)
+
 func GetTournamentSlug(ctx context.Context, tournamentShortSlug string) (string, error) {
 	tournamentResp, err := GetTournament(ctx, tournamentShortSlug)
 	if err != nil {

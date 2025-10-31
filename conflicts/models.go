@@ -1,14 +1,19 @@
 package conflicts
 
-import "github.com/AaronLieb/octagon/startgg"
+import (
+	"time"
 
-type player struct {
+	"github.com/AaronLieb/octagon/startgg"
+)
+
+type Player struct {
 	Name string     `json:"name"`
-	Id   startgg.ID `json:"id"`
+	ID   startgg.ID `json:"id"`
 }
 
-type conflict struct {
-	Priority int      `json:"priority"`
-	Reason   string   `json:"reason"`
-	Players  []player `json:"players"`
+type Conflict struct {
+	Priority   int        `json:"priority"`
+	Reason     string     `json:"reason"`
+	Players    []Player   `json:"players"`
+	Expiration *time.Time `json:"expiration,omitempty"`
 }

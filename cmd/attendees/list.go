@@ -2,7 +2,6 @@ package attendees
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/AaronLieb/octagon/startgg"
@@ -49,14 +48,12 @@ func listAttendees(ctx context.Context, cmd *cli.Command) error {
 
 	outputType := strings.ToLower(cmd.String("output"))
 	for _, participant := range participants {
-
 		player := participant.Player
 		if outputType == "csv" {
-			fmt.Printf("%s\t%s\n", startgg.ToString(player.Id), participant.GamerTag)
+			startgg.PrintPlayerCSV(player.Id, participant.GamerTag)
 		} else {
-			fmt.Printf("%-25s %-8s %-15s %-15s\n", participant.GamerTag, startgg.ToString(player.Id), participant.ContactInfo.NameFirst, participant.ContactInfo.NameLast)
+			startgg.PrintPlayerTable(participant.GamerTag, player.Id, participant.ContactInfo.NameFirst, participant.ContactInfo.NameLast)
 		}
-
 	}
 	return nil
 }

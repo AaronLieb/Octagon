@@ -22,8 +22,6 @@ const (
 and seed the players accordingly. It will then attempt to read all
 player conflicts and generate a variation of the original seeding
 that minimizes seeding changes while maximizing conflict resolution`
-	SINGLES    = "ultimate-singles"
-	REDEMPTION = "redemption-bracket"
 )
 
 func seedCommand() *cli.Command {
@@ -74,19 +72,19 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 		log.Warnf("Unable to determine tournament series number for '%s', skipping conflict generation", tournamentSlug)
 	}
 
-	event := SINGLES
+	event := startgg.EventUltimateSingles
 	consSeriesNumber := tournamentSeriesNumber - 1
 
 	if cmd.Bool("redemption") {
-		event = REDEMPTION
+		event = startgg.EventRedemptionBracket
 		consSeriesNumber = tournamentSeriesNumber
 	}
 
-	consEvent := fmt.Sprintf("tournament/octagon-%d/event/ultimate-singles", consSeriesNumber)
+	consEvent := fmt.Sprintf(startgg.TournamentEventSlugFormat, fmt.Sprintf("octagon-%d", consSeriesNumber), startgg.EventUltimateSingles)
 
 	cons := conflicts.CreateConflictsForSetsPlayed(ctx, consEvent)
 
-	slug := fmt.Sprintf("%s/event/%s", tournamentSlug, event)
+	slug := fmt.Sprintf(startgg.EventSlugFormat, tournamentSlug, event)
 	log.Debug(slug)
 	entrantsResp, err := startgg.GetUsersForEvent(ctx, slug)
 	if err != nil {

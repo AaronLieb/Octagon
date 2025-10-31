@@ -1,3 +1,4 @@
+/* Package cache provides commands for viewing and manipulating the cache */
 package cache
 
 import (
@@ -11,6 +12,8 @@ func Command() *cli.Command {
 		Usage:     "Manage the internal cache",
 		Commands: []*cli.Command{
 			ClearCommand(),
+			PopulateCommand(),
+			ListCommand(),
 		},
 	}
 }

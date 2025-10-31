@@ -1,3 +1,5 @@
+/* Package attendees provides commands to view the attendees of a startgg tournament
+* octagon attendees <subcommand> */
 package attendees
 
 import (

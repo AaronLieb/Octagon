@@ -1,3 +1,5 @@
+/* Package startgg provides an interface to the graphql api,
+* as well as various helper methods and models */
 package startgg
 
 import (
@@ -15,9 +17,9 @@ import (
 var client graphql.Client
 
 const (
-	API_VERSION = "alpha"
-	BASE_URL    = "https://api.start.gg/gql/"
-	URL         = BASE_URL + API_VERSION
+	APIVersion = "alpha"
+	BaseURL    = "https://api.start.gg/gql/"
+	URL        = BaseURL + APIVersion
 )
 
 type authedTransport struct {

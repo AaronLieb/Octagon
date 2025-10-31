@@ -1,3 +1,4 @@
+/* Package conflicts provides commands for creating, viewing, and managing manual conflicts */
 package conflicts
 
 import (
