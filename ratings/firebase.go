@@ -7,6 +7,7 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/db"
+	"github.com/AaronLieb/octagon/config"
 	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 	"google.golang.org/api/option"
@@ -27,24 +28,22 @@ func Init(ctx context.Context) {
 	}
 }
 
-func Get(ctx context.Context, userId startgg.ID) (float64, error) {
-	// TODO: Separate aliases into a config file
-	if userId == 4620434 {
-		userId = 31584
-	}
+func Get(ctx context.Context, userID startgg.ID) (float64, error) {
+	// Resolve alias to real ID
+	userID = config.ResolveAlias(userID)
 
-	log.Debug("Fetching rating", "userId", userId)
+	log.Debug("Fetching rating", "userId", userID)
 
 	if database == nil {
 		Init(ctx)
 	}
 
-	cachedRating, found := checkCache(userId)
+	cachedRating, found := checkCache(userID)
 	if found {
-		return cachedRating, nil
+		return applyBias(userID, cachedRating), nil
 	}
 
-	path := fmt.Sprintf("/players/%s/rating", startgg.ToString(userId))
+	path := fmt.Sprintf("/players/%s/rating", startgg.ToString(userID))
 	ratingRef := database.NewRef(path)
 	var rating float64
 	err := ratingRef.Get(ctx, &rating)
@@ -54,7 +53,18 @@ func Get(ctx context.Context, userId startgg.ID) (float64, error) {
 		return 0, err
 	}
 
-	updateCache(userId, rating)
+	updateCache(userID, rating)
 
-	return rating, nil
+	return applyBias(userID, rating), nil
+}
+
+func applyBias(userId startgg.ID, rating float64) float64 {
+	ratio := config.GetBiasForPlayer(userId)
+	if ratio == 1.0 {
+		return rating
+	}
+	
+	biasedRating := rating * ratio
+	log.Debug("Applied bias", "userId", userId, "original", rating, "ratio", ratio, "biased", biasedRating)
+	return biasedRating
 }

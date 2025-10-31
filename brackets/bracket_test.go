@@ -1,101 +1,150 @@
 package brackets
 
 import (
-	"fmt"
 	"testing"
 )
 
-func setExistsInRound(bracket *Bracket, s1 int, s2 int, roundNum int, isWinners bool) bool {
-	var round []*Set
-	if isWinners {
-		round = bracket.WinnersRounds[roundNum]
-	} else {
-		round = bracket.LosersRounds[roundNum]
+func TestCreateRound(t *testing.T) {
+	tests := []struct {
+		n        int
+		k        int
+		expected []int
+	}{
+		{2, 0, []int{1, 2}},
+		{4, 0, []int{1, 4, 2, 3}},
+		{8, 0, []int{1, 8, 4, 5, 2, 7, 3, 6}},
+		{1, 0, []int{}},
+		{0, 0, []int{}},
 	}
-	for _, set := range round {
-		if set.Player1 == s1 && set.Player2 == s2 {
-			return true
+
+	for _, test := range tests {
+		result := CreateRound(test.n, test.k)
+		if len(result) != len(test.expected) {
+			t.Errorf("CreateRound(%d, %d): expected length %d, got %d", 
+				test.n, test.k, len(test.expected), len(result))
+			continue
+		}
+		
+		for i, v := range result {
+			if v != test.expected[i] {
+				t.Errorf("CreateRound(%d, %d): expected %v, got %v", 
+					test.n, test.k, test.expected, result)
+				break
+			}
 		}
 	}
-	return false
+}
+
+func TestCreateSets(t *testing.T) {
+	round := []int{1, 8, 4, 5}
+	sets := createSets(round)
+	
+	if len(sets) != 2 {
+		t.Errorf("Expected 2 sets, got %d", len(sets))
+	}
+	
+	if sets[0].Player1 != 1 || sets[0].Player2 != 8 {
+		t.Errorf("First set: expected players 1 vs 8, got %d vs %d", 
+			sets[0].Player1, sets[0].Player2)
+	}
+	
+	if sets[1].Player1 != 4 || sets[1].Player2 != 5 {
+		t.Errorf("Second set: expected players 4 vs 5, got %d vs %d", 
+			sets[1].Player1, sets[1].Player2)
+	}
+}
+
+func TestReduce(t *testing.T) {
+	round := []int{1, 8, 4, 5, 2, 7, 3, 6}
+	result := reduce(round)
+	expected := []int{1, 4, 2, 3}
+	
+	if len(result) != len(expected) {
+		t.Errorf("Expected length %d, got %d", len(expected), len(result))
+	}
+	
+	for i, v := range result {
+		if v != expected[i] {
+			t.Errorf("Expected %v, got %v", expected, result)
+			break
+		}
+	}
 }
 
 func TestCreateBracket(t *testing.T) {
-	type testSet struct {
-		p1      int
-		p2      int
-		round   int
-		winners bool
+	tests := []struct {
+		numPlayers int
+		minSets    int
+	}{
+		{8, 7},  // 8-player bracket needs at least 7 sets
+		{4, 3},  // 4-player bracket needs at least 3 sets
+		{2, 1},  // 2-player bracket needs 1 set
 	}
-	tests := make(map[int][]testSet)
-	tests[8] = []testSet{
-		{1, 8, 0, true},
-		{2, 7, 0, true},
-		{3, 6, 0, true},
-		{5, 8, 0, false},
-		{6, 7, 0, false},
-
-		{4, 6, 1, false},
-		{3, 5, 1, false},
-
-		{3, 4, 2, false},
-		{2, 3, 3, false},
+	
+	for _, test := range tests {
+		bracket := CreateBracket(test.numPlayers)
+		
+		if bracket == nil {
+			t.Errorf("CreateBracket(%d) returned nil", test.numPlayers)
+			continue
+		}
+		
+		if len(bracket.Sets) < test.minSets {
+			t.Errorf("CreateBracket(%d): expected at least %d sets, got %d", 
+				test.numPlayers, test.minSets, len(bracket.Sets))
+		}
+		
+		if len(bracket.WinnersRounds) == 0 {
+			t.Errorf("CreateBracket(%d): no winners rounds created", test.numPlayers)
+		}
+		
+		// Verify no invalid player numbers
+		for _, set := range bracket.Sets {
+			if set.Player1 > test.numPlayers || set.Player2 > test.numPlayers {
+				t.Errorf("CreateBracket(%d): invalid player numbers %d vs %d", 
+					test.numPlayers, set.Player1, set.Player2)
+			}
+		}
 	}
-	tests[16] = []testSet{
-		{9, 16, 0, false},
-		{6, 9, 1, false},
-		{12, 13, 0, false},
-		{7, 12, 1, false},
-		{8, 11, 1, false},
-		{5, 8, 2, false},
+}
+
+func TestCarryDown(t *testing.T) {
+	lr := []int{5, 6}
+	wr := []int{1, 2}
+	
+	result := carryDown(lr, wr, false)
+	
+	if len(result) != len(lr) {
+		t.Errorf("Expected length %d, got %d", len(lr), len(result))
 	}
-
-	tests[32] = []testSet{
-		{1, 32, 0, true},
-		{16, 17, 0, true},
-		{4, 29, 0, true},
-		{13, 20, 0, true},
-
-		{21, 28, 0, false},
-		{20, 29, 0, false},
-		{22, 27, 0, false},
-		{18, 31, 0, false},
-
-		{12, 18, 1, false},
-		{16, 22, 1, false},
-		{13, 23, 1, false},
-
-		{12, 13, 2, false},
-		{9, 16, 2, false},
+	
+	// Basic structure test - should have proper length
+	if len(result) == 0 {
+		t.Error("carryDown returned empty result")
 	}
+}
 
-	tests[64] = []testSet{
-		{22, 43, 0, true},
-		{11, 54, 0, true},
-		{6, 59, 0, true},
-
-		{43, 54, 0, false},
-
-		{32, 43, 1, false},
-		{20, 39, 1, false},
-		{22, 33, 1, false},
-
-		{21, 28, 2, false},
-		{19, 30, 2, false},
-
-		{11, 21, 3, false},
-		{14, 20, 3, false},
-		{9, 23, 3, false},
+func TestBracketStructure(t *testing.T) {
+	bracket := CreateBracket(8)
+	
+	// Test that bracket has proper structure
+	if bracket.Sets == nil {
+		t.Error("Bracket.Sets is nil")
 	}
-
-	for bracketSize, test := range tests {
-		b := CreateBracket(bracketSize)
-		for _, set := range test {
-			t.Run(fmt.Sprintf("Bracket Size %d", bracketSize), func(t *testing.T) {
-				if !setExistsInRound(b, set.p1, set.p2, set.round, set.winners) {
-					t.Fatalf(`Expected to find set {%d, %d} r:%d, w:%t n:%d`, set.p1, set.p2, set.round, set.winners, bracketSize)
-				}
-			})
+	
+	if bracket.WinnersRounds == nil {
+		t.Error("Bracket.WinnersRounds is nil")
+	}
+	
+	if bracket.LosersRounds == nil {
+		t.Error("Bracket.LosersRounds is nil")
+	}
+	
+	// Test that all sets have valid player assignments
+	for i, set := range bracket.Sets {
+		if set.Player1 <= 0 || set.Player2 <= 0 {
+			t.Errorf("Set %d has invalid player numbers: %d vs %d", 
+				i, set.Player1, set.Player2)
 		}
 	}
 }

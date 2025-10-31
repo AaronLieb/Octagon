@@ -21,6 +21,9 @@ func Command() *cli.Command {
 		Description: desc,
 		UsageText:   "octagon rating [playerId]",
 		Action:      GetRating,
+		Commands: []*cli.Command{
+			biasCommand(),
+		},
 	}
 }
 
@@ -28,16 +31,31 @@ func GetRating(ctx context.Context, cmd *cli.Command) error {
 	log.Debug("Rating")
 
 	if cmd.Args().Len() < 1 {
-		return fmt.Errorf("please provide a userid")
+		return fmt.Errorf("please provide a userid or player name")
 	}
-	userIdStr := cmd.Args().First()
+	userInput := cmd.Args().First()
 
-	userId, err := strconv.Atoi(userIdStr)
-	if err != nil {
-		return err
+	// Try to resolve as player name first, then as ID
+	var userID int
+	player, err := findPlayerByName(userInput)
+	if err == nil {
+		// Convert ID to int
+		if id, ok := player.ID.(float64); ok {
+			userID = int(id)
+		} else if id, ok := player.ID.(int); ok {
+			userID = id
+		} else {
+			return fmt.Errorf("invalid player ID type")
+		}
+	} else {
+		// Try as direct ID
+		userID, err = strconv.Atoi(userInput)
+		if err != nil {
+			return fmt.Errorf("could not resolve '%s' as player name or ID: %v", userInput, err)
+		}
 	}
 
-	rating, err := ratings.Get(ctx, userId)
+	rating, err := ratings.Get(ctx, userID)
 	if err != nil {
 		return err
 	}

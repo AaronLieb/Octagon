@@ -134,6 +134,10 @@ query GetSets($slug: String) {
     sets(page: 0, perPage: 100, sortType: CALL_ORDER) {
       nodes {
         id
+        round
+        state
+        winnerId
+        displayScore
         slots {
           entrant {
             participants {
@@ -153,13 +157,15 @@ query GetReportableSets($slug: String) {
   event(slug: $slug) {
     sets(page: 0, perPage: 100, sortType: CALL_ORDER, filters: {
         hideEmpty: true,
-        showByes: false
+        showByes: false,
+        state: 1
       }) {
       nodes {
         id
         round
         slots {
           entrant {
+            id
             participants {
               player {
                 gamerTag
@@ -172,6 +178,8 @@ query GetReportableSets($slug: String) {
     }
   }
 }
+
+
 
 query GetSeeds($slug: String) {
   event(slug: $slug) {

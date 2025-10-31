@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/AaronLieb/octagon/brackets"
+	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 	"github.com/urfave/cli/v3"
 )
@@ -17,17 +18,67 @@ func printCommand() *cli.Command {
 		Name:    "print",
 		Usage:   "print bracket",
 		Aliases: []string{"p"},
-		Action:  printBracket,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "event",
+				Aliases:  []string{"e"},
+				Usage:    "Event slug to fetch real tournament data",
+				Required: false,
+			},
+		},
+		Action: printBracket,
 	}
 }
 
 func printBracket(ctx context.Context, cmd *cli.Command) error {
 	log.Debug("print bracket")
 
+	eventSlug := cmd.String("event")
+	if eventSlug != "" {
+		return printDetailedSets(ctx, eventSlug)
+	}
+
 	b := brackets.CreateBracket(8)
 	printRounds(b.WinnersRounds)
 	// printRounds(b.LosersRounds)
 	return nil
+}
+
+func printDetailedSets(ctx context.Context, eventSlug string) error {
+	setsResp, err := startgg.GetSets(ctx, eventSlug)
+	if err != nil {
+		return fmt.Errorf("unable to fetch sets: %v", err)
+	}
+
+	fmt.Println("=== DETAILED SET INFORMATION ===")
+	for i, set := range setsResp.Event.Sets.Nodes {
+		fmt.Printf("\n--- Set %d ---\n", i+1)
+		fmt.Printf("ID: %v\n", set.Id)
+		fmt.Printf("Round: %d (%s)\n", set.Round, parseRound(set.Round))
+		fmt.Printf("State: %v\n", set.State)
+		fmt.Printf("Winner ID: %v\n", set.WinnerId)
+		fmt.Printf("Display Score: %s\n", set.DisplayScore)
+
+		fmt.Println("Players:")
+		for j, slot := range set.Slots {
+			if slot.Entrant.Participants != nil && len(slot.Entrant.Participants) > 0 {
+				player := slot.Entrant.Participants[0].Player
+				fmt.Printf("  Slot %d: %s (Player ID: %v)\n", 
+					j+1, player.GamerTag, player.Id)
+			} else {
+				fmt.Printf("  Slot %d: [Empty/Bye]\n", j+1)
+			}
+		}
+	}
+	return nil
+}
+
+func parseRound(round int) string {
+	if round < 0 {
+		return fmt.Sprintf("LR%d", -round)
+	} else {
+		return fmt.Sprintf("WR%d", round)
+	}
 }
 
 func printRounds(rounds [][]*brackets.Set) {

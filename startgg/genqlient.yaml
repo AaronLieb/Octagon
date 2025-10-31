@@ -9,3 +9,5 @@ client_getter: github.com/AaronLieb/octagon/startgg.GetClient
 bindings:
   ID:
     type: interface{}
+  Timestamp:
+    type: interface{}

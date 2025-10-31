@@ -27,6 +27,16 @@ func ToString(value any) string {
 	}
 }
 
+func ToID(value string) ID {
+	if i, err := strconv.Atoi(value); err == nil {
+		return i
+	}
+	if f, err := strconv.ParseFloat(value, 64); err == nil {
+		return f
+	}
+	return value
+}
+
 func UnmarshalJSON(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }

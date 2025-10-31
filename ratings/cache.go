@@ -11,17 +11,17 @@ import (
 	"github.com/dgraph-io/badger/v4"
 )
 
-const KEY_FMT = "rating-%d"
+const KeyFmt = "rating-%d"
 
-func checkCache(userId startgg.ID) (float64, bool) {
-	key := fmt.Sprintf(KEY_FMT, userId)
+func checkCache(userID startgg.ID) (float64, bool) {
+	key := fmt.Sprintf(KeyFmt, userID)
 
 	log.Debugf("checking cache for '%s'", key)
 
 	bytes, err := cache.Get([]byte(key))
 	if err != nil {
 		if err != badger.ErrKeyNotFound {
-			log.Errorf("error while trying to read rating for '%d' from cache: %v", userId, err)
+			log.Errorf("error while trying to read rating for '%d' from cache: %v", userID, err)
 		}
 		return 0.0, false
 	}
@@ -33,8 +33,8 @@ func checkCache(userId startgg.ID) (float64, bool) {
 	return val, true
 }
 
-func updateCache(userId startgg.ID, rating float64) {
-	key := fmt.Sprintf(KEY_FMT, userId)
+func updateCache(userID startgg.ID, rating float64) {
+	key := fmt.Sprintf(KeyFmt, userID)
 
 	log.Debugf("updating cache for '%s'", key)
 
@@ -43,6 +43,6 @@ func updateCache(userId startgg.ID, rating float64) {
 	binary.LittleEndian.PutUint64(ratingBytes, ratingBits)
 	err := cache.Set([]byte(key), []byte(ratingBytes))
 	if err != nil {
-		log.Errorf("error while trying to update cache for '%d': %v", userId, err)
+		log.Errorf("error while trying to update cache for '%d': %v", userID, err)
 	}
 }

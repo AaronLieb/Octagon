@@ -22,6 +22,12 @@ func CreateConflictsForSetsPlayed(ctx context.Context, eventSlug string) []confl
 	log.Debug("sets", "n", len(sets))
 
 	for _, set := range sets {
+		// Skip DQ sets
+		if set.DisplayScore == "DQ" {
+			log.Debug("skipping DQ set", "setId", set.Id)
+			continue
+		}
+
 		if len(set.Slots[0].Entrant.Participants) == 0 {
 			continue
 		}

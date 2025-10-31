@@ -471,7 +471,13 @@ func (v *GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot) GetEntrant
 //
 // An entrant in an event
 type GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrant struct {
+	Id           interface{}                                                                                 `json:"id"`
 	Participants []GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrantParticipantsParticipant `json:"participants"`
+}
+
+// GetId returns GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrant.Id, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrant) GetId() interface{} {
+	return v.Id
 }
 
 // GetParticipants returns GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlotEntrant.Participants, and is useful for accessing the field via an interface.
@@ -732,12 +738,29 @@ func (v *GetSetsEventSetsSetConnection) GetNodes() []GetSetsEventSetsSetConnecti
 // A set
 type GetSetsEventSetsSetConnectionNodesSet struct {
 	Id interface{} `json:"id"`
+	// The round number of the set. Negative numbers are losers bracket
+	Round        int    `json:"round"`
+	State        int    `json:"state"`
+	WinnerId     int    `json:"winnerId"`
+	DisplayScore string `json:"displayScore"`
 	// A possible spot in a set. Use this to get all entrants in a set. Use this for all bracket types (FFA, elimination, etc)
 	Slots []GetSetsEventSetsSetConnectionNodesSetSlotsSetSlot `json:"slots"`
 }
 
 // GetId returns GetSetsEventSetsSetConnectionNodesSet.Id, and is useful for accessing the field via an interface.
 func (v *GetSetsEventSetsSetConnectionNodesSet) GetId() interface{} { return v.Id }
+
+// GetRound returns GetSetsEventSetsSetConnectionNodesSet.Round, and is useful for accessing the field via an interface.
+func (v *GetSetsEventSetsSetConnectionNodesSet) GetRound() int { return v.Round }
+
+// GetState returns GetSetsEventSetsSetConnectionNodesSet.State, and is useful for accessing the field via an interface.
+func (v *GetSetsEventSetsSetConnectionNodesSet) GetState() int { return v.State }
+
+// GetWinnerId returns GetSetsEventSetsSetConnectionNodesSet.WinnerId, and is useful for accessing the field via an interface.
+func (v *GetSetsEventSetsSetConnectionNodesSet) GetWinnerId() int { return v.WinnerId }
+
+// GetDisplayScore returns GetSetsEventSetsSetConnectionNodesSet.DisplayScore, and is useful for accessing the field via an interface.
+func (v *GetSetsEventSetsSetConnectionNodesSet) GetDisplayScore() string { return v.DisplayScore }
 
 // GetSlots returns GetSetsEventSetsSetConnectionNodesSet.Slots, and is useful for accessing the field via an interface.
 func (v *GetSetsEventSetsSetConnectionNodesSet) GetSlots() []GetSetsEventSetsSetConnectionNodesSetSlotsSetSlot {
@@ -1559,12 +1582,13 @@ func GetParticipants(
 const GetReportableSets_Operation = `
 query GetReportableSets ($slug: String) {
 	event(slug: $slug) {
-		sets(page: 0, perPage: 100, sortType: CALL_ORDER, filters: {hideEmpty:true,showByes:false}) {
+		sets(page: 0, perPage: 100, sortType: CALL_ORDER, filters: {hideEmpty:true,showByes:false,state:1}) {
 			nodes {
 				id
 				round
 				slots {
 					entrant {
+						id
 						participants {
 							player {
 								gamerTag
@@ -1720,6 +1744,10 @@ query GetSets ($slug: String) {
 		sets(page: 0, perPage: 100, sortType: CALL_ORDER) {
 			nodes {
 				id
+				round
+				state
+				winnerId
+				displayScore
 				slots {
 					entrant {
 						participants {
