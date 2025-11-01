@@ -39,6 +39,11 @@ func SaveConflict(newConflict Conflict) error {
 	return writeConflictsFile(ConflictFile, existingConflicts)
 }
 
+// WriteConflictsFile overwrites the conflicts file with the provided conflicts
+func WriteConflictsFile(conflicts []Conflict) error {
+	return writeConflictsFile(ConflictFile, conflicts)
+}
+
 // readConflictsFile reads conflicts from a JSON file
 func readConflictsFile(fileName string) []Conflict {
 	var conflicts []Conflict
