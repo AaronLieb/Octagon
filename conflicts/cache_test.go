@@ -8,8 +8,8 @@ import (
 
 func TestNewConflictCache(t *testing.T) {
 	players := []brackets.Player{
-		{Id: int64(123), Name: "Player1"},
-		{Id: int64(456), Name: "Player2"},
+		{ID: int64(123), Name: "Player1"},
+		{ID: int64(456), Name: "Player2"},
 	}
 
 	bracket := &brackets.Bracket{
@@ -43,8 +43,8 @@ func TestNewConflictCache(t *testing.T) {
 
 func TestCheckCached(t *testing.T) {
 	players := []brackets.Player{
-		{Id: int64(123), Name: "Player1"},
-		{Id: int64(456), Name: "Player2"},
+		{ID: int64(123), Name: "Player1"},
+		{ID: int64(456), Name: "Player2"},
 	}
 
 	bracket := &brackets.Bracket{

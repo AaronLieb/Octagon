@@ -8,7 +8,6 @@ import (
 
 	"github.com/AaronLieb/octagon/characters"
 	"github.com/AaronLieb/octagon/tournament"
-	"github.com/AaronLieb/octagon/validation"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -218,7 +217,7 @@ func (m Model) updateCharacterInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) validateAndReportSet() error {
-	if err := validation.ValidateSetScore(m.gameResults); err != nil {
+	if err := tournament.ValidateSetScore(m.gameResults); err != nil {
 		return err
 	}
 	return tournament.ReportSet(m.ctx, m.selectedSet, m.gameResults)

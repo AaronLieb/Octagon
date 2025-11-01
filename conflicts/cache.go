@@ -20,8 +20,8 @@ func newConflictCache(players []brackets.Player, bracket *brackets.Bracket) *con
 	
 	// Pre-compute player index lookups
 	for i, player := range players {
-		cache.playerIndexMap[player.Id] = i
-		cache.stringCache[player.Id] = startgg.ToString(player.Id)
+		cache.playerIndexMap[player.ID] = i
+		cache.stringCache[player.ID] = startgg.ToString(player.ID)
 	}
 	
 	// Pre-filter sets that could have conflicts

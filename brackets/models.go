@@ -4,7 +4,7 @@ import "github.com/AaronLieb/octagon/startgg"
 
 type Player struct {
 	Name   string
-	Id     startgg.ID
+	ID     startgg.ID
 	Rating float64
 }
 

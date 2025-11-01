@@ -28,7 +28,7 @@ func calculateSeedDiffScore(players, newPlayers []brackets.Player) float64 {
 	seedDiffScore := 0.0
 	for i, p := range newPlayers {
 		for j, q := range players {
-			if p.Id == q.Id {
+			if p.ID == q.ID {
 				importance := calculateImportance(j)
 				seedDiff := math.Abs(float64(i-j)) * importance
 				seedDiffScore += math.Pow(seedDiff, 1.5)
@@ -42,7 +42,7 @@ func calculateSeedDiffScore(players, newPlayers []brackets.Player) float64 {
 func calculateSeedDiffScoreCached(cache *conflictCache, newPlayers []brackets.Player) float64 {
 	seedDiffScore := 0.0
 	for i, p := range newPlayers {
-		if originalIndex, exists := cache.playerIndexMap[p.Id]; exists {
+		if originalIndex, exists := cache.playerIndexMap[p.ID]; exists {
 			importance := calculateImportance(originalIndex)
 			seedDiff := math.Abs(float64(i-originalIndex)) * importance
 			seedDiffScore += math.Pow(seedDiff, 1.5)

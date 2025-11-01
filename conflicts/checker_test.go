@@ -34,9 +34,9 @@ func TestConflictCheck(t *testing.T) {
 
 func TestCheckConflict(t *testing.T) {
 	players := []brackets.Player{
-		{Id: int64(123), Name: "Player1"},
-		{Id: int64(456), Name: "Player2"},
-		{Id: int64(789), Name: "Player3"},
+		{ID: int64(123), Name: "Player1"},
+		{ID: int64(456), Name: "Player2"},
+		{ID: int64(789), Name: "Player3"},
 	}
 
 	conflicts := []Conflict{

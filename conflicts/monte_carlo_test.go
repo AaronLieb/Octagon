@@ -8,21 +8,21 @@ import (
 
 func TestRandomizeSeeds(t *testing.T) {
 	players := []brackets.Player{
-		{Id: 1, Name: "Player1"},
-		{Id: 2, Name: "Player2"},
-		{Id: 3, Name: "Player3"},
-		{Id: 4, Name: "Player4"},
-		{Id: 5, Name: "Player5"},
+		{ID: 1, Name: "Player1"},
+		{ID: 2, Name: "Player2"},
+		{ID: 3, Name: "Player3"},
+		{ID: 4, Name: "Player4"},
+		{ID: 5, Name: "Player5"},
 	}
 
 	// Test that top 2 seeds are preserved
 	for i := 0; i < 10; i++ {
 		randomized := randomizeSeeds(players, 2)
 		
-		if randomized[0].Id != 1 {
+		if randomized[0].ID != 1 {
 			t.Error("Expected first seed to remain unchanged")
 		}
-		if randomized[1].Id != 2 {
+		if randomized[1].ID != 2 {
 			t.Error("Expected second seed to remain unchanged")
 		}
 		
@@ -54,8 +54,8 @@ func TestCalculateAttempts(t *testing.T) {
 
 func TestResolveConflictsNoConflicts(t *testing.T) {
 	players := []brackets.Player{
-		{Id: 1, Name: "Player1"},
-		{Id: 2, Name: "Player2"},
+		{ID: 1, Name: "Player1"},
+		{ID: 2, Name: "Player2"},
 	}
 
 	bracket := &brackets.Bracket{
@@ -73,7 +73,7 @@ func TestResolveConflictsNoConflicts(t *testing.T) {
 	
 	// Should be identical (no optimization needed)
 	for i, player := range result {
-		if player.Id != players[i].Id {
+		if player.ID != players[i].ID {
 			t.Error("Expected no changes when no conflicts exist")
 		}
 	}

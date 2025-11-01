@@ -1,3 +1,4 @@
+// Package brackets handles the logic for double elimination brackets, and determining which sets will be played
 package brackets
 
 import (
@@ -40,9 +41,6 @@ func reduce(round []int) []int {
 	return half
 }
 
-// temporary code that I need to refactor
-// way too much reptition, logic can be pulled out
-// to funcs
 func CreateBracket(numPlayers int) *Bracket {
 	n := int(math.Pow(2, math.Ceil(math.Log2(float64(numPlayers)))))
 

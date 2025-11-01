@@ -61,9 +61,9 @@ func printDetailedSets(ctx context.Context, eventSlug string) error {
 
 		fmt.Println("Players:")
 		for j, slot := range set.Slots {
-			if slot.Entrant.Participants != nil && len(slot.Entrant.Participants) > 0 {
+			if len(slot.Entrant.Participants) > 0 {
 				player := slot.Entrant.Participants[0].Player
-				fmt.Printf("  Slot %d: %s (Player ID: %v)\n", 
+				fmt.Printf("  Slot %d: %s (Player ID: %v)\n",
 					j+1, player.GamerTag, player.Id)
 			} else {
 				fmt.Printf("  Slot %d: [Empty/Bye]\n", j+1)

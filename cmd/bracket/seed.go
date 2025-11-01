@@ -106,7 +106,7 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 		}
 		players[i] = brackets.Player{
 			Name:   name,
-			Id:     id,
+			ID:     id,
 			Rating: rating,
 		}
 	}
@@ -125,7 +125,10 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 
 	var input string
 	fmt.Println("Publish seeding? (y/N)")
-	fmt.Scanln(&input)
+	_, err = fmt.Scanln(&input)
+	if err != nil {
+		return fmt.Errorf("invalid input: %v", err)
+	}
 
 	if input != "y" && input != "Y" {
 		log.Info("Cancelling seeding...")
@@ -157,7 +160,7 @@ func publishSeeds(ctx context.Context, eventSlug string, players []brackets.Play
 	seedMapping := make([]startgg.UpdatePhaseSeedInfo, len(players))
 	for _, seed := range seeds {
 		for s, player := range players {
-			if startgg.ToString(seed.Players[0].Id) == startgg.ToString(player.Id) {
+			if startgg.ToString(seed.Players[0].Id) == startgg.ToString(player.ID) {
 				seedMapping[s] = startgg.UpdatePhaseSeedInfo{
 					SeedId:  seed.Id,
 					SeedNum: s + 1,

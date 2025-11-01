@@ -54,8 +54,8 @@ func checkConflict(bracket *brackets.Bracket, conflicts []Conflict, players []br
 			continue
 		}
 		for _, con := range conflicts {
-			p1 := players[s.Player1-1].Id
-			p2 := players[s.Player2-1].Id
+			p1 := players[s.Player1-1].ID
+			p2 := players[s.Player2-1].ID
 			if con.check(p1, p2) {
 				conflictScore += float64(2 + con.Priority)
 				conflictSum++
@@ -73,8 +73,8 @@ func checkConflictCached(cache *conflictCache, conflicts []Conflict, players []b
 
 	for _, s := range cache.conflictSets {
 		for _, con := range conflicts {
-			p1 := players[s.Player1-1].Id
-			p2 := players[s.Player2-1].Id
+			p1 := players[s.Player1-1].ID
+			p2 := players[s.Player2-1].ID
 			if con.checkCached(p1, p2, cache) {
 				conflictScore += float64(2 + con.Priority)
 				conflictSum++
@@ -93,8 +93,8 @@ func listUnresolvedConflicts(bracket *brackets.Bracket, conflicts []Conflict, pl
 			continue
 		}
 		for _, con := range conflicts {
-			p1 := players[s.Player1-1].Id
-			p2 := players[s.Player2-1].Id
+			p1 := players[s.Player1-1].ID
+			p2 := players[s.Player2-1].ID
 			if con.check(p1, p2) {
 				unresolved = append(unresolved, con)
 			}

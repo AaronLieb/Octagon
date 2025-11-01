@@ -27,16 +27,16 @@ func TestCalculateImportance(t *testing.T) {
 
 func TestCalculateSeedDiffScore(t *testing.T) {
 	original := []brackets.Player{
-		{Id: int64(1), Name: "Player1"},
-		{Id: int64(2), Name: "Player2"},
-		{Id: int64(3), Name: "Player3"},
+		{ID: int64(1), Name: "Player1"},
+		{ID: int64(2), Name: "Player2"},
+		{ID: int64(3), Name: "Player3"},
 	}
 
 	// No changes
 	same := []brackets.Player{
-		{Id: int64(1), Name: "Player1"},
-		{Id: int64(2), Name: "Player2"},
-		{Id: int64(3), Name: "Player3"},
+		{ID: int64(1), Name: "Player1"},
+		{ID: int64(2), Name: "Player2"},
+		{ID: int64(3), Name: "Player3"},
 	}
 
 	score := calculateSeedDiffScore(original, same)
@@ -46,9 +46,9 @@ func TestCalculateSeedDiffScore(t *testing.T) {
 
 	// Swap positions
 	swapped := []brackets.Player{
-		{Id: int64(2), Name: "Player2"},
-		{Id: int64(1), Name: "Player1"},
-		{Id: int64(3), Name: "Player3"},
+		{ID: int64(2), Name: "Player2"},
+		{ID: int64(1), Name: "Player1"},
+		{ID: int64(3), Name: "Player3"},
 	}
 
 	score = calculateSeedDiffScore(original, swapped)
