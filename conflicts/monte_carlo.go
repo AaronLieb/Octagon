@@ -1,7 +1,6 @@
 package conflicts
 
 import (
-	"math"
 	"math/rand/v2"
 	"runtime"
 	"sync"
@@ -11,8 +10,11 @@ import (
 )
 
 const (
-	ConflictResolutionAttempts = 1000
-	ConflictResolutionVariance = 6
+	ConflictResolutionAttempts = 10000
+	ConflictResolutionVariance = 8
+	AttemptsAddedPerRound      = 10000
+	MinVariance                = 4
+	MaxAttemptsPerRound        = 40000
 )
 
 type monteCarloResult struct {
@@ -46,7 +48,7 @@ func runParallelMonteCarlo(cache *conflictCache, conflicts []Conflict, players [
 	lowestScore := initialScore
 	numWorkers := runtime.NumCPU()
 
-	for v := ConflictResolutionVariance; v > 2 && lowestScore > 0.0; v-- {
+	for v := ConflictResolutionVariance; v > MinVariance && lowestScore > 0.0; v-- {
 		attempts := calculateAttempts(v)
 		log.Debug("Running parallel monte carlo", "variance", v, "attempts", attempts, "workers", numWorkers)
 
@@ -60,11 +62,6 @@ func runParallelMonteCarlo(cache *conflictCache, conflicts []Conflict, players [
 				log.Info("Perfect solution found, terminating early")
 				break
 			}
-		}
-
-		// Adaptive variance reduction
-		if lowestScore < 5.0 && v > 3 {
-			v-- // Skip a variance level for good solutions
 		}
 	}
 
@@ -135,10 +132,8 @@ func randomizeSeeds(players []brackets.Player, variance int) []brackets.Player {
 
 // calculateAttempts determines number of attempts for given variance
 func calculateAttempts(variance int) int {
-	return int(math.Max(
-		ConflictResolutionAttempts*math.Pow(float64(6-variance), 1.5),
-		ConflictResolutionAttempts,
-	))
+	extraRounds := ConflictResolutionVariance - variance
+	return min(int(ConflictResolutionAttempts+AttemptsAddedPerRound*extraRounds), MaxAttemptsPerRound)
 }
 
 // logResults prints the final results
