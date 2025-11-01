@@ -29,13 +29,13 @@ func SaveBias(newBias Bias) error {
 	return writeBiasFile(biases)
 }
 
-func GetBiasForPlayer(userId startgg.ID) float64 {
+func GetBiasForPlayer(userID startgg.ID) float64 {
 	biases := readBiasFile()
 	biases = removeExpiredBiases(biases)
 
-	userIdStr := startgg.ToString(userId)
+	userIDStr := startgg.ToString(userID)
 	for _, bias := range biases {
-		if bias.PlayerID == userIdStr {
+		if bias.PlayerID == userIDStr {
 			return bias.Ratio
 		}
 	}

@@ -1,3 +1,4 @@
+// Package cmd is the root package for all `octagon` cli commands
 package cmd
 
 import (

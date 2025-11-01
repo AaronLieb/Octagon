@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/AaronLieb/octagon/startgg"
+	"github.com/AaronLieb/octagon/tournament"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
 	"github.com/urfave/cli/v3"
@@ -45,7 +46,7 @@ func runReportTUI(ctx context.Context, cmd *cli.Command) error {
 
 	eventSlug := fmt.Sprintf(startgg.EventSlugFormat, tournamentSlug, event)
 
-	sets, err := FetchReportableSets(ctx, eventSlug)
+	sets, err := tournament.FetchReportableSets(ctx, eventSlug)
 	if err != nil {
 		return err
 	}
