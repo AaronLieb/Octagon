@@ -1582,7 +1582,7 @@ func GetParticipants(
 const GetReportableSets_Operation = `
 query GetReportableSets ($slug: String) {
 	event(slug: $slug) {
-		sets(page: 0, perPage: 100, sortType: CALL_ORDER, filters: {hideEmpty:true,showByes:false,state:1}) {
+		sets(page: 0, perPage: 500, sortType: CALL_ORDER, filters: {hideEmpty:true,showByes:false,state:[1,2]}) {
 			nodes {
 				id
 				round

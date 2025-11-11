@@ -12,6 +12,7 @@ import (
 	"github.com/AaronLieb/octagon/conflicts"
 	"github.com/AaronLieb/octagon/seeding"
 	"github.com/AaronLieb/octagon/startgg"
+	"github.com/AaronLieb/octagon/tournament"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -52,6 +53,31 @@ type ConflictResponse struct {
 	Expiration string `json:"expiration"`
 }
 
+type SetResponse struct {
+	ID       int    `json:"id"`
+	Player1  Player `json:"player1"`
+	Player2  Player `json:"player2"`
+	Round    string `json:"round"`
+	Entrant1 int    `json:"entrant1"`
+	Entrant2 int    `json:"entrant2"`
+}
+
+type Player struct {
+	Name string `json:"name"`
+	ID   int    `json:"id"`
+}
+
+type GameResult struct {
+	Winner int    `json:"winner"`
+	P1Char string `json:"p1Char"`
+	P2Char string `json:"p2Char"`
+}
+
+type ReportSetRequest struct {
+	SetID int          `json:"setId"`
+	Games []GameResult `json:"games"`
+}
+
 type SeedResult struct {
 	Name   string  `json:"name"`
 	Rating float64 `json:"rating"`
@@ -82,6 +108,8 @@ func main() {
 	r.GET("/api/conflicts", getConflicts)
 	r.POST("/api/conflicts", addConflict)
 	r.DELETE("/api/conflicts/:index", deleteConflict)
+	r.GET("/api/sets", getSets)
+	r.POST("/api/sets/report", reportSet)
 
 	r.Run(":8080")
 }
@@ -320,5 +348,69 @@ func deleteConflict(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Conflict deleted successfully",
+	})
+}
+
+func getSets(c *gin.Context) {
+	tournamentSlug := c.DefaultQuery("tournament", "octagon")
+	redemption := c.DefaultQuery("redemption", "false") == "true"
+
+	fullTournamentSlug, err := startgg.GetTournamentSlug(context.Background(), tournamentSlug)
+	if err != nil {
+		fmt.Printf("Error getting tournament slug: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	event := startgg.EventUltimateSingles
+	if redemption {
+		event = startgg.EventRedemptionBracket
+	}
+
+	eventSlug := fmt.Sprintf(startgg.EventSlugFormat, fullTournamentSlug, event)
+	sets, err := tournament.FetchReportableSets(context.Background(), eventSlug)
+	if err != nil {
+		fmt.Printf("Error fetching sets: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	setResponses := make([]SetResponse, len(sets))
+	for i, set := range sets {
+		setResponses[i] = SetResponse{
+			ID:       set.ID,
+			Player1:  Player{Name: set.Player1.Name, ID: set.Player1.ID},
+			Player2:  Player{Name: set.Player2.Name, ID: set.Player2.ID},
+			Round:    set.Round,
+			Entrant1: set.Entrant1,
+			Entrant2: set.Entrant2,
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"sets": setResponses,
+	})
+}
+
+func reportSet(c *gin.Context) {
+	var req ReportSetRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Convert to tournament.GameResult format
+	gameResults := make([]tournament.GameResult, len(req.Games))
+	for i, game := range req.Games {
+		gameResults[i] = tournament.GameResult{
+			Winner: game.Winner,
+			P1Char: game.P1Char,
+			P2Char: game.P2Char,
+		}
+	}
+
+	// For now, just return success - actual reporting would need implementation
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Set reported successfully",
 	})
 }

@@ -32,6 +32,8 @@ type GameResult struct {
 }
 
 func FetchReportableSets(ctx context.Context, eventSlug string) ([]Set, error) {
+	// Note: The current GraphQL query only fetches 100 sets from page 0
+	// This is a limitation in the generated startgg.GetReportableSets function
 	resp, err := startgg.GetReportableSets(ctx, eventSlug)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch sets: %w", err)
@@ -92,7 +94,10 @@ func FetchReportableSets(ctx context.Context, eventSlug string) ([]Set, error) {
 		})
 	}
 
-	log.Debugf("Found %d reportable sets", len(sets))
+	log.Debugf("Found %d reportable sets (limited to first 500 due to pagination)", len(sets))
+	if len(resp.Event.Sets.Nodes) == 500 {
+		log.Warnf("Fetched exactly 500 sets - there may be more sets available that aren't shown")
+	}
 	return sets, nil
 }
 
