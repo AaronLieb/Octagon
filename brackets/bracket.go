@@ -114,54 +114,38 @@ func CreateBracket(numPlayers int) *Bracket {
 
 	// Initial winners bracket
 	wr := CreateRound(n, 0)
-	wrSets := createSets(wr)
-	sets = append(sets, wrSets...)
-	winnersRounds = append(winnersRounds, wrSets)
 
 	// Initial losers bracket (byes)
 	lr := CreateRound(n/2, n/2)
-	lrSets := createSets(lr)
-	sets = append(sets, lrSets...)
-	losersRounds = append(losersRounds, lrSets)
 
-	// Merge first winners bracket losers with initial losers
-	lr = carryDown(lr, wr, n, 0)
-	lrSets = createSets(lr)
-	sets = append(sets, lrSets...)
-	losersRounds = append(losersRounds, lrSets)
+	var wrSets []*Set
+	var lrSets []*Set
 
-	for round := 1; len(wr) > 4; round++ {
+	for round := 0; len(wr) > 2; round++ {
+
+		// Reduce previous rounds
+		if round != 0 {
+			wr = reduceWinners(wr)
+			lr = reduceWinners(lr)
+		}
+
 		// Advance winners bracket
-		wr = reduceWinners(wr)
 		wrSets = createSets(wr)
 		sets = append(sets, wrSets...)
 		winnersRounds = append(winnersRounds, wrSets)
 
-		// Advance losers bracket
-		lr = reduceWinners(lr)
-		lrSets = createSets(lr)
-		sets = append(sets, lrSets...)
-		losersRounds = append(losersRounds, lrSets)
+		if len(wr) > 2 {
+			// Advance losers bracket
+			lrSets = createSets(lr)
+			sets = append(sets, lrSets...)
+			losersRounds = append(losersRounds, lrSets)
 
-		// Merge winners bracket losers with losers bracket
-		lr = carryDown(lr, wr, n, round)
-		lrSets = createSets(lr)
-		sets = append(sets, lrSets...)
-		losersRounds = append(losersRounds, lrSets)
-	}
-
-	// Winners bracket finals
-	wr = reduceWinners(wr)
-	wrSets = createSets(wr)
-	sets = append(sets, wrSets...)
-	winnersRounds = append(winnersRounds, wrSets)
-
-	// Losers bracket finals
-	for len(lr) > 2 {
-		lr = reduceWinners(lr)
-		lrSets = createSets(lr)
-		sets = append(sets, lrSets...)
-		losersRounds = append(losersRounds, lrSets)
+			// Merge winners bracket losers with losers bracket
+			lr = carryDown(lr, wr, n, round)
+			lrSets = createSets(lr)
+			sets = append(sets, lrSets...)
+			losersRounds = append(losersRounds, lrSets)
+		}
 	}
 
 	// Filter out invalid players

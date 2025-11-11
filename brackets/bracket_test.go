@@ -74,12 +74,14 @@ func TestReduce(t *testing.T) {
 
 func TestCreateBracket(t *testing.T) {
 	tests := []struct {
-		numPlayers int
-		minSets    int
+		numPlayers       int
+		numSets          int
+		numWinnersRounds int
+		numLosersRounds  int
 	}{
-		{8, 7}, // 8-player bracket needs at least 7 sets
-		{4, 3}, // 4-player bracket needs at least 3 sets
-		{2, 1}, // 2-player bracket needs 1 set
+		{16, 29, 4, 6},
+		{8, 13, 3, 4},
+		{4, 5, 2, 2},
 	}
 
 	for _, test := range tests {
@@ -90,13 +92,17 @@ func TestCreateBracket(t *testing.T) {
 			continue
 		}
 
-		if len(bracket.Sets) < test.minSets {
-			t.Errorf("CreateBracket(%d): expected at least %d sets, got %d",
-				test.numPlayers, test.minSets, len(bracket.Sets))
+		if len(bracket.Sets) != test.numSets {
+			t.Errorf("CreateBracket(%d): expected  %d sets, got %d",
+				test.numPlayers, test.numSets, len(bracket.Sets))
 		}
 
-		if len(bracket.WinnersRounds) == 0 {
-			t.Errorf("CreateBracket(%d): no winners rounds created", test.numPlayers)
+		if len(bracket.WinnersRounds) != test.numWinnersRounds {
+			t.Errorf("CreateBracket(%d): expected %d winners rounds, got %d", test.numPlayers, test.numWinnersRounds, len(bracket.WinnersRounds))
+		}
+
+		if len(bracket.LosersRounds) != test.numLosersRounds {
+			t.Errorf("CreateBracket(%d): expected %d losers rounds, got %d", test.numPlayers, test.numLosersRounds, len(bracket.LosersRounds))
 		}
 
 		// Verify no invalid player numbers
@@ -259,6 +265,10 @@ func TestBracket32PlayerSets(t *testing.T) {
 		player2 int
 	}{
 		{1, 16, 17},
+		{2, 4, 13},
+		{3, 2, 7},
+		{4, 1, 4},
+		{5, 1, 2},
 		{-1, 28, 21},
 		{-1, 26, 23},
 		{-2, 11, 17},
@@ -271,6 +281,7 @@ func TestBracket32PlayerSets(t *testing.T) {
 		{-5, 5, 8},
 		{-6, 3, 5},
 		{-7, 3, 4},
+		{-8, 2, 3},
 	}
 
 	for _, expected := range expectedSets {
