@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	ConflictResolutionAttempts = 10000
+	ConflictResolutionAttempts = 5000
 	ConflictResolutionVariance = 8
-	AttemptsAddedPerRound      = 10000
+	AttemptsAddedPerRound      = 5000
 	MinVariance                = 4
-	MaxAttemptsPerRound        = 40000
+	MaxAttemptsPerRound        = 3000
 )
 
 type monteCarloResult struct {

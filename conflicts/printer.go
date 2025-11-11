@@ -2,6 +2,7 @@ package conflicts
 
 import (
 	"github.com/AaronLieb/octagon/brackets"
+	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 )
 
@@ -25,11 +26,11 @@ func printSeeds(before, after []brackets.Player) {
 				
 				switch {
 				case diff > 0:
-					log.Printf("%-5d %-6.1f %25s %1s%-6d%s %d", seed, p.Rating, p.Name, "\033[32m↑", diff, "\033[0m", p.ID)
+					log.Printf("%-5d %-6.1f %25s %1s%-6d%s %s", seed, p.Rating, p.Name, "\033[32m↑", diff, "\033[0m", startgg.ToString(p.ID))
 				case diff < 0:
-					log.Printf("%-5d %-6.1f %25s %1s%-6d%s %d", seed, p.Rating, p.Name, "\033[31m↓", -diff, "\033[0m", p.ID)
+					log.Printf("%-5d %-6.1f %25s %1s%-6d%s %s", seed, p.Rating, p.Name, "\033[31m↓", -diff, "\033[0m", startgg.ToString(p.ID))
 				default:
-					log.Printf("%-5d %-6.1f %25s  %-6s %d", seed, p.Rating, p.Name, "", p.ID)
+					log.Printf("%-5d %-6.1f %25s  %-6s %s", seed, p.Rating, p.Name, "", startgg.ToString(p.ID))
 				}
 			}
 		}

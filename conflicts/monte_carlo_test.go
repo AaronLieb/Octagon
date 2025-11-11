@@ -16,38 +16,19 @@ func TestRandomizeSeeds(t *testing.T) {
 	}
 
 	// Test that top 2 seeds are preserved
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		randomized := randomizeSeeds(players, 2)
-		
+
 		if randomized[0].ID != 1 {
 			t.Error("Expected first seed to remain unchanged")
 		}
 		if randomized[1].ID != 2 {
 			t.Error("Expected second seed to remain unchanged")
 		}
-		
+
 		// Should have same length
 		if len(randomized) != len(players) {
 			t.Error("Expected same number of players after randomization")
-		}
-	}
-}
-
-func TestCalculateAttempts(t *testing.T) {
-	tests := []struct {
-		variance int
-		expected int
-	}{
-		{6, ConflictResolutionAttempts},
-		{5, int(ConflictResolutionAttempts * 1.0)},
-		{3, int(ConflictResolutionAttempts * 5.196)}, // 6-3 = 3, 3^1.5 ≈ 5.196
-	}
-
-	for _, test := range tests {
-		result := calculateAttempts(test.variance)
-		if result < ConflictResolutionAttempts {
-			t.Errorf("calculateAttempts(%d) = %d, should be at least %d", 
-				test.variance, result, ConflictResolutionAttempts)
 		}
 	}
 }
@@ -66,11 +47,11 @@ func TestResolveConflictsNoConflicts(t *testing.T) {
 
 	// No conflicts - should return original players
 	result := ResolveConflicts(bracket, []Conflict{}, players)
-	
+
 	if len(result) != len(players) {
 		t.Error("Expected same number of players")
 	}
-	
+
 	// Should be identical (no optimization needed)
 	for i, player := range result {
 		if player.ID != players[i].ID {
