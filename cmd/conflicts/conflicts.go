@@ -10,7 +10,7 @@ func Command() *cli.Command {
 		Name:      "conflicts",
 		UsageText: "octagon conflicts [subcommand]",
 		Usage:     "View and manage conflicts",
-		Aliases:   []string{"c"},
+		Aliases:   []string{"c", "conflict"},
 		Commands: []*cli.Command{
 			createCommand(),
 			listCommand(),

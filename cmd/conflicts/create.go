@@ -17,13 +17,24 @@ import (
 func createCommand() *cli.Command {
 	return &cli.Command{
 		Name:    "create",
-		Usage:   "creates a conflict: octagon conflict create player1name player2name reason",
+		Usage:   "creates a conflict: octagon conflict create player1name player2name",
 		Aliases: []string{"c", "add", "a"},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "expires",
 				Aliases: []string{"e"},
 				Usage:   "Expiration duration (e.g., '24h', '7d', '2w')",
+			},
+			&cli.IntFlag{
+				Name:    "priority",
+				Aliases: []string{"p"},
+				Usage:   "Priority level (1-3)",
+				Value:   3,
+			},
+			&cli.StringFlag{
+				Name:    "reason",
+				Aliases: []string{"r"},
+				Usage:   "Reason for the conflict",
 			},
 		},
 		Action: createConflict,
@@ -32,13 +43,19 @@ func createCommand() *cli.Command {
 
 func createConflict(ctx context.Context, cmd *cli.Command) error {
 	args := cmd.Args().Slice()
-	if len(args) < 3 {
-		return fmt.Errorf("usage: octagon conflict create player1name player2name reason")
+	if len(args) < 2 {
+		return fmt.Errorf("usage: octagon conflict create player1name player2name")
 	}
 
 	player1Name := args[0]
 	player2Name := args[1]
-	reason := strings.Join(args[2:], " ")
+	reason := cmd.String("reason")
+
+	// Validate priority
+	priority := cmd.Int("priority")
+	if priority < 1 || priority > 3 {
+		return fmt.Errorf("priority must be between 1 and 3")
+	}
 
 	// Parse expiration if provided
 	var expiration *time.Time
@@ -66,7 +83,10 @@ func createConflict(ctx context.Context, cmd *cli.Command) error {
 	fmt.Printf("Create conflict between:\n")
 	fmt.Printf("  Player 1: %s (ID: %s)\n", player1.Name, startgg.ToString(player1.ID))
 	fmt.Printf("  Player 2: %s (ID: %s)\n", player2.Name, startgg.ToString(player2.ID))
-	fmt.Printf("  Reason: %s\n", reason)
+	fmt.Printf("  Priority: %d\n", priority)
+	if reason != "" {
+		fmt.Printf("  Reason: %s\n", reason)
+	}
 	fmt.Print("Confirm? (y/N): ")
 
 	var input string
@@ -81,7 +101,7 @@ func createConflict(ctx context.Context, cmd *cli.Command) error {
 
 	// Create and save conflict
 	newConflict := conflicts.Conflict{
-		Priority:   1,
+		Priority:   int(priority),
 		Reason:     reason,
 		Expiration: expiration,
 		Players: []conflicts.Player{
