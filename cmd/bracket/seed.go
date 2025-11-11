@@ -3,7 +3,6 @@ package bracket
 import (
 	"context"
 	"fmt"
-	"regexp"
 
 	"github.com/AaronLieb/octagon/seeding"
 	"github.com/AaronLieb/octagon/startgg"
@@ -44,11 +43,6 @@ func seedCommand() *cli.Command {
 		},
 		Action: seed,
 	}
-}
-
-func filterOutNonNumbers(input string) string {
-	reg, _ := regexp.Compile("[0-9]+")
-	return reg.FindString(input)
 }
 
 func seed(ctx context.Context, cmd *cli.Command) error {

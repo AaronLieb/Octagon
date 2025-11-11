@@ -5,6 +5,22 @@ import (
 	"math"
 )
 
+var flipMap map[int][]bool = map[int][]bool{
+	8:   {true},
+	16:  {true, false},
+	32:  {true, true, true},
+	64:  {true, true, false, false},
+	128: {true, true, false, false, true},
+}
+
+var swapMap map[int][]bool = map[int][]bool{
+	8:   {false},
+	16:  {false, false},
+	32:  {false, true, false},
+	64:  {false, true, true, false},
+	128: {false, true, true, false, false},
+}
+
 func createSets(round []int) []*Set {
 	sets := make([]*Set, len(round)/2)
 
@@ -18,72 +34,110 @@ func createSets(round []int) []*Set {
 	return sets
 }
 
-func carryDown(lr []int, wr []int, flip bool) []int {
+func carryDown(lr []int, wr []int, size int, round int) []int {
 	r := make([]int, len(lr))
-	if flip && len(lr) > 2 {
-		n := len(wr)
-		for i := 0; i < n/2; i++ {
-			wr[i], wr[n/2+i] = wr[n/2+i], wr[i]
+
+	flip := len(lr) > 2 && flipMap[size][round]
+	swap := len(lr) > 2 && swapMap[size][round]
+
+	wrl := reduceLosers(reduceWinners(wr))
+	lrw := reduceWinners(lr)
+	n := len(wrl)
+
+	if flip {
+		for i, j := 0, n-1; i < j; i, j = i+1, j-1 {
+			wrl[i], wrl[j] = wrl[j], wrl[i]
 		}
 	}
-	for i := 0; i < len(lr); i += 2 {
-		r[i] = wr[len(wr)-i*2-2]
-		r[i+1] = lr[i]
+
+	if swap {
+		wrl = append(wrl[n/2:n], wrl[0:n/2]...)
+	}
+
+	for i := range wrl {
+		r[2*i] = wrl[i]
+		r[2*i+1] = lrw[i]
 	}
 	return r
 }
 
-func reduce(round []int) []int {
+func reduceWinners(round []int) []int {
 	half := make([]int, len(round)/2)
 	for i := range half {
-		half[i] = round[2*i]
+		half[i] = min(round[2*i], round[2*i+1])
+	}
+	return half
+}
+
+func reduceLosers(round []int) []int {
+	half := make([]int, len(round)/2)
+	for i := range half {
+		half[i] = max(round[2*i+1], round[2*i])
 	}
 	return half
 }
 
 func CreateBracket(numPlayers int) *Bracket {
+	// the next power of 2, 36 person bracket -> n = 64
 	n := int(math.Pow(2, math.Ceil(math.Log2(float64(numPlayers)))))
 
 	var sets []*Set
 	var losersRounds [][]*Set
 	var winnersRounds [][]*Set
-	var wrSets, lr1Sets, lr2Sets []*Set
+
+	// Initial winners bracket
 	wr := CreateRound(n, 0)
-	lr1 := CreateRound(n/2, n/2)
-	lr2 := carryDown(lr1, wr, false)
-	wrSets = createSets(wr)
-	lr1Sets = createSets(lr1)
-	lr2Sets = createSets(lr2)
+	wrSets := createSets(wr)
 	sets = append(sets, wrSets...)
-	sets = append(sets, lr1Sets...)
-	sets = append(sets, lr2Sets...)
 	winnersRounds = append(winnersRounds, wrSets)
-	losersRounds = append(losersRounds, lr1Sets)
-	losersRounds = append(losersRounds, lr2Sets)
 
-	flip := true
-	for len(wr) > 4 {
-		wr = reduce(wr)
-		lr1 = reduce(lr2)
-		lr2 = carryDown(lr1, wr, flip)
-		flip = !flip
+	// Initial losers bracket (byes)
+	lr := CreateRound(n/2, n/2)
+	lrSets := createSets(lr)
+	sets = append(sets, lrSets...)
+	losersRounds = append(losersRounds, lrSets)
 
+	// Merge first winners bracket losers with initial losers
+	lr = carryDown(lr, wr, n, 0)
+	lrSets = createSets(lr)
+	sets = append(sets, lrSets...)
+	losersRounds = append(losersRounds, lrSets)
+
+	for round := 1; len(wr) > 4; round++ {
+		// Advance winners bracket
+		wr = reduceWinners(wr)
 		wrSets = createSets(wr)
-		lr1Sets = createSets(lr1)
-		lr2Sets = createSets(lr2)
 		sets = append(sets, wrSets...)
-		sets = append(sets, lr1Sets...)
-		sets = append(sets, lr2Sets...)
 		winnersRounds = append(winnersRounds, wrSets)
-		losersRounds = append(losersRounds, lr1Sets)
-		losersRounds = append(losersRounds, lr2Sets)
+
+		// Advance losers bracket
+		lr = reduceWinners(lr)
+		lrSets = createSets(lr)
+		sets = append(sets, lrSets...)
+		losersRounds = append(losersRounds, lrSets)
+
+		// Merge winners bracket losers with losers bracket
+		lr = carryDown(lr, wr, n, round)
+		lrSets = createSets(lr)
+		sets = append(sets, lrSets...)
+		losersRounds = append(losersRounds, lrSets)
 	}
 
-	wr = reduce(wr)
+	// Winners bracket finals
+	wr = reduceWinners(wr)
 	wrSets = createSets(wr)
 	sets = append(sets, wrSets...)
 	winnersRounds = append(winnersRounds, wrSets)
 
+	// Losers bracket finals
+	for len(lr) > 2 {
+		lr = reduceWinners(lr)
+		lrSets = createSets(lr)
+		sets = append(sets, lrSets...)
+		losersRounds = append(losersRounds, lrSets)
+	}
+
+	// Filter out invalid players
 	var setsFiltered []*Set
 	for _, set := range sets {
 		if set.Player1 <= numPlayers && set.Player2 <= numPlayers {
