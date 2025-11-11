@@ -5,6 +5,24 @@ import (
 	"math"
 )
 
+/* Determined the flip and swap values by creating
+ * brackets on startgg and manually checking
+*
+* "flipping" is reversing the order of the carryDown from winners
+* Instead of the loser from the top of winners going to the top of losers,
+* they will go to the bottom
+*
+* 5, 6, 7, 8 -> 8, 7, 6, 5
+*
+*
+* "swapping" is splitting the winners in half, and swapping the groups
+*
+* 5, 6, 7, 8 -> 7, 8, 5, 6
+*
+* Flipping and swapping can be combined to get a "flip swap"
+* 5, 6, 7, 8 -> 6, 5, 8, 7
+* */
+
 var flipMap map[int][]bool = map[int][]bool{
 	8:   {true},
 	16:  {true, false},
@@ -34,6 +52,11 @@ func createSets(round []int) []*Set {
 	return sets
 }
 
+/* carryDown creates the "carryDown" loser round, which is when
+* the losers from winners side play their first losers
+* side set. The logic for this is strange, and it depends
+* on the size of the bracket, and the round number.
+ */
 func carryDown(lr []int, wr []int, size int, round int) []int {
 	r := make([]int, len(lr))
 
@@ -61,6 +84,8 @@ func carryDown(lr []int, wr []int, size int, round int) []int {
 	return r
 }
 
+/* reduceWinners returns a new list with only
+* the better seeds from each set. */
 func reduceWinners(round []int) []int {
 	half := make([]int, len(round)/2)
 	for i := range half {
@@ -69,6 +94,8 @@ func reduceWinners(round []int) []int {
 	return half
 }
 
+/* reduceLosers returns a new list with only
+* the worse seeds from each set. */
 func reduceLosers(round []int) []int {
 	half := make([]int, len(round)/2)
 	for i := range half {
