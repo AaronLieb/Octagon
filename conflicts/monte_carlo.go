@@ -14,7 +14,7 @@ const (
 	ConflictResolutionVariance = 8
 	AttemptsAddedPerRound      = 5000
 	MinVariance                = 4
-	MaxAttemptsPerRound        = 3000
+	MaxAttemptsPerRound        = 10000
 )
 
 type monteCarloResult struct {
