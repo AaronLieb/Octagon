@@ -924,6 +924,159 @@ type GetSetsResponse struct {
 // GetEvent returns GetSetsResponse.Event, and is useful for accessing the field via an interface.
 func (v *GetSetsResponse) GetEvent() GetSetsEvent { return v.Event }
 
+// GetStreamQueueResponse is returned by GetStreamQueue on success.
+type GetStreamQueueResponse struct {
+	// Returns a tournament given its id or slug
+	Tournament GetStreamQueueTournament `json:"tournament"`
+}
+
+// GetTournament returns GetStreamQueueResponse.Tournament, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueResponse) GetTournament() GetStreamQueueTournament { return v.Tournament }
+
+// GetStreamQueueTournament includes the requested fields of the GraphQL type Tournament.
+// The GraphQL type's documentation follows.
+//
+// A tournament
+type GetStreamQueueTournament struct {
+	StreamQueue []GetStreamQueueTournamentStreamQueue `json:"streamQueue"`
+}
+
+// GetStreamQueue returns GetStreamQueueTournament.StreamQueue, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournament) GetStreamQueue() []GetStreamQueueTournamentStreamQueue {
+	return v.StreamQueue
+}
+
+// GetStreamQueueTournamentStreamQueue includes the requested fields of the GraphQL type StreamQueue.
+// The GraphQL type's documentation follows.
+//
+// A Stream queue object
+type GetStreamQueueTournamentStreamQueue struct {
+	Id string `json:"id"`
+	// The stream on the queue
+	Stream GetStreamQueueTournamentStreamQueueStreamStreams `json:"stream"`
+	// The sets on the stream
+	Sets []GetStreamQueueTournamentStreamQueueSetsSet `json:"sets"`
+}
+
+// GetId returns GetStreamQueueTournamentStreamQueue.Id, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueue) GetId() string { return v.Id }
+
+// GetStream returns GetStreamQueueTournamentStreamQueue.Stream, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueue) GetStream() GetStreamQueueTournamentStreamQueueStreamStreams {
+	return v.Stream
+}
+
+// GetSets returns GetStreamQueueTournamentStreamQueue.Sets, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueue) GetSets() []GetStreamQueueTournamentStreamQueueSetsSet {
+	return v.Sets
+}
+
+// GetStreamQueueTournamentStreamQueueSetsSet includes the requested fields of the GraphQL type Set.
+// The GraphQL type's documentation follows.
+//
+// A set
+type GetStreamQueueTournamentStreamQueueSetsSet struct {
+	Id interface{} `json:"id"`
+	// The round number of the set. Negative numbers are losers bracket
+	Round int `json:"round"`
+	// Full round text of this set.
+	FullRoundText string `json:"fullRoundText"`
+	State         int    `json:"state"`
+	// A possible spot in a set. Use this to get all entrants in a set. Use this for all bracket types (FFA, elimination, etc)
+	Slots []GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlot `json:"slots"`
+}
+
+// GetId returns GetStreamQueueTournamentStreamQueueSetsSet.Id, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueSetsSet) GetId() interface{} { return v.Id }
+
+// GetRound returns GetStreamQueueTournamentStreamQueueSetsSet.Round, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueSetsSet) GetRound() int { return v.Round }
+
+// GetFullRoundText returns GetStreamQueueTournamentStreamQueueSetsSet.FullRoundText, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueSetsSet) GetFullRoundText() string {
+	return v.FullRoundText
+}
+
+// GetState returns GetStreamQueueTournamentStreamQueueSetsSet.State, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueSetsSet) GetState() int { return v.State }
+
+// GetSlots returns GetStreamQueueTournamentStreamQueueSetsSet.Slots, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueSetsSet) GetSlots() []GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlot {
+	return v.Slots
+}
+
+// GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlot includes the requested fields of the GraphQL type SetSlot.
+// The GraphQL type's documentation follows.
+//
+// A slot in a set where a seed currently or will eventually exist in order to participate in the set.
+type GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlot struct {
+	Entrant GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrant `json:"entrant"`
+}
+
+// GetEntrant returns GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlot.Entrant, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlot) GetEntrant() GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrant {
+	return v.Entrant
+}
+
+// GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrant includes the requested fields of the GraphQL type Entrant.
+// The GraphQL type's documentation follows.
+//
+// An entrant in an event
+type GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrant struct {
+	// The entrant name as it appears in bracket: gamerTag of the participant or team name
+	Name         string                                                                                 `json:"name"`
+	Participants []GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipant `json:"participants"`
+}
+
+// GetName returns GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrant.Name, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrant) GetName() string {
+	return v.Name
+}
+
+// GetParticipants returns GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrant.Participants, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrant) GetParticipants() []GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipant {
+	return v.Participants
+}
+
+// GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipant includes the requested fields of the GraphQL type Participant.
+// The GraphQL type's documentation follows.
+//
+// A participant of a tournament; either a spectator or competitor
+type GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipant struct {
+	Player GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipantPlayer `json:"player"`
+}
+
+// GetPlayer returns GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipant.Player, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipant) GetPlayer() GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipantPlayer {
+	return v.Player
+}
+
+// GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipantPlayer includes the requested fields of the GraphQL type Player.
+// The GraphQL type's documentation follows.
+//
+// A player
+type GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipantPlayer struct {
+	GamerTag string `json:"gamerTag"`
+}
+
+// GetGamerTag returns GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipantPlayer.GamerTag, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueSetsSetSlotsSetSlotEntrantParticipantsParticipantPlayer) GetGamerTag() string {
+	return v.GamerTag
+}
+
+// GetStreamQueueTournamentStreamQueueStreamStreams includes the requested fields of the GraphQL type Streams.
+// The GraphQL type's documentation follows.
+//
+// Tournament Stream
+type GetStreamQueueTournamentStreamQueueStreamStreams struct {
+	StreamName string `json:"streamName"`
+}
+
+// GetStreamName returns GetStreamQueueTournamentStreamQueueStreamStreams.StreamName, and is useful for accessing the field via an interface.
+func (v *GetStreamQueueTournamentStreamQueueStreamStreams) GetStreamName() string {
+	return v.StreamName
+}
+
 // GetTournamentResponse is returned by GetTournament on success.
 type GetTournamentResponse struct {
 	// Returns a tournament given its id or slug
@@ -1250,6 +1403,14 @@ type __GetSetsInput struct {
 
 // GetSlug returns __GetSetsInput.Slug, and is useful for accessing the field via an interface.
 func (v *__GetSetsInput) GetSlug() string { return v.Slug }
+
+// __GetStreamQueueInput is used internally by genqlient
+type __GetStreamQueueInput struct {
+	Slug string `json:"slug"`
+}
+
+// GetSlug returns __GetStreamQueueInput.Slug, and is useful for accessing the field via an interface.
+func (v *__GetStreamQueueInput) GetSlug() string { return v.Slug }
 
 // __GetTournamentInput is used internally by genqlient
 type __GetTournamentInput struct {
@@ -1836,6 +1997,66 @@ func GetSetsForEntrant(
 	}
 
 	data_ = &GetSetsForEntrantResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetStreamQueue.
+const GetStreamQueue_Operation = `
+query GetStreamQueue ($slug: String) {
+	tournament(slug: $slug) {
+		streamQueue {
+			id
+			stream {
+				streamName
+			}
+			sets {
+				id
+				round
+				fullRoundText
+				state
+				slots {
+					entrant {
+						name
+						participants {
+							player {
+								gamerTag
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+`
+
+func GetStreamQueue(
+	ctx_ context.Context,
+	slug string,
+) (data_ *GetStreamQueueResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetStreamQueue",
+		Query:  GetStreamQueue_Operation,
+		Variables: &__GetStreamQueueInput{
+			Slug: slug,
+		},
+	}
+	var client_ graphql.Client
+
+	client_, err_ = GetClient(ctx_)
+	if err_ != nil {
+		return nil, err_
+	}
+
+	data_ = &GetStreamQueueResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

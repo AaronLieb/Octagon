@@ -251,3 +251,30 @@ mutation UpdateSeeding($phaseId: ID!, $seedMapping: [UpdatePhaseSeedInfo]!) {
     id
   }
 }
+
+query GetStreamQueue($slug: String) {
+  tournament(slug: $slug) {
+    streamQueue {
+      id
+      stream {
+        streamName
+      }
+      sets {
+        id
+        round
+        fullRoundText
+        state
+        slots {
+          entrant {
+            name
+            participants {
+              player {
+                gamerTag
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -8,6 +8,7 @@ import (
 	"github.com/AaronLieb/octagon/cmd/conflicts"
 	"github.com/AaronLieb/octagon/cmd/rating"
 	"github.com/AaronLieb/octagon/cmd/report"
+	"github.com/AaronLieb/octagon/cmd/stream"
 	"github.com/urfave/cli/v3"
 )
 
@@ -32,6 +33,7 @@ https://start.gg/octagon`,
 			cache.Command(),
 			conflicts.Command(),
 			bracket.Command(),
+			stream.Command(),
 		},
 	}
 }
