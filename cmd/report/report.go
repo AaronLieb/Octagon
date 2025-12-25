@@ -23,6 +23,12 @@ func Command() *cli.Command {
 				Usage:   "Tournament slug (default: octagon)",
 				Value:   "octagon",
 			},
+			&cli.StringFlag{
+				Name:    "event",
+				Aliases: []string{"e"},
+				Usage:   "Event name",
+				Value:   "ultimate-singles",
+			},
 			&cli.BoolFlag{
 				Name:    "redemption",
 				Aliases: []string{"r"},
@@ -39,7 +45,7 @@ func runReportTUI(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("tournament not found: %w", err)
 	}
 
-	event := startgg.EventUltimateSingles
+	event := cmd.String("event")
 	if cmd.Bool("redemption") {
 		event = startgg.EventRedemptionBracket
 	}
