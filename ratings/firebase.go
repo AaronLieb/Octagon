@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/db"
@@ -13,19 +14,24 @@ import (
 	"google.golang.org/api/option"
 )
 
-var database *db.Client
+var (
+	database *db.Client
+	once     sync.Once
+)
 
 func Init(ctx context.Context) {
-	config := &firebase.Config{}
-	opt := option.WithAPIKey(os.Getenv("FIREBASE_API_KEY"))
-	app, err := firebase.NewApp(ctx, config, opt)
-	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
-	}
-	database, err = app.DatabaseWithURL(ctx, os.Getenv("FIREBASE_DATABASE_URL"))
-	if err != nil {
-		log.Fatalf("error initializing db: %v\n", err)
-	}
+	once.Do(func() {
+		config := &firebase.Config{}
+		opt := option.WithAPIKey(os.Getenv("FIREBASE_API_KEY"))
+		app, err := firebase.NewApp(ctx, config, opt)
+		if err != nil {
+			log.Fatalf("error initializing app: %v\n", err)
+		}
+		database, err = app.DatabaseWithURL(ctx, os.Getenv("FIREBASE_DATABASE_URL"))
+		if err != nil {
+			log.Fatalf("error initializing db: %v\n", err)
+		}
+	})
 }
 
 func Get(ctx context.Context, userID startgg.ID) (float64, error) {
@@ -58,13 +64,13 @@ func Get(ctx context.Context, userID startgg.ID) (float64, error) {
 	return applyBias(userID, rating), nil
 }
 
-func applyBias(userId startgg.ID, rating float64) float64 {
-	ratio := config.GetBiasForPlayer(userId)
+func applyBias(userID startgg.ID, rating float64) float64 {
+	ratio := config.GetBiasForPlayer(userID)
 	if ratio == 1.0 {
 		return rating
 	}
-	
+
 	biasedRating := rating * ratio
-	log.Debug("Applied bias", "userId", userId, "original", rating, "ratio", ratio, "biased", biasedRating)
+	log.Debug("Applied bias", "userId", userID, "original", rating, "ratio", ratio, "biased", biasedRating)
 	return biasedRating
 }

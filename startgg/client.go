@@ -8,13 +8,17 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/charmbracelet/log"
 )
 
-var client graphql.Client
+var (
+	client graphql.Client
+	once   sync.Once
+)
 
 const (
 	APIVersion = "alpha"
@@ -33,29 +37,30 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func GetClient(ctx context.Context) (graphql.Client, error) {
-	if client != nil {
-		return client, nil
-	}
+	var err error
+	once.Do(func() {
+		key := os.Getenv("STARTGG_API_KEY")
+		if key == "" {
+			err = fmt.Errorf("must set STARTGG_API_KEY=<startgg token>")
+			return
+		}
+		log.Debug("Found API Key")
 
-	key := os.Getenv("STARTGG_API_KEY")
-	if key == "" {
-		return nil, fmt.Errorf("must set STARTGG_API_KEY=<startgg token>")
-	}
-	log.Debug("Found API Key")
-
-	httpClient := http.Client{
-		Transport: &authedTransport{
-			key: key,
-			wrapped: &http.Transport{
-				Dial: (&net.Dialer{
-					Timeout: 5 * time.Second,
-				}).Dial,
-				TLSHandshakeTimeout: 5 * time.Second,
+		httpClient := http.Client{
+			Transport: &authedTransport{
+				key: key,
+				wrapped: &http.Transport{
+					Dial: (&net.Dialer{
+						Timeout: 5 * time.Second,
+					}).Dial,
+					TLSHandshakeTimeout: 5 * time.Second,
+				},
 			},
-		},
-		Timeout: 10 * time.Second,
-	}
+			Timeout: 10 * time.Second,
+		}
 
-	client = graphql.NewClient(URL, &httpClient)
-	return client, nil
+		client = graphql.NewClient(URL, &httpClient)
+	})
+
+	return client, err
 }
