@@ -1,3 +1,4 @@
+// Package ratings handles fetching and caching of SchuStats ratings from firebase
 package ratings
 
 import (
