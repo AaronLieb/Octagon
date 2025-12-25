@@ -29,6 +29,8 @@ var flipMap map[int][]bool = map[int][]bool{
 	32:  {true, true, true},
 	64:  {true, true, false, false},
 	128: {true, true, false, false, true},
+	// Didn't test 256, just extrapolating from the previous sizes
+	256: {true, true, true, false, false, false},
 }
 
 var swapMap map[int][]bool = map[int][]bool{
@@ -37,6 +39,8 @@ var swapMap map[int][]bool = map[int][]bool{
 	32:  {false, true, false},
 	64:  {false, true, true, false},
 	128: {false, true, true, false, false},
+	// Didn't test 256, just extrapolating from the previous sizes
+	256: {false, true, true, true, false, false},
 }
 
 func createSets(round []int) []*Set {

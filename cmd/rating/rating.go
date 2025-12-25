@@ -1,3 +1,4 @@
+// Package rating is responsibel for fetching and manipulating SchuStats ratings
 package rating
 
 import (
