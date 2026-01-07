@@ -133,6 +133,7 @@ var characterMap = map[string]int{
 	"mythra":            1795,
 	"aegis":             1795,
 	"kazuya":            1846,
+	"kaz":               1846,
 	"sora":              1897,
 }
 
