@@ -103,6 +103,7 @@ var characterMap = map[string]int{
 	"incin":             1406,
 	"king k rool":       1407,
 	"krool":             1407,
+	"kkr":               1407,
 	"dark samus":        1408,
 	"chrom":             1409,
 	"ken":               1410,
