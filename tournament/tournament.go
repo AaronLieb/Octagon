@@ -16,6 +16,7 @@ type Set struct {
 	Round    string
 	Entrant1 int
 	Entrant2 int
+	State    int // 1 = not started, 2 = in progress, 3 = completed
 }
 
 type Player struct {
@@ -31,10 +32,15 @@ type GameResult struct {
 	P2CharID int
 }
 
-func FetchReportableSets(ctx context.Context, eventSlug string) ([]Set, error) {
-	// Note: The current GraphQL query only fetches 100 sets from page 0
-	// This is a limitation in the generated startgg.GetReportableSets function
-	resp, err := startgg.GetReportableSets(ctx, eventSlug)
+func FetchReportableSets(ctx context.Context, eventSlug string, includeCompleted bool) ([]Set, error) {
+	// State 1 = not started, State 2 = in progress, State 3 = completed
+	states := []int{1, 2}
+	if includeCompleted {
+		states = append(states, 3)
+	}
+
+	// Note: The current GraphQL query only fetches 500 sets from page 0
+	resp, err := startgg.GetReportableSets(ctx, eventSlug, states)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch sets: %w", err)
 	}
@@ -91,6 +97,7 @@ func FetchReportableSets(ctx context.Context, eventSlug string) ([]Set, error) {
 			Round:    parseRound(setNode.Round),
 			Entrant1: int(entrant1Id),
 			Entrant2: int(entrant2Id),
+			State:    setNode.State,
 		})
 	}
 
@@ -122,7 +129,7 @@ func ValidateSetScore(gameResults []GameResult) error {
 
 	// Validate best-of-3 (2-0, 2-1) or best-of-5 (3-0, 3-1, 3-2)
 	if (p1Wins != 2 || p2Wins > 1) && (p2Wins != 2 || p1Wins > 1) &&
-		 (p1Wins != 3 || p2Wins > 2) && (p2Wins != 3 || p1Wins > 2) {
+		(p1Wins != 3 || p2Wins > 2) && (p2Wins != 3 || p1Wins > 2) {
 		return fmt.Errorf("invalid score: must be best-of-3 (2-0, 2-1) or best-of-5 (3-0, 3-1, 3-2)")
 	}
 
@@ -130,6 +137,16 @@ func ValidateSetScore(gameResults []GameResult) error {
 }
 
 func ReportSet(ctx context.Context, set Set, gameResults []GameResult) error {
+	// If set is already completed (state 3), reset it first
+	if set.State == 3 {
+		log.Infof("Set %d is already completed, resetting before reporting", set.ID)
+		_, err := startgg.ResetSet(ctx, set.ID)
+		if err != nil {
+			log.Errorf("Failed to reset set: %v", err)
+			return fmt.Errorf("failed to reset set: %w", err)
+		}
+	}
+
 	p1Wins := 0
 	p2Wins := 0
 	for _, result := range gameResults {

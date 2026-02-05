@@ -9,6 +9,7 @@ import (
 
 	"github.com/AaronLieb/octagon/brackets"
 	"github.com/AaronLieb/octagon/cache"
+	"github.com/AaronLieb/octagon/characters"
 	"github.com/AaronLieb/octagon/conflicts"
 	"github.com/AaronLieb/octagon/seeding"
 	"github.com/AaronLieb/octagon/startgg"
@@ -60,6 +61,8 @@ type SetResponse struct {
 	Round    string `json:"round"`
 	Entrant1 int    `json:"entrant1"`
 	Entrant2 int    `json:"entrant2"`
+	P1Char   string `json:"p1Char,omitempty"`
+	P2Char   string `json:"p2Char,omitempty"`
 }
 
 type Player struct {
@@ -109,7 +112,9 @@ func main() {
 	r.POST("/api/conflicts", addConflict)
 	r.DELETE("/api/conflicts/:index", deleteConflict)
 	r.GET("/api/sets", getSets)
+	r.GET("/api/sets/ready", getReadySets)
 	r.POST("/api/sets/report", reportSet)
+	r.GET("/api/characters", getCharacters)
 
 	r.Run(":8080")
 }
@@ -140,7 +145,7 @@ func getAttendees(c *gin.Context) {
 		default:
 			playerID = fmt.Sprintf("%v", v)
 		}
-		
+
 		attendees[i] = Attendee{
 			ID:        fmt.Sprintf("%v", participant.Id),
 			GamerTag:  participant.GamerTag,
@@ -263,12 +268,12 @@ func getConflicts(c *gin.Context) {
 			player1 = conflict.Players[0].Name
 			player2 = conflict.Players[1].Name
 		}
-		
+
 		expiration := ""
 		if conflict.Expiration != nil {
 			expiration = conflict.Expiration.Format("2006-01-02 15:04")
 		}
-		
+
 		conflictResponses[i] = ConflictResponse{
 			Player1:    player1,
 			Player2:    player2,
@@ -338,7 +343,7 @@ func deleteConflict(c *gin.Context) {
 
 	// Remove the conflict at the specified index
 	updatedConflicts := append(conflictsList[:index], conflictsList[index+1:]...)
-	
+
 	err = conflicts.WriteConflictsFile(updatedConflicts)
 	if err != nil {
 		fmt.Printf("Error writing conflicts file: %v\n", err)
@@ -353,7 +358,7 @@ func deleteConflict(c *gin.Context) {
 
 func getSets(c *gin.Context) {
 	tournamentSlug := c.DefaultQuery("tournament", "octagon")
-	redemption := c.DefaultQuery("redemption", "false") == "true"
+	includeCompleted := c.DefaultQuery("includeCompleted", "false") == "true"
 
 	fullTournamentSlug, err := startgg.GetTournamentSlug(context.Background(), tournamentSlug)
 	if err != nil {
@@ -362,21 +367,26 @@ func getSets(c *gin.Context) {
 		return
 	}
 
-	event := startgg.EventUltimateSingles
-	if redemption {
-		event = startgg.EventRedemptionBracket
+	// Fetch sets from both events
+	events := []string{startgg.EventUltimateSingles, startgg.EventRedemptionBracket}
+	var allSets []tournament.Set
+
+	for _, event := range events {
+		eventSlug := fmt.Sprintf(startgg.EventSlugFormat, fullTournamentSlug, event)
+		sets, err := tournament.FetchReportableSets(context.Background(), eventSlug, includeCompleted)
+		if err != nil {
+			// Log error but continue with other events
+			fmt.Printf("Error fetching sets for %s: %v\n", event, err)
+			continue
+		}
+		allSets = append(allSets, sets...)
 	}
 
-	eventSlug := fmt.Sprintf(startgg.EventSlugFormat, fullTournamentSlug, event)
-	sets, err := tournament.FetchReportableSets(context.Background(), eventSlug)
-	if err != nil {
-		fmt.Printf("Error fetching sets: %v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	setResponses := make([]SetResponse, len(sets))
-	for i, set := range sets {
+	setResponses := make([]SetResponse, len(allSets))
+	for i, set := range allSets {
+		p1Char, _ := cache.GetPlayerCharacter(set.Player1.ID)
+		p2Char, _ := cache.GetPlayerCharacter(set.Player2.ID)
+		
 		setResponses[i] = SetResponse{
 			ID:       set.ID,
 			Player1:  Player{Name: set.Player1.Name, ID: set.Player1.ID},
@@ -384,6 +394,59 @@ func getSets(c *gin.Context) {
 			Round:    set.Round,
 			Entrant1: set.Entrant1,
 			Entrant2: set.Entrant2,
+			P1Char:   p1Char,
+			P2Char:   p2Char,
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"sets": setResponses,
+	})
+}
+
+func getReadySets(c *gin.Context) {
+	tournamentSlug := c.DefaultQuery("tournament", "octagon")
+
+	fullTournamentSlug, err := startgg.GetTournamentSlug(context.Background(), tournamentSlug)
+	if err != nil {
+		fmt.Printf("Error getting tournament slug: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Fetch sets with state 1 (ready to call) from both events
+	events := []string{startgg.EventUltimateSingles, startgg.EventRedemptionBracket}
+	var allSets []tournament.Set
+	
+	for _, event := range events {
+		eventSlug := fmt.Sprintf(startgg.EventSlugFormat, fullTournamentSlug, event)
+		sets, err := tournament.FetchReportableSets(context.Background(), eventSlug, false)
+		if err != nil {
+			fmt.Printf("Error fetching sets for %s: %v\n", event, err)
+			continue
+		}
+		// Filter for state 1 only
+		for _, set := range sets {
+			if set.State == 1 {
+				allSets = append(allSets, set)
+			}
+		}
+	}
+
+	setResponses := make([]SetResponse, len(allSets))
+	for i, set := range allSets {
+		p1Char, _ := cache.GetPlayerCharacter(set.Player1.ID)
+		p2Char, _ := cache.GetPlayerCharacter(set.Player2.ID)
+		
+		setResponses[i] = SetResponse{
+			ID:       set.ID,
+			Player1:  Player{Name: set.Player1.Name, ID: set.Player1.ID},
+			Player2:  Player{Name: set.Player2.Name, ID: set.Player2.ID},
+			Round:    set.Round,
+			Entrant1: set.Entrant1,
+			Entrant2: set.Entrant2,
+			P1Char:   p1Char,
+			P2Char:   p2Char,
 		}
 	}
 
@@ -399,18 +462,104 @@ func reportSet(c *gin.Context) {
 		return
 	}
 
-	// Convert to tournament.GameResult format
+	// Convert to tournament.GameResult format and get character IDs
 	gameResults := make([]tournament.GameResult, len(req.Games))
 	for i, game := range req.Games {
+		p1CharID := 0
+		p2CharID := 0
+
+		if game.P1Char != "" {
+			if id, ok := characters.GetCharacterID(game.P1Char); ok {
+				p1CharID = id
+			}
+		}
+
+		if game.P2Char != "" {
+			if id, ok := characters.GetCharacterID(game.P2Char); ok {
+				p2CharID = id
+			}
+		}
+
 		gameResults[i] = tournament.GameResult{
-			Winner: game.Winner,
-			P1Char: game.P1Char,
-			P2Char: game.P2Char,
+			Winner:   game.Winner,
+			P1Char:   game.P1Char,
+			P2Char:   game.P2Char,
+			P1CharID: p1CharID,
+			P2CharID: p2CharID,
 		}
 	}
 
-	// For now, just return success - actual reporting would need implementation
+	// Validate the set
+	if err := tournament.ValidateSetScore(gameResults); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get the set details to report
+	tournamentSlug := c.DefaultQuery("tournament", "octagon")
+	redemption := c.DefaultQuery("redemption", "false") == "true"
+
+	fullTournamentSlug, err := startgg.GetTournamentSlug(context.Background(), tournamentSlug)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	event := startgg.EventUltimateSingles
+	if redemption {
+		event = startgg.EventRedemptionBracket
+	}
+
+	eventSlug := fmt.Sprintf(startgg.EventSlugFormat, fullTournamentSlug, event)
+	sets, err := tournament.FetchReportableSets(context.Background(), eventSlug, true)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Find the set
+	var targetSet *tournament.Set
+	for _, set := range sets {
+		if set.ID == req.SetID {
+			targetSet = &set
+			break
+		}
+	}
+
+	if targetSet == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Set not found"})
+		return
+	}
+
+	// Report the set
+	err = tournament.ReportSet(context.Background(), *targetSet, gameResults)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Cache the character choices for each player
+	for _, game := range req.Games {
+		if game.P1Char != "" {
+			if err := cache.SetPlayerCharacter(targetSet.Player1.ID, game.P1Char); err != nil {
+				fmt.Printf("Failed to cache P1 character: %v\n", err)
+			}
+		}
+		if game.P2Char != "" {
+			if err := cache.SetPlayerCharacter(targetSet.Player2.ID, game.P2Char); err != nil {
+				fmt.Printf("Failed to cache P2 character: %v\n", err)
+			}
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Set reported successfully",
+	})
+}
+
+func getCharacters(c *gin.Context) {
+	c.Header("Cache-Control", "public, max-age=3600")
+	c.JSON(http.StatusOK, gin.H{
+		"characters": characters.Characters,
 	})
 }

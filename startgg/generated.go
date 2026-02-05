@@ -438,6 +438,7 @@ type GetReportableSetsEventSetsSetConnectionNodesSet struct {
 	Id interface{} `json:"id"`
 	// The round number of the set. Negative numbers are losers bracket
 	Round int `json:"round"`
+	State int `json:"state"`
 	// A possible spot in a set. Use this to get all entrants in a set. Use this for all bracket types (FFA, elimination, etc)
 	Slots []GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot `json:"slots"`
 }
@@ -447,6 +448,9 @@ func (v *GetReportableSetsEventSetsSetConnectionNodesSet) GetId() interface{} { 
 
 // GetRound returns GetReportableSetsEventSetsSetConnectionNodesSet.Round, and is useful for accessing the field via an interface.
 func (v *GetReportableSetsEventSetsSetConnectionNodesSet) GetRound() int { return v.Round }
+
+// GetState returns GetReportableSetsEventSetsSetConnectionNodesSet.State, and is useful for accessing the field via an interface.
+func (v *GetReportableSetsEventSetsSetConnectionNodesSet) GetState() int { return v.State }
 
 // GetSlots returns GetReportableSetsEventSetsSetConnectionNodesSet.Slots, and is useful for accessing the field via an interface.
 func (v *GetReportableSetsEventSetsSetConnectionNodesSet) GetSlots() []GetReportableSetsEventSetsSetConnectionNodesSetSlotsSetSlot {
@@ -1271,6 +1275,30 @@ func (v *ReportSetResponse) GetReportBracketSet() []ReportSetReportBracketSet {
 	return v.ReportBracketSet
 }
 
+// ResetSetResetSet includes the requested fields of the GraphQL type Set.
+// The GraphQL type's documentation follows.
+//
+// A set
+type ResetSetResetSet struct {
+	Id    interface{} `json:"id"`
+	State int         `json:"state"`
+}
+
+// GetId returns ResetSetResetSet.Id, and is useful for accessing the field via an interface.
+func (v *ResetSetResetSet) GetId() interface{} { return v.Id }
+
+// GetState returns ResetSetResetSet.State, and is useful for accessing the field via an interface.
+func (v *ResetSetResetSet) GetState() int { return v.State }
+
+// ResetSetResponse is returned by ResetSet on success.
+type ResetSetResponse struct {
+	// Resets set to initial state, can affect other sets and phase groups
+	ResetSet ResetSetResetSet `json:"resetSet"`
+}
+
+// GetResetSet returns ResetSetResponse.ResetSet, and is useful for accessing the field via an interface.
+func (v *ResetSetResponse) GetResetSet() ResetSetResetSet { return v.ResetSet }
+
 type UpdatePhaseSeedInfo struct {
 	SeedId       interface{} `json:"seedId"`
 	SeedNum      interface{} `json:"seedNum"`
@@ -1358,11 +1386,15 @@ func (v *__GetParticipantsInput) GetSlug() string { return v.Slug }
 
 // __GetReportableSetsInput is used internally by genqlient
 type __GetReportableSetsInput struct {
-	Slug string `json:"slug"`
+	Slug   string `json:"slug"`
+	States []int  `json:"states"`
 }
 
 // GetSlug returns __GetReportableSetsInput.Slug, and is useful for accessing the field via an interface.
 func (v *__GetReportableSetsInput) GetSlug() string { return v.Slug }
+
+// GetStates returns __GetReportableSetsInput.States, and is useful for accessing the field via an interface.
+func (v *__GetReportableSetsInput) GetStates() []int { return v.States }
 
 // __GetSeedsInput is used internally by genqlient
 type __GetSeedsInput struct {
@@ -1455,6 +1487,14 @@ func (v *__ReportSetInput) GetWinnerId() interface{} { return v.WinnerId }
 
 // GetGameData returns __ReportSetInput.GameData, and is useful for accessing the field via an interface.
 func (v *__ReportSetInput) GetGameData() []BracketSetGameDataInput { return v.GameData }
+
+// __ResetSetInput is used internally by genqlient
+type __ResetSetInput struct {
+	SetId interface{} `json:"setId"`
+}
+
+// GetSetId returns __ResetSetInput.SetId, and is useful for accessing the field via an interface.
+func (v *__ResetSetInput) GetSetId() interface{} { return v.SetId }
 
 // __UpdateSeedingInput is used internally by genqlient
 type __UpdateSeedingInput struct {
@@ -1741,12 +1781,13 @@ func GetParticipants(
 
 // The query executed by GetReportableSets.
 const GetReportableSets_Operation = `
-query GetReportableSets ($slug: String) {
+query GetReportableSets ($slug: String, $states: [Int]) {
 	event(slug: $slug) {
-		sets(page: 0, perPage: 500, sortType: CALL_ORDER, filters: {hideEmpty:true,showByes:false,state:[1,2]}) {
+		sets(page: 0, perPage: 500, sortType: CALL_ORDER, filters: {hideEmpty:true,showByes:false,state:$states}) {
 			nodes {
 				id
 				round
+				state
 				slots {
 					entrant {
 						id
@@ -1767,12 +1808,14 @@ query GetReportableSets ($slug: String) {
 func GetReportableSets(
 	ctx_ context.Context,
 	slug string,
+	states []int,
 ) (data_ *GetReportableSetsResponse, err_ error) {
 	req_ := &graphql.Request{
 		OpName: "GetReportableSets",
 		Query:  GetReportableSets_Operation,
 		Variables: &__GetReportableSetsInput{
-			Slug: slug,
+			Slug:   slug,
+			States: states,
 		},
 	}
 	var client_ graphql.Client
@@ -2237,6 +2280,46 @@ func ReportSet(
 	}
 
 	data_ = &ReportSetResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ResetSet.
+const ResetSet_Operation = `
+mutation ResetSet ($setId: ID!) {
+	resetSet(setId: $setId, resetDependentSets: false) {
+		id
+		state
+	}
+}
+`
+
+func ResetSet(
+	ctx_ context.Context,
+	setId interface{},
+) (data_ *ResetSetResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ResetSet",
+		Query:  ResetSet_Operation,
+		Variables: &__ResetSetInput{
+			SetId: setId,
+		},
+	}
+	var client_ graphql.Client
+
+	client_, err_ = GetClient(ctx_)
+	if err_ != nil {
+		return nil, err_
+	}
+
+	data_ = &ResetSetResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

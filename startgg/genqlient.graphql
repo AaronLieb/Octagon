@@ -153,16 +153,17 @@ query GetSets($slug: String) {
   }
 }
 
-query GetReportableSets($slug: String) {
+query GetReportableSets($slug: String, $states: [Int]) {
   event(slug: $slug) {
     sets(page: 0, perPage: 500, sortType: CALL_ORDER, filters: {
         hideEmpty: true,
         showByes: false,
-        state: [1, 2]
+        state: $states
       }) {
       nodes {
         id
         round
+        state
         slots {
           entrant {
             id
@@ -239,6 +240,13 @@ mutation RegisterForTournament($eventId: ID!, $regToken: String!) {
 
 mutation ReportSet($setId: ID!, $winnerId: ID!, $gameData: [BracketSetGameDataInput]) {
   reportBracketSet(setId: $setId, winnerId: $winnerId, gameData: $gameData) {
+    id
+    state
+  }
+}
+
+mutation ResetSet($setId: ID!) {
+  resetSet(setId: $setId, resetDependentSets: false) {
     id
     state
   }
