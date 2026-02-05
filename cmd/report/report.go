@@ -52,7 +52,7 @@ func runReportTUI(ctx context.Context, cmd *cli.Command) error {
 
 	eventSlug := fmt.Sprintf(startgg.EventSlugFormat, tournamentSlug, event)
 
-	sets, err := tournament.FetchReportableSets(ctx, eventSlug)
+	sets, err := tournament.FetchReportableSets(ctx, eventSlug, false)
 	if err != nil {
 		return err
 	}
