@@ -71,7 +71,7 @@ func applyBias(userID startgg.ID, rating float64) float64 {
 		return rating
 	}
 
-	biasedRating := rating * ratio
+	biasedRating := max(1, rating) * ratio
 	log.Debug("Applied bias", "userId", userID, "original", rating, "ratio", ratio, "biased", biasedRating)
 	return biasedRating
 }
