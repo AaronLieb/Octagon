@@ -64,6 +64,8 @@ If it is unable to find a config file there, it will look for a local .env file.
 STARTGG_API_KEY=
 FIREBASE_API_KEY=
 FIREBASE_DATABASE_URL=
+OBS_WS_PORT=
+OBS_WS_PASS=
 ```
 
 ## Installation & Usage

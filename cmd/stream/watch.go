@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/AaronLieb/octagon/startgg"
+	watcher "github.com/AaronLieb/octagon/stream"
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
 	"github.com/urfave/cli/v3"
@@ -19,10 +20,9 @@ func WatchCommand() *cli.Command {
 		UsageText: "octagon stream watch --port <port>",
 		Flags: []cli.Flag{
 			&cli.IntFlag{
-				Name:     "port",
-				Aliases:  []string{"p"},
-				Usage:    "Port to connect to",
-				Required: true,
+				Name:    "port",
+				Aliases: []string{"p"},
+				Usage:   "Port to connect to",
 			},
 			&cli.StringFlag{
 				Name:    "tournament",
@@ -37,8 +37,13 @@ func WatchCommand() *cli.Command {
 				Value:   "ultimate-singles",
 			},
 		},
-		Action: connectClient,
+		Action: startWatcher,
 	}
+}
+
+func startWatcher(_ context.Context, _ *cli.Command) error {
+	watcher.StartWatcher()
+	return nil
 }
 
 func connectClient(ctx context.Context, cmd *cli.Command) error {

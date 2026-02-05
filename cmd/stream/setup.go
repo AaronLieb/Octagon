@@ -2,14 +2,18 @@ package stream
 
 import (
 	"context"
+	"image"
 
+	"github.com/AaronLieb/octagon/obs"
+	"github.com/AaronLieb/octagon/ocr"
+	"github.com/charmbracelet/log"
 	"github.com/urfave/cli/v3"
 )
 
 func SetupCommand() *cli.Command {
 	return &cli.Command{
-		Name:      "watch",
-		Aliases:   []string{"w"},
+		Name:      "setup",
+		Aliases:   []string{"s"},
 		Usage:     "sets up tsh and obs",
 		UsageText: "octagon stream setup",
 		Flags: []cli.Flag{
@@ -31,5 +35,17 @@ func SetupCommand() *cli.Command {
 }
 
 func setup(ctx context.Context, cmd *cli.Command) error {
+	img, err := obs.GetScreenshot()
+	if err != nil {
+		return err
+	}
+
+	imgCropped := obs.Crop(img, image.Rect(610, 945, 640, 985))
+	log.Info(ocr.GetAverageNonBlackColor(imgCropped))
+
+	// imgProcessed := ocr.PreprocessPercent(imgCropped)
+	obs.SaveImageToDisk(imgCropped)
+	// fmt.Println(ocr.ReadNumber(imgCropped))
+
 	return nil
 }

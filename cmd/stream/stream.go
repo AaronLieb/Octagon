@@ -13,6 +13,7 @@ func Command() *cli.Command {
 		Aliases:   []string{"c", "conflict"},
 		Commands: []*cli.Command{
 			WatchCommand(),
+			SetupCommand(),
 		},
 	}
 }
