@@ -7,7 +7,7 @@ API_PID=$!
 
 # Start the React development server
 echo "Starting React development server..."
-REACT_APP_API_URL=https://octagon.beer PORT=6002 cd web && npm start &
+cd web && REACT_APP_API_URL=https://octagon.beer PORT=6002 npm start &
 WEB_PID=$!
 
 # Function to cleanup processes on exit
