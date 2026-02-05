@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Set, Character } from '../../types';
 import { ListSearch } from './ListSearch';
-import API_URL from '../../config';
+import API_URL, { getAuthHeaders } from '../../config';
 import './SetReporter.css';
 
 interface SetReporterProps {
@@ -26,7 +26,7 @@ export function SetReporter({ set, tournament, onBack }: SetReporterProps) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetch('${API_URL}/api/characters')
+    fetch(`${API_URL}/api/characters`, { headers: getAuthHeaders() })
       .then(res => res.json())
       .then(data => {
         const chars = data.characters || [];
@@ -166,7 +166,7 @@ export function SetReporter({ set, tournament, onBack }: SetReporterProps) {
     try {
       const response = await fetch(`${API_URL}/api/sets/report?tournament=${tournament}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ setId: set.id, games: gameResults }),
       });
 

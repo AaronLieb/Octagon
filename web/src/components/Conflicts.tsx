@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API_URL from '../config';
+import API_URL, { getAuthHeaders } from '../config';
 
 interface Conflict {
   player1: string;
@@ -30,7 +30,9 @@ const Conflicts: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('${API_URL}/api/conflicts');
+      const response = await fetch(`${API_URL}/api/conflicts`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch conflicts');
       }
@@ -51,6 +53,7 @@ const Conflicts: React.FC = () => {
     try {
       const response = await fetch(`${API_URL}/api/conflicts/${index}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
       });
       
       if (!response.ok) {
@@ -67,11 +70,9 @@ const Conflicts: React.FC = () => {
     if (!newConflict.player1 || !newConflict.player2) return;
     
     try {
-      const response = await fetch('${API_URL}/api/conflicts', {
+      const response = await fetch(`${API_URL}/api/conflicts`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           player1: newConflict.player1,
           player2: newConflict.player2,

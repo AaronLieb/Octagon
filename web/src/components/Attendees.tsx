@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API_URL from '../config';
+import API_URL, { getAuthHeaders } from '../config';
 
 interface Attendee {
   id: string;
@@ -25,7 +25,9 @@ const Attendees: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch(`${API_URL}/api/attendees?tournament=${tournamentSlug}`);
+      const response = await fetch(`${API_URL}/api/attendees?tournament=${tournamentSlug}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch attendees');
       }

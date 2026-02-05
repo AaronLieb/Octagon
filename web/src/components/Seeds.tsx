@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import API_URL from '../config';
+import API_URL, { getAuthHeaders } from '../config';
 
 interface SeedResult {
   name: string;
@@ -28,11 +28,9 @@ const Seeds: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('${API_URL}/api/seed', {
+      const response = await fetch(`${API_URL}/api/seed`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           tournament: tournamentSlug,
           redemption: isRedemption,
@@ -63,11 +61,9 @@ const Seeds: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('${API_URL}/api/seed/publish', {
+      const response = await fetch(`${API_URL}/api/seed/publish`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           tournament: tournament,
           redemption: redemption,

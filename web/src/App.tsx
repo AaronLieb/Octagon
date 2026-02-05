@@ -4,9 +4,19 @@ import Attendees from './components/Attendees';
 import Seeds from './components/Seeds';
 import Conflicts from './components/Conflicts';
 import { Report } from './components/report/Report';
+import { Login } from './components/Login';
 
 function App() {
   const location = useLocation();
+
+  // Don't show nav on login page
+  if (location.pathname === '/login') {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    );
+  }
 
   return (
     <div>
