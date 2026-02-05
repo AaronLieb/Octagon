@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API_URL from '../config';
 
 interface Attendee {
   id: string;
@@ -24,7 +25,7 @@ const Attendees: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch(`http://localhost:8080/api/attendees?tournament=${tournamentSlug}`);
+      const response = await fetch(`${API_URL}/api/attendees?tournament=${tournamentSlug}`);
       if (!response.ok) {
         throw new Error('Failed to fetch attendees');
       }

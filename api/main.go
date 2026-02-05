@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -116,7 +117,12 @@ func main() {
 	r.POST("/api/sets/report", reportSet)
 	r.GET("/api/characters", getCharacters)
 
-	r.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	r.Run(":" + port)
 }
 
 func getAttendees(c *gin.Context) {

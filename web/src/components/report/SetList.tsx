@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Set } from '../../types';
 import { ListSearch } from './ListSearch';
+import API_URL from '../../config';
 import './SetList.css';
 
 interface SetListProps {
@@ -24,7 +25,7 @@ export function SetList({ tournament, onSelectSet }: SetListProps) {
 
   const fetchSets = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/sets?tournament=${tournament}&includeCompleted=${includeCompleted}`);
+      const response = await fetch(`${API_URL}/api/sets?tournament=${tournament}&includeCompleted=${includeCompleted}`);
       const data = await response.json();
       setSets(data.sets || []);
     } catch (error) {
@@ -36,7 +37,7 @@ export function SetList({ tournament, onSelectSet }: SetListProps) {
 
   const fetchReadyToCall = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/sets/ready?tournament=${tournament}`);
+      const response = await fetch(`${API_URL}/api/sets/ready?tournament=${tournament}`);
       const data = await response.json();
       setReadyToCallSets(data.sets || []);
     } catch (error) {

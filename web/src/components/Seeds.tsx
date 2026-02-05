@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import API_URL from '../config';
 
 interface SeedResult {
   name: string;
@@ -27,7 +28,7 @@ const Seeds: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:8080/api/seed', {
+      const response = await fetch('${API_URL}/api/seed', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +63,7 @@ const Seeds: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:8080/api/seed/publish', {
+      const response = await fetch('${API_URL}/api/seed/publish', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

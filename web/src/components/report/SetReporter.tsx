@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Set, Character } from '../../types';
 import { ListSearch } from './ListSearch';
+import API_URL from '../../config';
 import './SetReporter.css';
 
 interface SetReporterProps {
@@ -25,7 +26,7 @@ export function SetReporter({ set, tournament, onBack }: SetReporterProps) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/characters')
+    fetch('${API_URL}/api/characters')
       .then(res => res.json())
       .then(data => {
         const chars = data.characters || [];
@@ -163,7 +164,7 @@ export function SetReporter({ set, tournament, onBack }: SetReporterProps) {
     }));
 
     try {
-      const response = await fetch(`http://localhost:8080/api/sets/report?tournament=${tournament}`, {
+      const response = await fetch(`${API_URL}/api/sets/report?tournament=${tournament}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ setId: set.id, games: gameResults }),
