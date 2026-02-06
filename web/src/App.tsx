@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Attendees from './components/Attendees';
 import Seeds from './components/Seeds';
@@ -10,7 +9,6 @@ import { NavBar } from './components/NavBar';
 function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
       <Route path="*" element={
         <>
           <NavBar />
@@ -20,6 +18,7 @@ function App() {
             <Route path="/seeds" element={<Seeds />} />
             <Route path="/conflicts" element={<Conflicts />} />
             <Route path="/report" element={<Report />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </>
       } />
