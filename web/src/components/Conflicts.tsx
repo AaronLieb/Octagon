@@ -1,34 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import API_URL, { getAuthHeaders } from '../config';
-
-interface Conflict {
-  player1: string;
-  player2: string;
-  reason: string;
-  priority: number;
-  expiration: string | null;
-}
-
-interface ConflictsResponse {
-  conflicts: Conflict[];
-}
+import { Button } from './common/Button';
+import { DataTable } from './common/DataTable';
+import { LoadingSpinner, ErrorMessage } from './common/LoadingError';
+import { Conflict, ConflictsResponse } from '../types';
 
 const Conflicts: React.FC = () => {
   const [data, setData] = useState<ConflictsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [newConflict, setNewConflict] = useState({ 
-    player1: '', 
-    player2: '', 
-    reason: '', 
-    priority: 1, 
-    expiration: '' 
+  const [newConflict, setNewConflict] = useState({
+    player1: '',
+    player2: '',
+    reason: '',
+    priority: 1,
+    expiration: ''
   });
 
   const fetchConflicts = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch(`${API_URL}/api/conflicts`, {
         headers: getAuthHeaders()
@@ -50,16 +42,17 @@ const Conflicts: React.FC = () => {
   }, []);
 
   const deleteConflict = async (index: number) => {
+    setError(null);
     try {
       const response = await fetch(`${API_URL}/api/conflicts/${index}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete conflict');
       }
-      
+
       fetchConflicts();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -68,7 +61,8 @@ const Conflicts: React.FC = () => {
 
   const addConflict = async () => {
     if (!newConflict.player1 || !newConflict.player2) return;
-    
+
+    setError(null);
     try {
       const response = await fetch(`${API_URL}/api/conflicts`, {
         method: 'POST',
@@ -81,11 +75,11 @@ const Conflicts: React.FC = () => {
           expiration: newConflict.expiration || null,
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to add conflict');
       }
-      
+
       setNewConflict({ player1: '', player2: '', reason: '', priority: 1, expiration: '' });
       fetchConflicts();
     } catch (err) {
@@ -93,37 +87,24 @@ const Conflicts: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="loading">
-        Loading conflicts...
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="container">
-      <h1 className="title">Tournament Conflicts</h1>
-      
-      <button onClick={fetchConflicts} className="button" style={{ marginBottom: '20px' }}>
-        Refresh Conflicts
-      </button>
+    <div className="page-container">
+      <h1>Conflicts</h1>
 
-      {error && (
-        <div className="error">
-          Error: {error}
-        </div>
-      )}
+      <Button onClick={fetchConflicts} style={{ marginBottom: '20px' }}>
+        Refresh Conflicts
+      </Button>
+
+      {error && <ErrorMessage message={error} />}
 
       {data && (
         <>
-          <div className="tournament-info">
-            <h2 className="tournament-name">Conflicts from File</h2>
-            <p className="attendee-count">{data.conflicts.length} conflicts found</p>
-          </div>
+          <p style={{ color: '#666', marginBottom: '20px' }}>{data.conflicts.length} conflicts found</p>
 
-          <div className="add-conflict" style={{ marginBottom: '20px', padding: '16px', border: '1px solid #ddd', borderRadius: '8px' }}>
-            <h3>Add New Conflict</h3>
+          <div style={{ marginBottom: '20px', padding: '16px', border: `1px solid var(--border-color)`, borderRadius: '8px', background: 'var(--bg-secondary)' }}>
+            <h2>Add New Conflict</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
               <input
                 type="text"
@@ -167,45 +148,41 @@ const Conflicts: React.FC = () => {
                 title="Leave empty for no expiration"
               />
             </div>
-            <button onClick={addConflict} className="button">
-              Add Conflict
-            </button>
+            <Button onClick={addConflict}>Add Conflict</Button>
           </div>
 
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Player 1</th>
-                  <th>Player 2</th>
-                  <th>Reason</th>
-                  <th>Priority</th>
-                  <th>Expiration</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.conflicts.map((conflict, index) => (
-                  <tr key={index}>
-                    <td className="name">{conflict.player1}</td>
-                    <td className="name">{conflict.player2}</td>
-                    <td>{conflict.reason}</td>
-                    <td>P{conflict.priority}</td>
-                    <td>{conflict.expiration || 'Never'}</td>
-                    <td>
-                      <button 
-                        onClick={() => deleteConflict(index)} 
-                        className="button-secondary"
-                        style={{ fontSize: '12px', padding: '4px 8px' }}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            data={data.conflicts}
+            columns={[
+              { key: 'player1', label: 'Player 1' },
+              { key: 'player2', label: 'Player 2' },
+              { key: 'reason', label: 'Reason' },
+              { 
+                key: 'priority', 
+                label: 'Priority',
+                render: (c) => `P${c.priority}`
+              },
+              { 
+                key: 'expiration', 
+                label: 'Expiration',
+                render: (c) => c.expiration || 'Never'
+              },
+              {
+                key: 'actions',
+                label: 'Actions',
+                render: (_, idx) => (
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => deleteConflict(idx)}
+                    style={{ fontSize: '12px', padding: '4px 8px' }}
+                  >
+                    Delete
+                  </Button>
+                )
+              }
+            ]}
+            keyExtractor={(_, idx) => idx}
+          />
         </>
       )}
     </div>

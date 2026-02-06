@@ -1,38 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import { useTournament } from '../utils/tournament';
 import API_URL, { getAuthHeaders } from '../config';
-
-interface Attendee {
-  id: string;
-  gamerTag: string;
-  firstName: string;
-  lastName: string;
-  playerId: string;
-}
-
-interface AttendeesResponse {
-  tournament: string;
-  attendees: Attendee[];
-}
+import { DataTable } from './common/DataTable';
+import { LoadingSpinner, ErrorMessage } from './common/LoadingError';
+import { Attendee } from '../types';
 
 const Attendees: React.FC = () => {
-  const [data, setData] = useState<AttendeesResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const [tournament] = useTournament();
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tournament, setTournament] = useState('octagon');
 
-  const fetchAttendees = async (tournamentSlug: string) => {
+  const fetchAttendees = async () => {
     setLoading(true);
     setError(null);
-    
     try {
-      const response = await fetch(`${API_URL}/api/attendees?tournament=${tournamentSlug}`, {
+      const response = await fetch(`${API_URL}/api/attendees?tournament=${tournament}`, {
         headers: getAuthHeaders()
       });
-      if (!response.ok) {
-        throw new Error('Failed to fetch attendees');
-      }
-      const result = await response.json();
-      setData(result);
+      if (!response.ok) throw new Error('Failed to fetch attendees');
+      const data = await response.json();
+      setAttendees(data.attendees || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -41,78 +29,27 @@ const Attendees: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchAttendees('octagon');
-  }, []);
+    fetchAttendees();
+  }, [tournament]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchAttendees(tournament);
-  };
-
-  if (loading) {
-    return (
-      <div className="loading">
-        Loading attendees...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container">
-        <div className="error">
-          Error: {error}
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="container">
-      <h1 className="title">Tournament Attendees</h1>
-      
-      <form onSubmit={handleSubmit} className="form">
-        <input
-          type="text"
-          value={tournament}
-          onChange={(e) => setTournament(e.target.value)}
-          placeholder="Tournament slug (e.g., octagon)"
-          className="input"
-        />
-        <button type="submit" className="button">
-          Load
-        </button>
-      </form>
-
-      {data && (
-        <>
-          <div className="tournament-info">
-            <h2 className="tournament-name">{data.tournament}</h2>
-            <p className="attendee-count">{data.attendees.length} attendees</p>
-          </div>
-
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Gamer Tag</th>
-                  <th>Name</th>
-                  <th>Player ID</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.attendees.map((attendee) => (
-                  <tr key={attendee.id}>
-                    <td className="gamer-tag">{attendee.gamerTag}</td>
-                    <td className="name">{attendee.firstName} {attendee.lastName}</td>
-                    <td className="player-id">{attendee.playerId}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
+    <div className="page-container">
+      <h1>Attendees ({attendees.length})</h1>
+      {error && <ErrorMessage message={error} />}
+      <DataTable
+        data={attendees}
+        columns={[
+          { key: 'gamerTag', label: 'Gamer Tag' },
+          { 
+            key: 'name', 
+            label: 'Name',
+            render: (a) => `${a.firstName} ${a.lastName}`
+          }
+        ]}
+        keyExtractor={(a) => a.id}
+      />
     </div>
   );
 };

@@ -100,9 +100,9 @@ func main() {
 
 	// Enable CORS for React frontend
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:8080"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
 	}))
 
@@ -392,7 +392,7 @@ func getSets(c *gin.Context) {
 	for i, set := range allSets {
 		p1Char, _ := cache.GetPlayerCharacter(set.Player1.ID)
 		p2Char, _ := cache.GetPlayerCharacter(set.Player2.ID)
-		
+
 		setResponses[i] = SetResponse{
 			ID:       set.ID,
 			Player1:  Player{Name: set.Player1.Name, ID: set.Player1.ID},
@@ -423,7 +423,7 @@ func getReadySets(c *gin.Context) {
 	// Fetch sets with state 1 (ready to call) from both events
 	events := []string{startgg.EventUltimateSingles, startgg.EventRedemptionBracket}
 	var allSets []tournament.Set
-	
+
 	for _, event := range events {
 		eventSlug := fmt.Sprintf(startgg.EventSlugFormat, fullTournamentSlug, event)
 		sets, err := tournament.FetchReportableSets(context.Background(), eventSlug, false)
@@ -443,7 +443,7 @@ func getReadySets(c *gin.Context) {
 	for i, set := range allSets {
 		p1Char, _ := cache.GetPlayerCharacter(set.Player1.ID)
 		p2Char, _ := cache.GetPlayerCharacter(set.Player2.ID)
-		
+
 		setResponses[i] = SetResponse{
 			ID:       set.ID,
 			Player1:  Player{Name: set.Player1.Name, ID: set.Player1.ID},

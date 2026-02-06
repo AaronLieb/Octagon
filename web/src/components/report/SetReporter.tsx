@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Set, Character } from '../../types';
+import { Set, Character, Game } from '../../types';
 import { ListSearch } from './ListSearch';
 import API_URL, { getAuthHeaders } from '../../config';
 import './SetReporter.css';
@@ -8,12 +8,6 @@ interface SetReporterProps {
   set: Set;
   tournament: string;
   onBack: () => void;
-}
-
-interface Game {
-  winner: number;
-  p1Char?: Character;
-  p2Char?: Character;
 }
 
 export function SetReporter({ set, tournament, onBack }: SetReporterProps) {
@@ -26,8 +20,12 @@ export function SetReporter({ set, tournament, onBack }: SetReporterProps) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    setError('');
     fetch(`${API_URL}/api/characters`, { headers: getAuthHeaders() })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch characters');
+        return res.json();
+      })
       .then(data => {
         const chars = data.characters || [];
         setCharacters(chars);
@@ -42,7 +40,7 @@ export function SetReporter({ set, tournament, onBack }: SetReporterProps) {
           if (char) setP2DefaultChar(char);
         }
       })
-      .catch(err => console.error('Failed to fetch characters:', err));
+      .catch(err => setError(err instanceof Error ? err.message : 'Failed to fetch characters'));
   }, [set]);
 
   useEffect(() => {
@@ -134,7 +132,7 @@ export function SetReporter({ set, tournament, onBack }: SetReporterProps) {
   };
 
   const handleGameClick = (gameIndex: number, player: 1 | 2) => {
-    setSelectingChar({ player, gameIndex });
+    addGame(player);
   };
 
   const validateSet = (): boolean => {
@@ -217,25 +215,43 @@ export function SetReporter({ set, tournament, onBack }: SetReporterProps) {
           <div key={i} className="game-row">
             <div
               className={`game-cell ${games[i]?.winner === 1 ? 'win' : games[i] ? 'loss' : ''} ${!games[i] && (p1DefaultChar || p2DefaultChar) ? 'pending' : ''}`}
-              onClick={() => handleGameClick(i, 1)}
             >
-              {(games[i]?.p1Char || (!games[i] && p1DefaultChar)) && (
-                <>
-                  <div className="char-icon">🎮</div>
-                  <div className="char-name">{games[i]?.p1Char?.name || p1DefaultChar?.name}</div>
-                </>
-              )}
+              <div className="char-icon-btn" onClick={(e) => {
+                e.stopPropagation();
+                setSelectingChar({ player: 1, gameIndex: i });
+              }}>
+                {(games[i]?.p1Char || (!games[i] && p1DefaultChar)) ? (
+                  <>
+                    <div className="char-icon">🎮</div>
+                    <div className="char-name">{games[i]?.p1Char?.name || p1DefaultChar?.name}</div>
+                  </>
+                ) : (
+                  <div className="char-placeholder">?</div>
+                )}
+              </div>
+              <div className="game-click-area" onClick={() => handleGameClick(i, 1)}>
+                <div className="player-label">{set.player1.name}</div>
+              </div>
             </div>
             <div
               className={`game-cell ${games[i]?.winner === 2 ? 'win' : games[i] ? 'loss' : ''} ${!games[i] && (p1DefaultChar || p2DefaultChar) ? 'pending' : ''}`}
-              onClick={() => handleGameClick(i, 2)}
             >
-              {(games[i]?.p2Char || (!games[i] && p2DefaultChar)) && (
-                <>
-                  <div className="char-icon">🎮</div>
-                  <div className="char-name">{games[i]?.p2Char?.name || p2DefaultChar?.name}</div>
-                </>
-              )}
+              <div className="game-click-area" onClick={() => handleGameClick(i, 2)}>
+                <div className="player-label">{set.player2.name}</div>
+              </div>
+              <div className="char-icon-btn" onClick={(e) => {
+                e.stopPropagation();
+                setSelectingChar({ player: 2, gameIndex: i });
+              }}>
+                {(games[i]?.p2Char || (!games[i] && p2DefaultChar)) ? (
+                  <>
+                    <div className="char-icon">🎮</div>
+                    <div className="char-name">{games[i]?.p2Char?.name || p2DefaultChar?.name}</div>
+                  </>
+                ) : (
+                  <div className="char-placeholder">?</div>
+                )}
+              </div>
             </div>
           </div>
         ))}

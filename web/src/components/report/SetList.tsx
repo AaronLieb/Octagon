@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Set } from '../../types';
 import { ListSearch } from './ListSearch';
 import API_URL, { getAuthHeaders } from '../../config';
+import { ErrorMessage } from '../common/LoadingError';
 import './SetList.css';
 
 interface SetListProps {
@@ -14,8 +15,10 @@ export function SetList({ tournament, onSelectSet }: SetListProps) {
   const [readyToCallSets, setReadyToCallSets] = useState<Set[]>([]);
   const [loading, setLoading] = useState(true);
   const [includeCompleted, setIncludeCompleted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     fetchSets();
   }, [tournament, includeCompleted]);
 
@@ -24,14 +27,16 @@ export function SetList({ tournament, onSelectSet }: SetListProps) {
   }, [tournament]);
 
   const fetchSets = async () => {
+    setError(null);
     try {
       const response = await fetch(`${API_URL}/api/sets?tournament=${tournament}&includeCompleted=${includeCompleted}`, {
         headers: getAuthHeaders()
       });
+      if (!response.ok) throw new Error('Failed to fetch sets');
       const data = await response.json();
       setSets(data.sets || []);
-    } catch (error) {
-      console.error('Failed to fetch sets:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -42,10 +47,11 @@ export function SetList({ tournament, onSelectSet }: SetListProps) {
       const response = await fetch(`${API_URL}/api/sets/ready?tournament=${tournament}`, {
         headers: getAuthHeaders()
       });
+      if (!response.ok) throw new Error('Failed to fetch ready sets');
       const data = await response.json();
       setReadyToCallSets(data.sets || []);
-    } catch (error) {
-      console.error('Failed to fetch ready sets:', error);
+    } catch (err) {
+      console.error('Failed to fetch ready sets:', err);
     }
   };
 
@@ -63,6 +69,7 @@ export function SetList({ tournament, onSelectSet }: SetListProps) {
   return (
     <div className="set-list-container">
       <div className="set-list-main">
+        {error && <ErrorMessage message={error} />}
         <div style={{ marginBottom: '10px' }}>
           <label>
             <input

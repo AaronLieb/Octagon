@@ -26,6 +26,39 @@ export interface Character {
   aliases?: string[];
 }
 
+export interface Game {
+  winner: number;
+  p1Char?: Character;
+  p2Char?: Character;
+}
+
+export interface Attendee {
+  id: string;
+  gamerTag: string;
+  firstName: string;
+  lastName: string;
+  playerId: string;
+}
+
+export interface SeedResult {
+  name: string;
+  rating: number;
+  seed: number;
+  id: string;
+}
+
+export interface Conflict {
+  player1: string;
+  player2: string;
+  reason: string;
+  priority: number;
+  expiration: string | null;
+}
+
+export interface ConflictsResponse {
+  conflicts: Conflict[];
+}
+
 export const CHARACTERS: Character[] = [
   { id: 1271, name: 'Bayonetta' },
   { id: 1272, name: 'Bowser Jr' },

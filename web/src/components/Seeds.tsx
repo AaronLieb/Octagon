@@ -1,47 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useTournament } from '../utils/tournament';
 import API_URL, { getAuthHeaders } from '../config';
-
-interface SeedResult {
-  name: string;
-  rating: number;
-  seed: number;
-  id: number;
-}
-
-interface SeedsResponse {
-  tournament: string;
-  event: string;
-  seeds: SeedResult[];
-}
+import { Button } from './common/Button';
+import { DataTable } from './common/DataTable';
+import { LoadingSpinner, ErrorMessage } from './common/LoadingError';
+import { SeedResult } from '../types';
 
 const Seeds: React.FC = () => {
-  const [data, setData] = useState<SeedsResponse | null>(null);
+  const [seeds, setSeeds] = useState<SeedResult[]>([]);
+  const [tournament] = useTournament();
+  const [redemption, setRedemption] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tournament, setTournament] = useState('octagon');
-  const [redemption, setRedemption] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [publishing, setPublishing] = useState(false);
 
-  const runSeeding = async (tournamentSlug: string, isRedemption: boolean) => {
+  const runSeeding = async () => {
     setLoading(true);
     setError(null);
-    
     try {
       const response = await fetch(`${API_URL}/api/seed`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({
-          tournament: tournamentSlug,
-          redemption: isRedemption,
-        }),
+        body: JSON.stringify({ tournament, redemption }),
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to run seeding');
-      }
-      const result = await response.json();
-      setData(result);
+      if (!response.ok) throw new Error('Failed to run seeding');
+      const data = await response.json();
+      setSeeds(data.seeds || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -49,157 +32,65 @@ const Seeds: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    runSeeding(tournament, redemption);
-  };
-
-  const publishSeeds = async () => {
-    if (!data) return;
-    
-    setPublishing(true);
+  const publishSeeding = async () => {
+    setLoading(true);
     setError(null);
-    
     try {
       const response = await fetch(`${API_URL}/api/seed/publish`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({
-          tournament: tournament,
-          redemption: redemption,
-          players: data.seeds,
-        }),
+        body: JSON.stringify({ tournament, redemption, players: seeds }),
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to publish seeding');
-      }
-      
-      setShowConfirmation(false);
-      alert('Seeding published successfully!');
+      if (!response.ok) throw new Error('Failed to publish seeds');
+      alert('Seeds published successfully!');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
-      setPublishing(false);
+      setLoading(false);
     }
   };
 
-  const confirmSeeding = () => {
-    setShowConfirmation(false);
-    runSeeding(tournament, redemption);
-  };
+  useEffect(() => {
+    setSeeds([]);
+  }, [tournament]);
 
-  const cancelSeeding = () => {
-    setShowConfirmation(false);
-  };
-
-  if (loading) {
-    return (
-      <div className="loading">
-        Running seeding algorithm...
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="container">
-      <h1 className="title">Generate Tournament Seeding</h1>
-      
-      <form onSubmit={handleSubmit} className="form">
-        <input
-          type="text"
-          value={tournament}
-          onChange={(e) => setTournament(e.target.value)}
-          placeholder="Tournament slug (e.g., octagon)"
-          className="input"
-        />
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div className="page-container">
+      <h1>Seeding</h1>
+      {error && <ErrorMessage message={error} />}
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '20px', alignItems: 'center' }}>
+        <label>
           <input
             type="checkbox"
             checked={redemption}
-            onChange={(e) => setRedemption(e.target.checked)}
+            onChange={e => setRedemption(e.target.checked)}
           />
-          Redemption Bracket
+          {' '}Redemption Bracket
         </label>
-        <button type="submit" className="button">
-          Generate Seeding
-        </button>
-      </form>
+        <Button onClick={runSeeding}>Generate Seeds</Button>
+      </div>
 
-      {showConfirmation && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '24px',
-            borderRadius: '8px',
-            maxWidth: '400px',
-            textAlign: 'center'
-          }}>
-            <h3>Publish Seeding to start.gg?</h3>
-            <p>This will update the seeding on start.gg for <strong>{data?.tournament}</strong>.</p>
-            {redemption && <p><em>This will update the redemption bracket seeding.</em></p>}
-            <div style={{ marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
-              <button onClick={publishSeeds} className="button" disabled={publishing}>
-                {publishing ? 'Publishing...' : 'Yes, Publish'}
-              </button>
-              <button onClick={() => setShowConfirmation(false)} className="button-secondary" disabled={publishing}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {error && (
-        <div className="error">
-          Error: {error}
-        </div>
-      )}
-
-      {data && (
+      {seeds.length > 0 && (
         <>
-          <div className="tournament-info">
-            <h2 className="tournament-name">{data.tournament}</h2>
-            <p className="attendee-count">{data.seeds.length} players seeded for {data.event}</p>
-          </div>
-
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Seed</th>
-                  <th>Gamer Tag</th>
-                  <th>Rating</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.seeds.map((seed) => (
-                  <tr key={seed.seed}>
-                    <td className="gamer-tag">{seed.seed}</td>
-                    <td className="name">{seed.name}</td>
-                    <td className="player-id">{seed.rating.toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div style={{ marginTop: '16px', textAlign: 'center' }}>
-            <button onClick={() => setShowConfirmation(true)} className="button">
-              Publish to start.gg
-            </button>
-          </div>
+          <h2>Seeds ({seeds.length})</h2>
+          <DataTable
+            data={seeds}
+            columns={[
+              { key: 'seed', label: 'Seed' },
+              { key: 'name', label: 'Name' },
+              { 
+                key: 'rating', 
+                label: 'Rating',
+                render: (s) => s.rating.toFixed(2)
+              }
+            ]}
+            keyExtractor={(s) => s.id}
+          />
+          <Button variant="success" onClick={publishSeeding} style={{ marginTop: '20px' }}>
+            Publish Seeds
+          </Button>
         </>
       )}
     </div>

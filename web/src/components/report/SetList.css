@@ -1,9 +1,9 @@
 .set-list-container {
   display: flex;
   gap: 20px;
-  padding: 20px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 20px;
 }
 
 .set-list-main {
@@ -18,10 +18,11 @@
 
 .set-list h2 {
   margin-bottom: 10px;
+  color: var(--text-primary);
 }
 
 .hint {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
   margin-bottom: 20px;
 }
@@ -34,14 +35,15 @@
 
 .set-item {
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
+  background-color: var(--bg-secondary);
 }
 
 .set-item:hover {
-  background-color: #f5f5f5;
+  background-color: var(--bg-tertiary);
 }
 
 .players {
@@ -54,15 +56,16 @@
 
 .player {
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .vs {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .round {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
@@ -75,9 +78,15 @@
 .list-search input {
   padding: 10px;
   font-size: 16px;
-  border: 2px solid #007bff;
+  border: 2px solid var(--primary);
   border-radius: 4px;
   outline: none;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.list-search input:focus {
+  border-color: var(--accent-blue);
 }
 
 .list-search-results {
@@ -90,25 +99,27 @@
 
 .list-search-item {
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .list-search-item:hover {
-  background-color: #f5f5f5;
+  background-color: var(--bg-tertiary);
 }
 
 .list-search-item.selected {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
+  background-color: var(--primary);
+  color: var(--text-primary);
+  border-color: var(--primary);
 }
 
 .ready-to-call {
   width: 300px;
-  border-left: 2px solid #ddd;
+  border-left: 2px solid var(--border-color);
   padding-left: 20px;
 }
 
@@ -116,28 +127,31 @@
   margin-top: 0;
   margin-bottom: 15px;
   font-size: 18px;
+  color: var(--accent-purple);
 }
 
 .ready-set {
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   margin-bottom: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
+  background-color: var(--bg-secondary);
 }
 
 .ready-set:hover {
-  background-color: #f5f5f5;
+  background-color: var(--bg-tertiary);
 }
 
 .ready-players {
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 4px;
+  color: var(--text-primary);
 }
 
 .ready-round {
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
 }
