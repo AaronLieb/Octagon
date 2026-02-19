@@ -30,6 +30,11 @@ func seedCommand() *cli.Command {
 				Usage:   "The slug for the tournament. Example: octagon-99",
 				Value:   "octagon",
 			},
+			&cli.StringFlag{
+				Name:    "event",
+				Aliases: []string{"e"},
+				Usage:   "The event name. Example: 'ultimate-singles'",
+			},
 			&cli.BoolFlag{
 				Name:    "redemption",
 				Aliases: []string{"r"},
@@ -81,6 +86,10 @@ func seed(ctx context.Context, cmd *cli.Command) error {
 	event := startgg.EventUltimateSingles
 	if redemption {
 		event = startgg.EventRedemptionBracket
+	}
+
+	if len(cmd.String("event")) > 0 {
+		event = cmd.String("event")
 	}
 
 	slug := fmt.Sprintf(startgg.EventSlugFormat, tournamentSlug, event)

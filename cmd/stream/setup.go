@@ -6,6 +6,7 @@ import (
 
 	"github.com/AaronLieb/octagon/obs"
 	"github.com/AaronLieb/octagon/ocr"
+	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 	"github.com/urfave/cli/v3"
 )
@@ -27,7 +28,7 @@ func SetupCommand() *cli.Command {
 				Name:    "event",
 				Aliases: []string{"e"},
 				Usage:   "Event name",
-				Value:   "ultimate-singles",
+				Value:   startgg.EventUltimateSingles,
 			},
 		},
 		Action: setup,

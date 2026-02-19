@@ -34,7 +34,7 @@ func WatchCommand() *cli.Command {
 				Name:    "event",
 				Aliases: []string{"e"},
 				Usage:   "Event name",
-				Value:   "ultimate-singles",
+				Value:   startgg.EventUltimateSingles,
 			},
 		},
 		Action: startWatcher,

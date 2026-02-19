@@ -27,7 +27,7 @@ func Command() *cli.Command {
 				Name:    "event",
 				Aliases: []string{"e"},
 				Usage:   "Event name",
-				Value:   "ultimate-singles",
+				Value:   startgg.EventUltimateSingles,
 			},
 			&cli.BoolFlag{
 				Name:    "redemption",

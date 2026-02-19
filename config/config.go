@@ -41,3 +41,7 @@ func Load() {
 	}
 	log.Debug("successfully loaded config from .env")
 }
+
+func GetParryGGAPIKey() string {
+	return os.Getenv("PARRYGG_API_KEY")
+}

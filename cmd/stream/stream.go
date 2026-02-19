@@ -14,6 +14,7 @@ func Command() *cli.Command {
 		Commands: []*cli.Command{
 			WatchCommand(),
 			SetupCommand(),
+			SelectCommand(),
 		},
 	}
 }
