@@ -56,14 +56,15 @@ type ConflictResponse struct {
 }
 
 type SetResponse struct {
-	ID       int    `json:"id"`
-	Player1  Player `json:"player1"`
-	Player2  Player `json:"player2"`
-	Round    string `json:"round"`
-	Entrant1 int    `json:"entrant1"`
-	Entrant2 int    `json:"entrant2"`
-	P1Char   string `json:"p1Char,omitempty"`
-	P2Char   string `json:"p2Char,omitempty"`
+	ID           int    `json:"id"`
+	Player1      Player `json:"player1"`
+	Player2      Player `json:"player2"`
+	Round        string `json:"round"`
+	Entrant1     int    `json:"entrant1"`
+	Entrant2     int    `json:"entrant2"`
+	P1Char       string `json:"p1Char,omitempty"`
+	P2Char       string `json:"p2Char,omitempty"`
+	IsRedemption bool   `json:"isRedemption"`
 }
 
 type Player struct {
@@ -394,14 +395,15 @@ func getSets(c *gin.Context) {
 		p2Char, _ := cache.GetPlayerCharacter(set.Player2.ID)
 
 		setResponses[i] = SetResponse{
-			ID:       set.ID,
-			Player1:  Player{Name: set.Player1.Name, ID: set.Player1.ID},
-			Player2:  Player{Name: set.Player2.Name, ID: set.Player2.ID},
-			Round:    set.Round,
-			Entrant1: set.Entrant1,
-			Entrant2: set.Entrant2,
-			P1Char:   p1Char,
-			P2Char:   p2Char,
+			ID:           set.ID,
+			Player1:      Player{Name: set.Player1.Name, ID: set.Player1.ID},
+			Player2:      Player{Name: set.Player2.Name, ID: set.Player2.ID},
+			Round:        set.Round,
+			Entrant1:     set.Entrant1,
+			Entrant2:     set.Entrant2,
+			P1Char:       p1Char,
+			P2Char:       p2Char,
+			IsRedemption: set.IsRedemption,
 		}
 	}
 
@@ -445,14 +447,15 @@ func getReadySets(c *gin.Context) {
 		p2Char, _ := cache.GetPlayerCharacter(set.Player2.ID)
 
 		setResponses[i] = SetResponse{
-			ID:       set.ID,
-			Player1:  Player{Name: set.Player1.Name, ID: set.Player1.ID},
-			Player2:  Player{Name: set.Player2.Name, ID: set.Player2.ID},
-			Round:    set.Round,
-			Entrant1: set.Entrant1,
-			Entrant2: set.Entrant2,
-			P1Char:   p1Char,
-			P2Char:   p2Char,
+			ID:           set.ID,
+			Player1:      Player{Name: set.Player1.Name, ID: set.Player1.ID},
+			Player2:      Player{Name: set.Player2.Name, ID: set.Player2.ID},
+			Round:        set.Round,
+			Entrant1:     set.Entrant1,
+			Entrant2:     set.Entrant2,
+			P1Char:       p1Char,
+			P2Char:       p2Char,
+			IsRedemption: set.IsRedemption,
 		}
 	}
 
@@ -503,7 +506,6 @@ func reportSet(c *gin.Context) {
 
 	// Get the set details to report
 	tournamentSlug := c.DefaultQuery("tournament", "octagon")
-	redemption := c.DefaultQuery("redemption", "false") == "true"
 
 	fullTournamentSlug, err := startgg.GetTournamentSlug(context.Background(), tournamentSlug)
 	if err != nil {
@@ -511,23 +513,24 @@ func reportSet(c *gin.Context) {
 		return
 	}
 
-	event := startgg.EventUltimateSingles
-	if redemption {
-		event = startgg.EventRedemptionBracket
-	}
-
-	eventSlug := fmt.Sprintf(startgg.EventSlugFormat, fullTournamentSlug, event)
-	sets, err := tournament.FetchReportableSets(context.Background(), eventSlug, true)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Find the set
+	// Fetch from both events to find the set
+	events := []string{startgg.EventUltimateSingles, startgg.EventRedemptionBracket}
 	var targetSet *tournament.Set
-	for _, set := range sets {
-		if set.ID == req.SetID {
-			targetSet = &set
+
+	for _, event := range events {
+		eventSlug := fmt.Sprintf(startgg.EventSlugFormat, fullTournamentSlug, event)
+		sets, err := tournament.FetchReportableSets(context.Background(), eventSlug, true)
+		if err != nil {
+			continue
+		}
+
+		for _, set := range sets {
+			if set.ID == req.SetID {
+				targetSet = &set
+				break
+			}
+		}
+		if targetSet != nil {
 			break
 		}
 	}

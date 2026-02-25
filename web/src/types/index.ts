@@ -7,6 +7,7 @@ export interface Set {
   entrant2: number;
   p1Char?: string;
   p2Char?: string;
+  isRedemption: boolean;
 }
 
 export interface Player {

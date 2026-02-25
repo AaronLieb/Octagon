@@ -4,19 +4,21 @@ package tournament
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 )
 
 type Set struct {
-	ID       int
-	Player1  Player
-	Player2  Player
-	Round    string
-	Entrant1 int
-	Entrant2 int
-	State    int // 1 = not started, 2 = in progress, 3 = completed
+	ID          int
+	Player1     Player
+	Player2     Player
+	Round       string
+	Entrant1    int
+	Entrant2    int
+	State       int // 1 = not started, 2 = in progress, 3 = completed
+	IsRedemption bool
 }
 
 type Player struct {
@@ -38,6 +40,8 @@ func FetchReportableSets(ctx context.Context, eventSlug string, includeCompleted
 	if includeCompleted {
 		states = append(states, 3)
 	}
+
+	isRedemption := strings.Contains(eventSlug, startgg.EventRedemptionBracket)
 
 	// Note: The current GraphQL query only fetches 500 sets from page 0
 	resp, err := startgg.GetReportableSets(ctx, eventSlug, states)
@@ -94,10 +98,11 @@ func FetchReportableSets(ctx context.Context, eventSlug string, includeCompleted
 				Name: p2.GamerTag,
 				ID:   int(player2Id),
 			},
-			Round:    parseRound(setNode.Round),
-			Entrant1: int(entrant1Id),
-			Entrant2: int(entrant2Id),
-			State:    setNode.State,
+			Round:        parseRound(setNode.Round),
+			Entrant1:     int(entrant1Id),
+			Entrant2:     int(entrant2Id),
+			State:        setNode.State,
+			IsRedemption: isRedemption,
 		})
 	}
 
