@@ -30,9 +30,7 @@ func ResolveConflicts(bracket *brackets.Bracket, conflicts []Conflict, players [
 	lowestScore := calculateConflictScoreCached(cache, conflicts, players)
 
 	log.Infof("conflictScore before resolution: %.2f", lowestScore)
-	if unresolved := listUnresolvedConflicts(bracket, conflicts, players); len(unresolved) > 0 {
-		printConflicts(unresolved)
-	}
+	printUnresolved(bracket, conflicts, players)
 
 	if lowestScore > 0.0 {
 		best, lowestScore = runParallelMonteCarlo(cache, conflicts, players, lowestScore)
@@ -205,9 +203,7 @@ func logResults(original, final []brackets.Player, bracket *brackets.Bracket, co
 	_, numConflicts := checkConflict(bracket, conflicts, final)
 	if numConflicts > 0 {
 		log.Warnf("%d conflicts were unresolved", numConflicts)
-		if unresolved := listUnresolvedConflicts(bracket, conflicts, final); len(unresolved) > 0 {
-			printConflicts(unresolved)
-		}
+		printUnresolved(bracket, conflicts, final)
 	}
 
 	log.Debug("Finished conflict resolution", "score", score)
