@@ -3,6 +3,7 @@ package conflicts
 import (
 	"time"
 
+	"github.com/AaronLieb/octagon/brackets"
 	"github.com/AaronLieb/octagon/startgg"
 )
 
@@ -12,8 +13,9 @@ type Player struct {
 }
 
 type Conflict struct {
-	Priority   int        `json:"priority"`
-	Reason     string     `json:"reason"`
-	Players    []Player   `json:"players"`
-	Expiration *time.Time `json:"expiration,omitempty"`
+	Priority   int              `json:"priority"`
+	Reason     string           `json:"reason"`
+	Players    []Player         `json:"players"`
+	Expiration *time.Time       `json:"expiration,omitempty"`
+	Round      *brackets.Round  `json:"round,omitempty"`
 }

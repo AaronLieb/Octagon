@@ -40,19 +40,23 @@ type PublishRequest struct {
 }
 
 type ConflictRequest struct {
+	Player1   string  `json:"player1"`
+	Player2   string  `json:"player2"`
+	Player1ID string  `json:"player1Id"`
+	Player2ID string  `json:"player2Id"`
+	Reason    string  `json:"reason"`
+	Priority  int     `json:"priority"`
+	Expiration *string `json:"expiration"`
+	Round      *string `json:"round"`
+}
+
+type ConflictResponse struct {
 	Player1    string  `json:"player1"`
 	Player2    string  `json:"player2"`
 	Reason     string  `json:"reason"`
 	Priority   int     `json:"priority"`
-	Expiration *string `json:"expiration"`
-}
-
-type ConflictResponse struct {
-	Player1    string `json:"player1"`
-	Player2    string `json:"player2"`
-	Reason     string `json:"reason"`
-	Priority   int    `json:"priority"`
-	Expiration string `json:"expiration"`
+	Expiration string  `json:"expiration"`
+	Round      *string `json:"round"`
 }
 
 type SetResponse struct {
@@ -281,12 +285,19 @@ func getConflicts(c *gin.Context) {
 			expiration = conflict.Expiration.Format("2006-01-02 15:04")
 		}
 
+		var round *string
+		if conflict.Round != nil {
+			s := conflict.Round.String()
+			round = &s
+		}
+
 		conflictResponses[i] = ConflictResponse{
 			Player1:    player1,
 			Player2:    player2,
 			Reason:     conflict.Reason,
 			Priority:   conflict.Priority,
 			Expiration: expiration,
+			Round:      round,
 		}
 	}
 
@@ -314,12 +325,21 @@ func addConflict(c *gin.Context) {
 
 	newConflict := conflicts.Conflict{
 		Players: []conflicts.Player{
-			{Name: req.Player1},
-			{Name: req.Player2},
+			{Name: req.Player1, ID: startgg.ToID(req.Player1ID)},
+			{Name: req.Player2, ID: startgg.ToID(req.Player2ID)},
 		},
 		Priority:   req.Priority,
 		Reason:     req.Reason,
 		Expiration: expiration,
+	}
+
+	if req.Round != nil && *req.Round != "" {
+		r, err := brackets.ParseRound(*req.Round)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid round format (e.g., WR1, LR2)"})
+			return
+		}
+		newConflict.Round = &r
 	}
 
 	err := conflicts.SaveConflict(newConflict)

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/AaronLieb/octagon/brackets"
 	"github.com/AaronLieb/octagon/cache"
 	"github.com/AaronLieb/octagon/conflicts"
 	"github.com/AaronLieb/octagon/startgg"
@@ -28,13 +29,17 @@ func createCommand() *cli.Command {
 			&cli.IntFlag{
 				Name:    "priority",
 				Aliases: []string{"p"},
-				Usage:   "Priority level (1-3)",
+				Usage:   "Priority level (1-3 for conflicts, -1 to -3 for set requests)",
 				Value:   3,
 			},
 			&cli.StringFlag{
 				Name:    "reason",
 				Aliases: []string{"r"},
 				Usage:   "Reason for the conflict",
+			},
+			&cli.StringFlag{
+				Name:  "round",
+				Usage: "Specific round (e.g., 'WR1' for winners round 1, 'LR2' for losers round 2)",
 			},
 		},
 		Action: createConflict,
@@ -53,8 +58,20 @@ func createConflict(ctx context.Context, cmd *cli.Command) error {
 
 	// Validate priority
 	priority := cmd.Int("priority")
-	if priority < 1 || priority > 3 {
-		return fmt.Errorf("priority must be between 1 and 3")
+
+	label := "conflict"
+	if priority < 0 {
+		label = "set request"
+	}
+
+	// Parse round if provided
+	var round *brackets.Round
+	if roundStr := cmd.String("round"); roundStr != "" {
+		r, err := brackets.ParseRound(roundStr)
+		if err != nil {
+			return err
+		}
+		round = &r
 	}
 
 	// Parse expiration if provided
@@ -80,10 +97,13 @@ func createConflict(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// Confirm players
-	fmt.Printf("Create conflict between:\n")
+	fmt.Printf("Create %s between:\n", label)
 	fmt.Printf("  Player 1: %s (ID: %s)\n", player1.Name, startgg.ToString(player1.ID))
 	fmt.Printf("  Player 2: %s (ID: %s)\n", player2.Name, startgg.ToString(player2.ID))
 	fmt.Printf("  Priority: %d\n", priority)
+	if round != nil {
+		fmt.Printf("  Round: %s\n", round)
+	}
 	if reason != "" {
 		fmt.Printf("  Reason: %s\n", reason)
 	}
@@ -104,6 +124,7 @@ func createConflict(ctx context.Context, cmd *cli.Command) error {
 		Priority:   int(priority),
 		Reason:     reason,
 		Expiration: expiration,
+		Round:      round,
 		Players: []conflicts.Player{
 			{Name: player1.Name, ID: player1.ID},
 			{Name: player2.Name, ID: player2.ID},
@@ -115,7 +136,7 @@ func createConflict(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed to save conflict: %v", err)
 	}
 
-	fmt.Println("Conflict created successfully")
+	fmt.Printf("%s created successfully\n", label)
 	return nil
 }
 
@@ -180,15 +201,15 @@ func parseDuration(s string) (time.Duration, error) {
 			return d * 24, nil
 		}
 	}
-	
-	// Handle weeks  
+
+	// Handle weeks
 	if strings.HasSuffix(s, "w") {
 		weeks := strings.TrimSuffix(s, "w")
 		if d, err := time.ParseDuration(weeks + "h"); err == nil {
 			return d * 168, nil // 24 * 7
 		}
 	}
-	
+
 	// Standard Go duration parsing for h, m, s
 	return time.ParseDuration(s)
 }

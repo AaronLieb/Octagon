@@ -54,6 +54,7 @@ export interface Conflict {
   reason: string;
   priority: number;
   expiration: string | null;
+  round: string | null;
 }
 
 export interface ConflictsResponse {

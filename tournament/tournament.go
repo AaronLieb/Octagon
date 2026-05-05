@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/AaronLieb/octagon/brackets"
 	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
 )
@@ -98,7 +99,7 @@ func FetchReportableSets(ctx context.Context, eventSlug string, includeCompleted
 				Name: p2.GamerTag,
 				ID:   int(player2Id),
 			},
-			Round:        parseRound(setNode.Round),
+			Round:        brackets.RoundFromStartGG(setNode.Round).String(),
 			Entrant1:     int(entrant1Id),
 			Entrant2:     int(entrant2Id),
 			State:        setNode.State,
@@ -111,13 +112,6 @@ func FetchReportableSets(ctx context.Context, eventSlug string, includeCompleted
 		log.Warnf("Fetched exactly 500 sets - there may be more sets available that aren't shown")
 	}
 	return sets, nil
-}
-
-func parseRound(round int) string {
-	if round < 0 {
-		return fmt.Sprintf("LR%d", -round)
-	}
-	return fmt.Sprintf("WR%d", round)
 }
 
 func ValidateSetScore(gameResults []GameResult) error {

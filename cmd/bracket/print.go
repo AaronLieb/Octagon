@@ -54,7 +54,7 @@ func printDetailedSets(ctx context.Context, eventSlug string) error {
 	for i, set := range setsResp.Event.Sets.Nodes {
 		fmt.Printf("\n--- Set %d ---\n", i+1)
 		fmt.Printf("ID: %v\n", set.Id)
-		fmt.Printf("Round: %d (%s)\n", set.Round, parseRound(set.Round))
+		fmt.Printf("Round: %d (%s)\n", set.Round, brackets.RoundFromStartGG(set.Round))
 		fmt.Printf("State: %v\n", set.State)
 		fmt.Printf("Winner ID: %v\n", set.WinnerId)
 		fmt.Printf("Display Score: %s\n", set.DisplayScore)
@@ -71,14 +71,6 @@ func printDetailedSets(ctx context.Context, eventSlug string) error {
 		}
 	}
 	return nil
-}
-
-func parseRound(round int) string {
-	if round < 0 {
-		return fmt.Sprintf("LR%d", -round)
-	} else {
-		return fmt.Sprintf("WR%d", round)
-	}
 }
 
 func printRounds(rounds [][]*brackets.Set) {

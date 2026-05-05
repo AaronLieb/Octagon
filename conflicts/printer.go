@@ -1,6 +1,8 @@
 package conflicts
 
 import (
+	"fmt"
+
 	"github.com/AaronLieb/octagon/brackets"
 	"github.com/AaronLieb/octagon/startgg"
 	"github.com/charmbracelet/log"
@@ -9,7 +11,15 @@ import (
 // printConflicts displays conflict information
 func printConflicts(conflicts []Conflict) {
 	for _, con := range conflicts {
-		log.Printf("%-15s %15s  |  p%d - %s", con.Players[0].Name, con.Players[1].Name, con.Priority, con.Reason)
+		label := fmt.Sprintf("p%d", con.Priority)
+		if con.isRequest() {
+			label = fmt.Sprintf("r%d", -con.Priority)
+		}
+		roundStr := ""
+		if con.Round != nil {
+			roundStr = fmt.Sprintf(" %s", con.Round)
+		}
+		log.Printf("%-15s %15s  |  %s%s - %s", con.Players[0].Name, con.Players[1].Name, label, roundStr, con.Reason)
 	}
 }
 
