@@ -13,8 +13,8 @@ const (
 	ConflictResolutionAttempts = 5000
 	ConflictResolutionVariance = 8
 	AttemptsAddedPerRound      = 5000
-	MinVariance                = 4
-	MaxAttemptsPerRound        = 10000
+	MinVariance                = 3
+	MaxAttemptsPerRound        = 30000
 )
 
 type monteCarloResult struct {
@@ -52,7 +52,10 @@ func runParallelMonteCarlo(cache *conflictCache, conflicts []Conflict, players [
 		attempts := calculateAttempts(v)
 		log.Debug("Running parallel monte carlo", "variance", v, "attempts", attempts, "workers", numWorkers)
 
-		result := runVarianceIteration(cache, conflicts, players, v, attempts, numWorkers, lowestScore)
+		// Pass the best-so-far as the starting point for this iteration, so
+		// progress compounds across variance levels rather than restarting
+		// from the original seeding every time.
+		result := runVarianceIteration(cache, conflicts, players, best, v, attempts, numWorkers, lowestScore)
 		if result.score < lowestScore {
 			log.Debug("Found new best", "variance", v, "score", result.score)
 			lowestScore = result.score
@@ -68,8 +71,20 @@ func runParallelMonteCarlo(cache *conflictCache, conflicts []Conflict, players [
 	return best, lowestScore
 }
 
-// runVarianceIteration runs one iteration of the Monte Carlo algorithm
-func runVarianceIteration(cache *conflictCache, conflicts []Conflict, players []brackets.Player, variance, attempts, numWorkers int, currentBest float64) monteCarloResult {
+// restartInterval controls how often a worker resets its walk back to the
+// original seeding. Restarts inject diversity and help the MC escape local
+// minima when perturbing only from the current best would stagnate.
+const restartInterval = 200
+
+// runVarianceIteration runs one iteration of the Monte Carlo algorithm.
+//
+// Within each worker we hill-climb: successive perturbations are applied to
+// the current best rather than always starting from the original seeding.
+// This lets progress compound and is essential for scenarios where the
+// optimal solution requires several coordinated seed moves (e.g. multiple
+// simultaneous set requests). We periodically restart from the original to
+// escape local minima.
+func runVarianceIteration(cache *conflictCache, conflicts []Conflict, original, startBest []brackets.Player, variance, attempts, numWorkers int, currentBest float64) monteCarloResult {
 	resultChan := make(chan monteCarloResult, numWorkers)
 	attemptsPerWorker := attempts / numWorkers
 
@@ -78,17 +93,35 @@ func runVarianceIteration(cache *conflictCache, conflicts []Conflict, players []
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			workerBest := players
+
+			workerBest := make([]brackets.Player, len(startBest))
+			copy(workerBest, startBest)
 			workerLowest := currentBest
 
-			for range attemptsPerWorker {
-				newPlayers := randomizeSeeds(players, variance)
+			walkFrom := workerBest
+			sinceImprovement := 0
+
+			for i := range attemptsPerWorker {
+				// Periodic restart: alternate between walking from the current
+				// best (exploitation) and resetting to the original seeding
+				// (exploration). This prevents a worker from getting permanently
+				// stuck in a local minimum.
+				if i > 0 && sinceImprovement >= restartInterval {
+					walkFrom = original
+					sinceImprovement = 0
+				}
+
+				newPlayers := randomizeSeeds(walkFrom, variance)
 				score := calculateConflictScoreCached(cache, conflicts, newPlayers)
 
 				if score < workerLowest {
 					workerLowest = score
 					workerBest = make([]brackets.Player, len(newPlayers))
 					copy(workerBest, newPlayers)
+					walkFrom = workerBest
+					sinceImprovement = 0
+				} else {
+					sinceImprovement++
 				}
 			}
 
@@ -102,7 +135,7 @@ func runVarianceIteration(cache *conflictCache, conflicts []Conflict, players []
 		close(resultChan)
 	}()
 
-	bestResult := monteCarloResult{players, currentBest}
+	bestResult := monteCarloResult{startBest, currentBest}
 	for result := range resultChan {
 		if result.score < bestResult.score {
 			bestResult = result
@@ -112,18 +145,46 @@ func runVarianceIteration(cache *conflictCache, conflicts []Conflict, players []
 	return bestResult
 }
 
-// randomizeSeeds randomly shifts seeding (doesn't impact seeds 1 and 2)
+// randomizeSeeds perturbs the seeding while preserving seeds 1 and 2.
+// It combines two kinds of perturbation:
+//
+//  1. Per-position adjacent swaps (the original mechanism): each position
+//     from index 3 onwards has a 1/variance chance of swapping with its
+//     immediate predecessor. This produces mostly-local perturbations that
+//     fine-tune the seeding once it's close to optimal.
+//  2. An occasional long-range swap between two random non-reserved
+//     positions. Without this, candidates that require moving a player
+//     more than a couple of seeds are effectively unreachable in reasonable
+//     attempt counts — which was why set requests on larger brackets
+//     silently failed to resolve.
 func randomizeSeeds(players []brackets.Player, variance int) []brackets.Player {
 	newPlayers := make([]brackets.Player, len(players))
 	copy(newPlayers, players)
 
-	for j := range players[3:] {
-		i := j + 3
+	// Seeds 1 and 2 are preserved; we shuffle from index 2 onwards.
+	// Brackets smaller than 4 have nothing meaningful to shuffle.
+	if len(players) < 4 {
+		return newPlayers
+	}
+
+	// Long-range swap. Gated by variance so lower variance (more aggressive
+	// MC iteration) produces big jumps more often. We draw two indices in
+	// [2, len-1] and swap them unconditionally if they differ.
+	if rand.IntN(variance) == 0 {
+		shufStart := 2
+		n := len(players) - shufStart
+		i := shufStart + rand.IntN(n)
+		j := shufStart + rand.IntN(n)
+		if i != j {
+			newPlayers[i], newPlayers[j] = newPlayers[j], newPlayers[i]
+		}
+	}
+
+	// Adjacent swaps (the original perturbation).
+	for k := range players[3:] {
+		i := k + 3
 		if rand.IntN(variance) == 0 {
-			temp := newPlayers[i]
-			n := 1
-			newPlayers[i] = newPlayers[i-n]
-			newPlayers[i-n] = temp
+			newPlayers[i], newPlayers[i-1] = newPlayers[i-1], newPlayers[i]
 		}
 	}
 
