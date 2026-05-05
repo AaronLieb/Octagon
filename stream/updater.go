@@ -4,7 +4,6 @@ package stream
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/AaronLieb/octagon/cache"
 	"github.com/AaronLieb/octagon/config"
@@ -25,6 +24,9 @@ func UpdateFromParryGG() error {
 	defer client.Close()
 
 	ctx := client.WithAuth(context.Background())
+
+	db := cache.Open()
+	defer db.Close()
 
 	// Get cached stream match ID
 	matchID, err := cache.GetStreamMatch()
@@ -80,6 +82,11 @@ func UpdateFromParryGG() error {
 	log.Infof("Found match: %s - %s vs %s (State: %v)", match.Identifier, player1.GamerTag, player2.GamerTag, match.State)
 
 	// Update OBS with current match state
+	// if err := updateMatchScore(client, ctx, match, player1, player2, 1.0, 0.0); err != nil {
+	// 	return fmt.Errorf("failed to update match score on parrygg: %w", err)
+	// }
+
+	// Update OBS with current match state
 	if err := updateOBSFromMatch(match, player1, player2); err != nil {
 		return fmt.Errorf("failed to update OBS: %w", err)
 	}
@@ -90,13 +97,21 @@ func UpdateFromParryGG() error {
 
 func updateOBSFromMatch(match *pb.Match, player1, player2 *pb.User) error {
 	// Get scores from match slots
-	score1 := match.Slots[0].Score
-	score2 := match.Slots[1].Score
+	score1 := 0
+	score2 := 2
+	for _, matchGame := range match.MatchGames {
+		if matchGame.Slots[0].Placement == 1 {
+			score1++
+		}
+		if matchGame.Slots[1].Placement == 1 {
+			score2++
+		}
+	}
 
-	player1Score := strconv.FormatFloat(score1, 'f', 0, 64)
-	player2Score := strconv.FormatFloat(score2, 'f', 0, 64)
+	s1 := fmt.Sprintf("%d", score1)
+	s2 := fmt.Sprintf("%d", score2)
 
-	log.Infof("Updating OBS - %s (%s) vs %s (%s)", player1.GamerTag, player1Score, player2.GamerTag, player2Score)
+	log.Infof("Updating OBS - %s (%s) vs %s (%s)", player1.GamerTag, s1, player2.GamerTag, s2)
 
 	// Update OBS text sources
 	if err := obs.UpdateText("Player 1 Name", player1.GamerTag); err != nil {
@@ -105,10 +120,10 @@ func updateOBSFromMatch(match *pb.Match, player1, player2 *pb.User) error {
 	if err := obs.UpdateText("Player 2 Name", player2.GamerTag); err != nil {
 		return err
 	}
-	if err := obs.UpdateText("Player 1 Score", player1Score); err != nil {
+	if err := obs.UpdateText("Player 1 Score", s1); err != nil {
 		return err
 	}
-	if err := obs.UpdateText("Player 2 Score", player2Score); err != nil {
+	if err := obs.UpdateText("Player 2 Score", s2); err != nil {
 		return err
 	}
 
@@ -121,67 +136,69 @@ func updateMatchScore(client *parrygg.Client, ctx context.Context, match *pb.Mat
 	placement2 := int32(2)
 	slotState := pb.SlotState_SLOT_STATE_NUMERIC
 
-	_, err := client.MatchGameService.UpdateMatchGame(ctx, &pb.UpdateMatchGameRequest{
-		Id: match.MatchGames[0].Id,
-		MatchGame: &pb.MatchGameMutation{
-			Index: 0,
-			Slots: []*pb.GameSlotMutation{
-				{
-					Slot:      0,
-					Score:     &score1,
-					Placement: &placement1,
-					Participants: []*pb.GameParticipantMutation{
-						{UserId: player1.Id},
+	for idx, matchGame := range match.MatchGames {
+		_, err := client.MatchGameService.UpdateMatchGame(ctx, &pb.UpdateMatchGameRequest{
+			Id: matchGame.Id,
+			MatchGame: &pb.MatchGameMutation{
+				Index: int32(idx),
+				Slots: []*pb.GameSlotMutation{
+					{
+						Slot:      0,
+						Score:     &score1,
+						Placement: &placement1,
+						Participants: []*pb.GameParticipantMutation{
+							{UserId: player1.Id},
+						},
+						State: &slotState,
 					},
-					State: &slotState,
-				},
-				{
-					Slot:      1,
-					Score:     &score2,
-					Placement: &placement2,
-					Participants: []*pb.GameParticipantMutation{
-						{UserId: player2.Id},
+					{
+						Slot:      1,
+						Score:     &score2,
+						Placement: &placement2,
+						Participants: []*pb.GameParticipantMutation{
+							{UserId: player2.Id},
+						},
+						State: &slotState,
 					},
-					State: &slotState,
 				},
+				State: pb.MatchGameState_MATCH_GAME_STATE_COMPLETED,
 			},
-			State: pb.MatchGameState_MATCH_GAME_STATE_COMPLETED,
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("failed to create match game: %w", err)
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create match game: %w", err)
+		}
 	}
 
-	_, err = client.MatchGameService.CreateMatchGame(ctx, &pb.CreateMatchGameRequest{
-		MatchId: match.Id,
-		MatchGame: &pb.MatchGameMutation{
-			Index: 1,
-			Slots: []*pb.GameSlotMutation{
-				{
-					Slot:      0,
-					Score:     &score1,
-					Placement: &placement1,
-					Participants: []*pb.GameParticipantMutation{
-						{UserId: player1.Id},
-					},
-					State: &slotState,
-				},
-				{
-					Slot:      1,
-					Score:     &score2,
-					Placement: &placement2,
-					Participants: []*pb.GameParticipantMutation{
-						{UserId: player2.Id},
-					},
-					State: &slotState,
-				},
-			},
-			State: pb.MatchGameState_MATCH_GAME_STATE_COMPLETED,
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("failed to create match game: %w", err)
-	}
+	// _, err = client.MatchGameService.CreateMatchGame(ctx, &pb.CreateMatchGameRequest{
+	// 	MatchId: match.Id,
+	// 	MatchGame: &pb.MatchGameMutation{
+	// 		Index: 1,
+	// 		Slots: []*pb.GameSlotMutation{
+	// 			{
+	// 				Slot:      0,
+	// 				Score:     &score1,
+	// 				Placement: &placement1,
+	// 				Participants: []*pb.GameParticipantMutation{
+	// 					{UserId: player1.Id},
+	// 				},
+	// 				State: &slotState,
+	// 			},
+	// 			{
+	// 				Slot:      1,
+	// 				Score:     &score2,
+	// 				Placement: &placement2,
+	// 				Participants: []*pb.GameParticipantMutation{
+	// 					{UserId: player2.Id},
+	// 				},
+	// 				State: &slotState,
+	// 			},
+	// 		},
+	// 		State: pb.MatchGameState_MATCH_GAME_STATE_COMPLETED,
+	// 	},
+	// })
+	// if err != nil {
+	// 	return fmt.Errorf("failed to create match game: %w", err)
+	// }
 
 	return nil
 }
