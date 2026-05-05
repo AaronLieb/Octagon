@@ -14,6 +14,9 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# Built octagon CLI binary (produced by `go build` at the repo root)
+/octagon
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
@@ -27,3 +30,20 @@ go.work.sum
 # React build files
 web/build/
 web/node_modules/
+
+# Editor / agent / IDE local state
+.kiro/
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Large tournament media (VOD recordings) — too big for git.
+# Keep source files but skip video assets.
+img/*.mkv
+img/*.mp4
+img/*.mov
+
+# Generated output from the smash_percentage_extractor Python tool.
+tools/smash_percentage_extractor/output/
+tools/smash_percentage_extractor/preprocessed/
