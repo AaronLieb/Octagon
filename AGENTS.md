@@ -222,6 +222,8 @@ perf: cached getTournament responses
 
 - Keep PRs small and scoped to one concern.
 - Update the relevant `AGENTS.md` in the same PR as behavior changes that affect agent context.
+- Commit features and fixes as they are completed, not at the end of a session. One logical change per commit. Agents should run `git commit` after verifying a change works, without waiting to be asked.
+- Do not push commits unless the user explicitly asks. Committing is always safe; pushing isn't.
 - Do not force-push to `main`.
 
 ## Gotchas
