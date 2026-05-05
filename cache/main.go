@@ -27,7 +27,7 @@ func Open() *badger.DB {
 func Set(key []byte, value []byte) error {
 	log.Debug("Setting key-pair in cache", "key", string(key), "value", value)
 	err := db.Update(func(txn *badger.Txn) error {
-		entry := badger.NewEntry(key, value).WithTTL(time.Hour * 24)
+		entry := badger.NewEntry(key, value).WithTTL(time.Hour * 24 * 90)
 		err := txn.SetEntry(entry)
 		return err
 	})
